@@ -1,0 +1,1080 @@
+import { useState, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, get, update, onValue } from "firebase/database";
+import { createClient } from "@supabase/supabase-js";
+
+// ── Services ──────────────────────────────────────────────────
+const supabase = createClient(
+  "https://hlvjyikeyjigaxucpkbu.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsdmp5aWtleWppZ2F4dWNwa2J1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDU4NzIsImV4cCI6MjA4ODI4MTg3Mn0.HsAhp0b9_hmAeEpXaP6krHMUL-9rU0dDCnu-KSzplSA"
+);
+const db = getDatabase(initializeApp({
+  apiKey: "AIzaSyBl86SocbdtuN4t1tQ1j2pECdW8U_BsPXA",
+  authDomain: "mamad-proj.firebaseapp.com",
+  databaseURL: "https://mamad-proj-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mamad-proj",
+  storageBucket: "mamad-proj.firebasestorage.app",
+  messagingSenderId: "951625552802",
+  appId: "1:951625552802:web:5b4151e77283e7105898fb"
+}));
+
+// ── Design System ─────────────────────────────────────────────
+// Direction: "Late-night game show" — deep indigo base, electric violet + neon lime accents,
+// glassmorphism cards, chunky rounded corners, bold Clash Display font.
+const D = {
+  // Backgrounds
+  bg:        "linear-gradient(145deg,#0E0A1F 0%,#1A1035 50%,#0E0A1F 100%)",
+  bgFixed:   "#0E0A1F",
+  card:      "rgba(255,255,255,.06)",
+  cardHover: "rgba(255,255,255,.10)",
+  cardSolid: "#1C1535",
+  // Accents
+  violet:    "#A855F7",
+  violetGlow:"rgba(168,85,247,.3)",
+  lime:      "#A3E635",
+  limeGlow:  "rgba(163,230,53,.25)",
+  gold:      "#FBBF24",
+  goldGlow:  "rgba(251,191,36,.25)",
+  pink:      "#F472B6",
+  cyan:      "#22D3EE",
+  // Neutrals
+  white:     "#FFFFFF",
+  offWhite:  "rgba(255,255,255,.88)",
+  muted:     "rgba(255,255,255,.45)",
+  subtle:    "rgba(255,255,255,.12)",
+  border:    "rgba(255,255,255,.10)",
+  // Status
+  green:     "#4ADE80",
+  greenBg:   "rgba(74,222,128,.12)",
+  red:       "#F87171",
+  redBg:     "rgba(248,113,113,.12)",
+  amber:     "#FCD34D",
+  // Radii
+  r:   "16px",
+  rLg: "24px",
+  rXl: "32px",
+  // Shadows
+  shadow:    "0 4px 24px rgba(0,0,0,.4)",
+  shadowGlow:"0 0 40px rgba(168,85,247,.2)",
+  glow: (col) => `0 0 24px ${col}`,
+};
+
+// ── Global CSS ────────────────────────────────────────────────
+const G = `
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100%;background:#0E0A1F;direction:rtl;overscroll-behavior:none;}
+  button,input{font-family:'Plus Jakarta Sans',sans-serif;}
+  button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+
+  @keyframes fadeUp   {from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes scaleIn  {from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+  @keyframes glow     {0%,100%{opacity:.6}50%{opacity:1}}
+  @keyframes spin     {to{transform:rotate(360deg)}}
+  @keyframes countdown{0%{transform:scale(1.6);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+  @keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
+  .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
+  .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
+`;
+
+// ── Data ──────────────────────────────────────────────────────
+const QUESTIONS = [
+  {id:"q01",label:"מה המאכל האהוב עליך?",           giphy:"delicious food yum",       e:"🍕",  d:["פיצה","סושי","המבורגר","פסטה","שווארמה","גלידה","סטייק","חומוס","לזניה","ראמן"]},
+  {id:"q02",label:"מה האוכל שאתה הכי שונא?",         giphy:"disgusted food gross",     e:"🤢",  d:["כרוב ניצנים","סרדינים","כבד","חציל","סלק","כוסמת","כרובית","דג מלוח","לשון","טחינה"]},
+  {id:"q03",label:"לאן הכי רצית לטוס לחופשה?",       giphy:"vacation travel beach",    e:"✈️", d:["יפן","ניו יורק","פריז","תאילנד","ברצלונה","איטליה","יוון","מלדיביים","ברזיל","קנדה","אוסטרליה","מרוקו","פורטוגל","איסלנד"]},
+  {id:"q04",label:"באיזו ארץ היית רוצה לגור?",       giphy:"world travel adventure",   e:"🌍", d:["קנדה","ניו זילנד","שוודיה","אוסטרליה","הולנד","שוויץ","נורווגיה","פורטוגל","גרמניה","ספרד","דנמרק","יפן","אירלנד","סקוטלנד"]},
+  {id:"q05",label:"מה העיר הכי יפה שביקרת בה?",      giphy:"beautiful city travel",    e:"🏙️",d:["פריז","רומא","ניו יורק","ברצלונה","טוקיו","אמסטרדם","פראג","דובאי","סידני","לונדון","ויאנה","ליסבון","בנגקוק"]},
+  {id:"q06",label:"מה הסרט שצפית בו הכי הרבה?",     giphy:"movie popcorn cinema",     e:"🎬", d:["האריה המלך","פורסט גאמפ","הארי פוטר","טיטאניק","אינטרסטלר","שר הטבעות","הסנדק","מטריקס","פייט קלאב","טרמינייטור"]},
+  {id:"q07",label:"מה הסדרה האהובה עליך?",           giphy:"binge watch tv series",    e:"📺", d:["שובר שורות","חברים","משחקי הכס","ביג בנג","ווקינג דד","שרלוק","ביצים","מנדלוריאן","סופרנוס","אוזארק"]},
+  {id:"q08",label:"מה המשחק הכי ממכר שמשחקת?",      giphy:"video game addicted",      e:"🎮", d:["מיינקראפט","פורטנייט","FIFA","GTA","Valorant","Roblox","Zelda","Mario Kart","Among Us","Candy Crush","Elden Ring"]},
+  {id:"q09",label:"מה סגנון המוזיקה האהוב עליך?",    giphy:"music genre vibes",        e:"🎸", d:["פופ","רוק","היפ הופ","אלקטרוניקה","קלאסי","מזרחי","מטאל","ריגטון","אינדי","בלוז","פאנק","דאנס"]},
+  {id:"q10",label:"מה השיר שאתה הכי אוהב?",         giphy:"music dancing happy",      e:"🎵", d:["Bohemian Rhapsody","Billie Jean","Imagine","Hotel California","Hey Jude","Thriller","Smells Like Teen Spirit","Shape of You"]},
+  {id:"q11",label:"מה הרכב שחלמת עליו?",             giphy:"dream car luxury",         e:"🚗", d:["פורשה","פרארי","טסלה","מרצדס G","למבורגיני","BMW M3","מאזדה MX5","פורד מוסטנג","אאודי R8","ריינג רובר"]},
+  {id:"q12",label:"מה הספורט האהוב עליך?",           giphy:"sports action game",       e:"⚽", d:["כדורגל","כדורסל","טניס","שחייה","אופניים","ריצה","גלישה","סקי","בוקס","כדורעף","טריאתלון","פדל"]},
+  {id:"q13",label:"מה הספורטאי שאתה הכי מעריץ?",    giphy:"sports hero champion",     e:"🏅", d:["מסי","רונאלדו","לברון","פדרר","מייקל ג'ורדן","בולט","סרנה וויליאמס","נאדאל","טייגר וודס","שאקיל אונייל"]},
+  {id:"q14",label:"מה הספר האהוב עליך?",             giphy:"reading books library",    e:"📚", d:["הארי פוטר","שר הטבעות","הנסיך הקטן","קוד דה וינצ'י","סאפיינס","המבצר","מאה שנות בדידות","הסיפור של השפחה"]},
+  {id:"q15",label:"מה המקצוע שחלמת עליו בילדות?",   giphy:"dream job career",         e:"👔", d:["רופא","פיילוט","שחקן","כדורגלן","אסטרונאוט","מבשל","עורך דין","מורה","צלם","מדען","שוטר","כבאי"]},
+  {id:"q16",label:"מה החלום הכי גדול שלך?",         giphy:"dream big success",        e:"🌟", d:["לטייל בכל העולם","לפתוח עסק","לכתוב ספר","לבנות בית","להיות עצמאי כלכלית","לעשות שינוי בעולם","לגדל משפחה"]},
+  {id:"q17",label:"מה התחביב העיקרי שלך?",           giphy:"hobby creative fun",       e:"🎨", d:["ציור","ריצה","בישול","גיימינג","גינון","צילום","קריאה","נגינה","יוגה","אפייה","טיולים","עבודת יד"]},
+  {id:"q18",label:"איזה כישרון נסתר יש לך?",         giphy:"talent surprise wow",      e:"✨", d:["שירה","ריקוד","קסמים","חיקוי","ציור","גיטרה","אמנות","כתיבה","בישול","שרטוט"]},
+  {id:"q19",label:"איזה חיה היית רוצה להיות?",       giphy:"cute animals funny",       e:"🦁", d:["דולפין","נשר","אריה","כלב","חתול","ינשוף","פנתר","זאב","פיל","קוף","נמר","עורב"]},
+  {id:"q20",label:"איזה סופרפאואר היית רוצה?",       giphy:"superhero power flying",   e:"🦸", d:["טלפתיה","עצירת זמן","בלתי נראה","טיסה","ריפוי מיידי","כוח פיזי","שכפול עצמי","ניבוי עתיד","שינוי צורה"]},
+  {id:"q21",label:"מה היית קונה ראשון בלוטו?",       giphy:"lottery winner money",     e:"💰", d:["בית על הים","מכונית פרארי","טיול עולמי","השקעות","מתנות למשפחה","עסק משלי","קרן צדקה","אי פרטי","פנטהאוז"]},
+  {id:"q22",label:"מה הרגל הכי טוב שלך?",            giphy:"good habits healthy",      e:"💪", d:["ספורט יומי","שינה מוקדמת","קריאה","מדיטציה","שתיית מים","אכילה בריאה","תכנון יומי","הכרת תודה"]},
+  {id:"q23",label:"מה הדבר שאתה אף פעם לא שוכח?",   giphy:"daily habit routine",      e:"🎒", d:["טלפון","מפתחות","ארנק","אוזניות","בקבוק מים","מטעין","תרופות","ספר","מחברת","מטריה"]},
+  {id:"q24",label:"מה עונת השנה האהובה עליך?",       giphy:"seasons nature beautiful", e:"🍂", d:["קיץ","חורף","אביב","סתיו"]},
+  {id:"q25",label:"ים או הרים?",                     giphy:"sea mountains nature",     e:"🌊", d:["ים","הרים","מדבר","עיר","יער","כפר","ג'ונגל","ערבה"]},
+  {id:"q26",label:"מה הגאדג'ט שאתה הכי אוהב?",      giphy:"technology gadget cool",   e:"📱", d:["אייפון","אייפד","אוזניות אלחוטיות","שעון חכם","מחשב נייד","מצלמה","רמקול חכם","מסך גדול","מקלדת מכנית"]},
+  {id:"q27",label:"מה הדבר הכי מוזר שעשית?",         giphy:"weird funny strange",      e:"🤪", d:["קפצתי ממקום גבוה","אכלתי משהו מוזר","דיברתי עם עצמי בקול","ישנתי 18 שעות","הלכתי בפיג'מה לרחוב"]},
+  {id:"q28",label:"מה הדבר שהכי מעצבן אותך?",       giphy:"annoyed frustrated",       e:"😤", d:["אנשים שמאחרים","רעש בלילה","תור ארוך","ספויילרים","אנשים שלא מקשיבים","פקקים","חיבור אינטרנט איטי"]},
+  {id:"q29",label:"מה המאכל שאתה הכי טוב בהכנתו?",  giphy:"cooking chef kitchen",     e:"👨‍🍳",d:["פסטה","שקשוקה","סטייק","עוגה","סלט","ריזוטו","לחם","עוגיות","אורז מוקפץ","מרק עוף"]},
+  {id:"q30",label:"מה הדבר שאתה הכי גאה בו?",       giphy:"proud achievement",        e:"😤", d:["ההישג שלי בעבודה","המשפחה שלי","הכושר שלי","הידע שלי","החברים שלי","הסבלנות שלי","הכישרון שלי"]},
+]
+const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
+const SS_CODE="sid_code", SS_NAME="sid_name";
+
+// ── Helpers ───────────────────────────────────────────────────
+function buildSequence(players, lobbyQs) {
+  const n = players.length;
+  // Use the SAME questions that were saved in lobbyQuestions, so qIds match personalAnswers
+  const seq = lobbyQs.map((q,i)=>({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:players[i%n].name}));
+  seq.push({qId:SIL.id,qType:"sil",qLabel:SIL.label,qGiphy:SIL.giphy,qEmoji:SIL.e,subjectName:players[Math.floor(Math.random()*n)].name});
+  return seq;
+}
+function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}
+
+// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options
+
+
+// Image utils
+function makeSil(file){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const W=400,H=Math.round(img.height/img.width*W);
+      const c=document.createElement("canvas");c.width=W;c.height=H;
+      const ctx=c.getContext("2d");ctx.drawImage(img,0,0,W,H);
+      const d=ctx.getImageData(0,0,W,H);const px=d.data;
+      for(let i=0;i<px.length;i+=4){
+        const b=px[i]*.299+px[i+1]*.587+px[i+2]*.114;
+        if(b<180){px[i]=0;px[i+1]=0;px[i+2]=0;px[i+3]=255;}else px[i+3]=0;
+      }
+      ctx.putImageData(d,0,0);
+      const f=document.createElement("canvas");f.width=W;f.height=H;
+      const fc=f.getContext("2d");fc.fillStyle="#1C1535";fc.fillRect(0,0,W,H);fc.drawImage(c,0,0);
+      f.toBlob(res,"image/jpeg",.85);
+    };
+    img.src=URL.createObjectURL(file);
+  });
+}
+function compress(file){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const s=Math.min(1,800/Math.max(img.width,img.height));
+      const W=Math.round(img.width*s),H=Math.round(img.height*s);
+      const c=document.createElement("canvas");c.width=W;c.height=H;
+      c.getContext("2d").drawImage(img,0,0,W,H);
+      c.toBlob(res,"image/jpeg",.8);
+    };
+    img.src=URL.createObjectURL(file);
+  });
+}
+async function upload(blob,type){
+  const path=`${type}${Date.now()}.jpg`;
+  const{error}=await supabase.storage.from("photos").upload(path,blob,{upsert:true});
+  if(error)throw error;
+  return supabase.storage.from("photos").getPublicUrl(path).data.publicUrl;
+}
+async function fetchGif(q){
+  try{
+    const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=sXpGFDGZs0Dv1mmNFvYaGUvYwKX0PWIh&q=${encodeURIComponent(q)}&limit=8&rating=g`);
+    const d=await r.json();const a=d?.data;if(!a?.length)return null;
+    const p=a[Math.floor(Math.random()*Math.min(5,a.length))];
+    return p?.images?.downsized_medium?.url||p?.images?.fixed_height?.url||null;
+  }catch{return null;}
+}
+
+// ── Primitive Components ──────────────────────────────────────
+const ff = "'Plus Jakarta Sans',sans-serif";
+const ffd = "'Nunito',sans-serif";
+
+function GlassCard({children,style={},glow}){
+  return(
+    <div style={{
+      background:D.card,
+      backdropFilter:"blur(20px)",
+      WebkitBackdropFilter:"blur(20px)",
+      border:`1px solid ${D.border}`,
+      borderRadius:D.rLg,
+      boxShadow:glow?`${D.shadow},${D.glow(glow)}`:D.shadow,
+      padding:"20px 18px",
+      ...style
+    }}>{children}</div>
+  );
+}
+
+function Btn({children,onClick,disabled,variant="primary",style={}}){
+  const styles = {
+    primary:{background:disabled?"rgba(255,255,255,.08)":D.violet,color:disabled?D.muted:"#fff",boxShadow:disabled?"none":`0 4px 20px ${D.violetGlow}`},
+    lime:   {background:D.lime,color:"#0E0A1F",boxShadow:`0 4px 20px ${D.limeGlow}`},
+    ghost:  {background:"transparent",color:D.violet,border:`1.5px solid ${D.violet}`},
+    gold:   {background:D.gold,color:"#0E0A1F",boxShadow:`0 4px 20px ${D.goldGlow}`},
+  };
+  return(
+    <button onClick={onClick} disabled={disabled} style={{
+      width:"100%",padding:"15px",borderRadius:D.r,border:"none",
+      fontFamily:ff,fontWeight:700,fontSize:16,cursor:disabled?"not-allowed":"pointer",
+      transition:"all .2s",letterSpacing:"-.01em",
+      ...styles[variant],...style
+    }}>{children}</button>
+  );
+}
+
+function Input({value,onChange,placeholder,type="text",style={}}){
+  return(
+    <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} type={type}
+      style={{
+        width:"100%",padding:"14px 16px",borderRadius:D.r,
+        background:"rgba(255,255,255,.07)",color:D.white,
+        border:`1.5px solid ${D.border}`,fontFamily:ff,fontSize:15,outline:"none",
+        transition:"border-color .2s",...style
+      }}
+      onFocus={e=>{e.target.style.borderColor=D.violet;e.target.style.background="rgba(168,85,247,.08)";}}
+      onBlur={e=>{e.target.style.borderColor=D.border;e.target.style.background="rgba(255,255,255,.07)";}}
+    />
+  );
+}
+
+function Avatar({url,name,size=40}){
+  return url
+    ?<img src={url} alt={name} style={{width:size,height:size,borderRadius:"50%",objectFit:"cover",border:`2px solid ${D.violet}50`,flexShrink:0}}/>
+    :<div style={{width:size,height:size,borderRadius:"50%",flexShrink:0,
+        background:`linear-gradient(135deg,${D.violet},${D.pink})`,
+        display:"flex",alignItems:"center",justifyContent:"center",
+        color:"#fff",fontWeight:800,fontSize:size*.38,fontFamily:ffd,boxShadow:`0 0 16px ${D.violetGlow}`}}>
+       {name?.[0]?.toUpperCase()||"?"}
+     </div>;
+}
+
+function Spinner({size=32}){
+  return<div style={{width:size,height:size,borderRadius:"50%",border:`3px solid rgba(255,255,255,.1)`,
+    borderTop:`3px solid ${D.violet}`,animation:"spin .7s linear infinite",margin:"0 auto"}}/>;
+}
+
+function TimerRing({t,total}){
+  const p=t/total,r=28,c=2*Math.PI*r;
+  const col=t>total*.5?D.lime:t>total*.25?D.gold:D.red;
+  return(
+    <div style={{position:"relative",width:64,height:64,flexShrink:0}}>
+      <svg width="64" height="64" style={{transform:"rotate(-90deg)"}}>
+        <circle cx="32" cy="32" r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="5"/>
+        <circle cx="32" cy="32" r={r} fill="none" stroke={col} strokeWidth="5"
+          strokeDasharray={c} strokeDashoffset={c*(1-p)} strokeLinecap="round"
+          style={{transition:"stroke-dashoffset .95s linear,stroke .3s"}}/>
+      </svg>
+      <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",
+        fontFamily:ffd,fontSize:20,fontWeight:900,color:col}}>{t}</span>
+    </div>
+  );
+}
+
+function ExitBtn(){
+  return(
+    <button onClick={()=>{if(window.confirm("לצאת למסך הראשי?")){{sessionStorage.clear();window.location.reload();}}}}
+      style={{position:"fixed",bottom:20,left:16,zIndex:999,
+        background:"rgba(255,255,255,.08)",backdropFilter:"blur(12px)",border:`1px solid ${D.border}`,
+        color:D.muted,borderRadius:99,padding:"8px 16px",fontSize:13,fontFamily:ff}}>
+      ← יציאה
+    </button>
+  );
+}
+
+function Dots({current,total}){
+  return(
+    <div style={{display:"flex",gap:5,alignItems:"center"}}>
+      {Array.from({length:total}).map((_,i)=>(
+        <div key={i} style={{width:i===current-1?22:7,height:7,borderRadius:99,
+          background:i<current?D.violet:"rgba(255,255,255,.15)",transition:"all .3s"}}/>
+      ))}
+    </div>
+  );
+}
+
+// ── Page shell ────────────────────────────────────────────────
+function Page({children,center=false,style={}}){
+  return(
+    <div style={{minHeight:"100dvh",background:D.bg,padding:"20px 18px 100px",
+      direction:"rtl",fontFamily:ff,color:D.white,
+      display:"flex",flexDirection:"column",alignItems:"center",
+      justifyContent:center?"center":"flex-start",...style}}>
+      <style>{G}</style>
+      {children}
+    </div>
+  );
+}
+function Wrap({children,style={}}){
+  return<div style={{width:"100%",maxWidth:440,display:"flex",flexDirection:"column",gap:14,...style}}>{children}</div>;
+}
+
+// ── HOME ──────────────────────────────────────────────────────
+function Home({onJoin}){
+  const[name,setName]=useState("");
+  const[code,setCode]=useState("");
+  const[tab,setTab]=useState("create");
+  const[setup,setSetup]=useState(false);
+  const[numP,setNumP]=useState(4);
+  const[rnd,setRnd]=useState(null);
+  const[time,setTime]=useState(null);
+  const[busy,setBusy]=useState(false);
+
+  const rOpts=[
+    {l:"קצר",v:Math.max(3,numP),s:`${Math.max(3,numP)} שאלות`},
+    {l:"רגיל",v:Math.max(6,numP*2),s:`${Math.max(6,numP*2)} שאלות`},
+    {l:"מרתוני",v:Math.max(10,numP*3),s:`${Math.max(10,numP*3)} שאלות`},
+  ];
+  const tOpts=[{l:"⚡ מהיר",v:15},{l:"⏱ רגיל",v:25},{l:"🧘 נינוח",v:40}];
+
+  const create=async()=>{
+    if(!name.trim()||!rnd||!time)return;
+    setBusy(true);
+    const c=Math.floor(1000+Math.random()*9000).toString();
+    const qs=pickLobbyQs(rnd);
+    await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
+    sessionStorage.setItem(SS_CODE,c);sessionStorage.setItem(SS_NAME,name.trim());
+    onJoin(c,name.trim());setBusy(false);
+  };
+  const join=async()=>{
+    if(!name.trim()||code.length!==4)return;
+    setBusy(true);
+    const snap=await get(ref(db,`rooms/${code}`));
+    if(!snap.exists()){alert("חדר לא נמצא!");setBusy(false);return;}
+    await update(ref(db,`rooms/${code}/players/${name.trim()}`),{name:name.trim(),score:0,ready:false});
+    sessionStorage.setItem(SS_CODE,code);sessionStorage.setItem(SS_NAME,name.trim());
+    onJoin(code,name.trim());setBusy(false);
+  };
+
+  if(setup) return(
+    <Page>
+      <Wrap>
+        <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}>← חזור</button>
+        <div className="fu" style={{textAlign:"center",marginBottom:4}}>
+          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>⚙️ הגדרות</h2>
+        </div>
+
+        <GlassCard className="fu d1">
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>כמה שחקנים?</p>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {[2,3,4,5,6,7,8].map(n=>(
+              <button key={n} onClick={()=>{setNumP(n);setRnd(null);}} style={{
+                flex:"1 1 36px",padding:"10px 0",borderRadius:12,fontFamily:ffd,fontWeight:800,fontSize:15,
+                background:numP===n?D.violet:"rgba(255,255,255,.06)",
+                color:numP===n?"#fff":D.muted,border:`1px solid ${numP===n?D.violet:D.border}`,
+                boxShadow:numP===n?`0 0 16px ${D.violetGlow}`:"none",transition:"all .18s"}}>
+                {n}
+              </button>
+            ))}
+          </div>
+          {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}>⚡ מצב דואל — מבחן אמריקאי פעיל!</p>}
+        </GlassCard>
+
+        <GlassCard className="fu d2">
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>כמות שאלות:</p>
+          <div style={{display:"flex",gap:8}}>
+            {rOpts.map(o=>(
+              <button key={o.v} onClick={()=>setRnd(o.v)} style={{
+                flex:1,padding:"14px 8px",borderRadius:14,fontFamily:ffd,cursor:"pointer",fontWeight:800,
+                background:rnd===o.v?D.violet:"rgba(255,255,255,.06)",
+                color:rnd===o.v?"#fff":D.muted,border:`1px solid ${rnd===o.v?D.violet:D.border}`,
+                boxShadow:rnd===o.v?`0 0 16px ${D.violetGlow}`:"none",transition:"all .18s"}}>
+                <div style={{fontSize:14,marginBottom:2}}>{o.l}</div>
+                <div style={{fontSize:11,opacity:.7}}>{o.s}</div>
+              </button>
+            ))}
+          </div>
+        </GlassCard>
+
+        <GlassCard className="fu d3">
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לשאלה:</p>
+          <div style={{display:"flex",gap:8}}>
+            {tOpts.map(o=>(
+              <button key={o.v} onClick={()=>setTime(o.v)} style={{
+                flex:1,padding:"14px 8px",borderRadius:14,fontFamily:ffd,cursor:"pointer",fontWeight:800,fontSize:14,
+                background:time===o.v?D.lime:"rgba(255,255,255,.06)",
+                color:time===o.v?"#0E0A1F":D.muted,border:`1px solid ${time===o.v?D.lime:D.border}`,
+                boxShadow:time===o.v?`0 0 16px ${D.limeGlow}`:"none",transition:"all .18s"}}>
+                {o.l}<div style={{fontSize:11,marginTop:2,opacity:.7}}>{o.v} שנ'</div>
+              </button>
+            ))}
+          </div>
+        </GlassCard>
+
+        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🚀"}</Btn>
+      </Wrap>
+    </Page>
+  );
+
+  return(
+    <Page center>
+      {/* Hero */}
+      <div className="fu" style={{textAlign:"center",marginBottom:36}}>
+        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎭</div>
+        <h1 style={{fontFamily:ffd,fontSize:52,fontWeight:900,lineHeight:1,
+          background:`linear-gradient(135deg,${D.white},${D.violet})`,
+          WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>
+          SocialID
+        </h1>
+        <p style={{color:D.muted,fontSize:16}}>המשחק שמגלה מי באמת מכיר את מי</p>
+      </div>
+
+      <Wrap style={{maxWidth:390}}>
+        {/* Tab */}
+        <GlassCard className="fu d1" style={{padding:"6px"}}>
+          <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.04)",borderRadius:14,padding:4}}>
+            {[{k:"create",l:"צור חדר 🎮"},{k:"join",l:"הצטרף 🔑"}].map(t=>(
+              <button key={t.k} onClick={()=>setTab(t.k)} style={{
+                flex:1,padding:"11px",borderRadius:10,fontFamily:ff,fontWeight:700,fontSize:14,
+                background:tab===t.k?"rgba(168,85,247,.25)":"transparent",
+                color:tab===t.k?D.violet:D.muted,
+                border:`1px solid ${tab===t.k?D.violet+"50":"transparent"}`,
+                transition:"all .2s",cursor:"pointer"}}>
+                {t.l}
+              </button>
+            ))}
+          </div>
+          <div style={{padding:"12px 8px 8px",display:"flex",flexDirection:"column",gap:10}}>
+            <Input value={name} onChange={setName} placeholder="השם שלך ✍️"/>
+            {tab==="join"&&(
+              <Input value={code} onChange={v=>setCode(v.replace(/\D/g,"").slice(0,4))} placeholder="קוד חדר"
+                style={{textAlign:"center",fontSize:32,fontWeight:900,letterSpacing:10}}/>
+            )}
+            {tab==="create"
+              ?<Btn onClick={()=>{if(!name.trim())return alert("הכנס שם!");setSetup(true);}}>המשך ←</Btn>
+              :<Btn onClick={join} disabled={!name.trim()||code.length!==4||busy} variant="primary">{busy?"...":"הצטרף!"}</Btn>
+            }
+          </div>
+        </GlassCard>
+
+        <p className="fu d2" style={{color:D.muted,fontSize:12,textAlign:"center"}}>
+          נבנה עם ❤️ לרגעים שיחד
+        </p>
+      </Wrap>
+    </Page>
+  );
+}
+
+// ── LOBBY ─────────────────────────────────────────────────────
+function Lobby({room,code,myName,isHost}){
+  const me=room.players?.[myName];
+  const qs=room.lobbyQuestions||[];
+  const KA=`ans_${code}_${myName}`,KL=`ln_${code}_${myName}`;
+  const[ans,setAns]=useState(()=>{try{return JSON.parse(sessionStorage.getItem(KA)||"{}")}catch{return{}}});
+  const[ln,setLn]=useState(()=>sessionStorage.getItem(KL)||"");
+  const[upping,setUp]=useState(false);
+  const[upT,setUpT]=useState("");
+
+  useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
+  useEffect(()=>{if(ln)sessionStorage.setItem(KL,ln)},[ln]);
+
+  const up=async(file,type)=>{
+    setUp(true);setUpT(type);
+    try{const body=type==="sil"?await makeSil(file):await compress(file);const url=await upload(body,type);
+      await update(ref(db,`rooms/${code}/players/${myName}`),type==="sil"?{silhouetteURL:url}:{photoURL:url});}
+    catch(e){alert(e.message);}
+    setUp(false);setUpT("");
+  };
+  const onFile=(e,t)=>{const f=e.target.files?.[0];if(f)up(f,t);e.target.value="";};
+
+  const ready=()=>{
+    if(!ln.trim())return alert("חובה שם משפחה!");
+    if(!me?.photoURL)return alert("חובה להעלות סלפי!");
+    if(qs.some(q=>!ans[q.id]?.trim()))return alert("ענה על כל השאלות");
+    update(ref(db,`rooms/${code}/players/${myName}`),{personalAnswers:ans,lastName:ln,ready:true});
+  };
+  const start=()=>{
+    const pl=Object.values(room.players||{});
+    const seq=buildSequence(pl,room.lobbyQuestions||[]);
+    // Build decoy map instantly from static bank
+    const decoyMap={};
+    if(pl.length===2){
+      seq.forEach(item=>{
+        if(item.qType==="sil") return;
+        const subj=pl.find(p=>p.name===item.subjectName);
+        const correct=(subj?.personalAnswers?.[item.qId]||"").trim();
+        if(!correct) return;
+        const qDef=QUESTIONS.find(q=>q.id===item.qId);
+        const pool=(qDef?.d||[]).filter(d=>d.trim().toLowerCase()!==correct.toLowerCase());
+        const shuffled=pool.sort(()=>Math.random()-.5);
+        const decoys=shuffled.slice(0,3);
+        // pad if not enough
+        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אחר");
+        const opts=[...decoys,correct].sort(()=>Math.random()-.5);
+        decoyMap[`${item.qId}_${item.subjectName}`]=opts;
+      });
+    }
+    update(ref(db,`rooms/${code}`),{phase:"question",round:1,roundSequence:seq,guesses:null,decoyMap});
+  };
+
+  // ── WAITING ROOM ──────────────────────────────────────────────
+  if(me?.ready){
+    const pl=Object.values(room.players||{});
+    const rc=pl.filter(p=>p.ready).length,all=pl.length>1&&pl.every(p=>p.ready);
+    return(
+      <Page>
+        <ExitBtn/>
+        <Wrap>
+          <div className="fu" style={{textAlign:"center",padding:"12px 0 4px"}}>
+            <div style={{fontSize:48,marginBottom:6}}>✅</div>
+            <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>נרשמת!</h2>
+            <div style={{display:"inline-flex",alignItems:"center",gap:10,marginTop:12,
+              background:D.violetGlow,border:`1px solid ${D.violet}50`,borderRadius:16,
+              padding:"10px 24px"}}>
+              <span style={{color:D.muted,fontSize:13}}>קוד:</span>
+              <span style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.violet,letterSpacing:6}}>{code}</span>
+            </div>
+          </div>
+
+          <GlassCard className="fu d1">
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <span style={{color:D.muted,fontSize:13}}>שחקנים</span>
+              <span style={{color:D.violet,fontWeight:700,fontSize:13}}>{rc}/{pl.length} מוכנים</span>
+            </div>
+            {pl.map((p,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+                padding:"10px 12px",borderRadius:14,marginBottom:6,
+                background:p.ready?"rgba(163,230,53,.08)":"rgba(255,255,255,.04)",
+                border:`1px solid ${p.ready?D.lime+"30":D.border}`}}>
+                <span style={{color:p.ready?D.lime:D.muted,fontWeight:700,fontSize:13}}>
+                  {p.ready?"✓ מוכן":"⏳ ממלא..."}
+                </span>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
+                  <Avatar url={p.photoURL} name={p.name} size={32}/>
+                </div>
+              </div>
+            ))}
+          </GlassCard>
+
+          {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
+            {all?"התחל! 🎲":`מחכים... (${rc}/${pl.length})`}
+          </Btn>}
+        </Wrap>
+      </Page>
+    );
+  }
+
+  // ── FILL FORM ─────────────────────────────────────────────────
+  const filled=qs.filter(q=>ans[q.id]?.trim()).length;
+  return(
+    <Page style={{paddingBottom:100}}>
+      <ExitBtn/>
+      <Wrap>
+        <div className="fu" style={{textAlign:"center",marginBottom:4}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,
+            background:"rgba(168,85,247,.15)",border:`1px solid ${D.violet}40`,borderRadius:12,
+            padding:"8px 20px",marginBottom:6}}>
+            <span style={{color:D.muted,fontSize:13}}>קוד:</span>
+            <span style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.violet,letterSpacing:5}}>{code}</span>
+          </div>
+        </div>
+
+        {/* Photos */}
+        <GlassCard className="fu d1">
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>📸 תמונות</p>
+          {[{t:"sil",lbl:"צללית (לחידה):",has:me?.silhouetteURL,cap:undefined,icons:["📷 בחר","🔄 החלף"]},
+            {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}
+          ].map(({t,lbl,has,cap,icons})=>(
+            <div key={t} style={{marginBottom:14}}>
+              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>{lbl}</p>
+              {has&&t==="sil"&&<img src={has} style={{width:"100%",maxHeight:90,objectFit:"cover",borderRadius:12,marginBottom:8,border:`1px solid ${D.violet}30`}}/>}
+              {has&&t==="pro"&&<div style={{display:"flex",justifyContent:"center",marginBottom:8}}>
+                <img src={has} style={{width:60,height:60,borderRadius:"50%",objectFit:"cover",border:`2px solid ${D.violet}`}}/>
+              </div>}
+              <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+                background:"rgba(168,85,247,.1)",border:`1.5px dashed ${D.violet}60`,
+                borderRadius:12,padding:"12px",cursor:"pointer",color:D.violet,fontWeight:600,fontSize:14}}>
+                <input type="file" accept="image/*" capture={cap} onChange={e=>onFile(e,t)} style={{display:"none"}}/>
+                {upping&&upT===t?"⏳ מעבד...":has?icons[1]:icons[0]}
+              </label>
+            </div>
+          ))}
+        </GlassCard>
+
+        {/* Questions */}
+        <GlassCard className="fu d2">
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+            <p style={{color:D.white,fontWeight:700,fontSize:15}}>❓ שאלות</p>
+            <span style={{background:filled===qs.length?D.greenBg:"rgba(255,255,255,.08)",
+              color:filled===qs.length?D.green:D.muted,borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700}}>
+              {filled}/{qs.length}
+            </span>
+          </div>
+          <p style={{color:D.muted,fontSize:12,marginBottom:14}}>נשמר אוטומטית — בטוח מרענון דפדפן</p>
+          <Input value={ln} onChange={setLn} placeholder="שם משפחה" style={{marginBottom:12}}/>
+          {qs.map((q,i)=>(
+            <div key={q.id} style={{marginBottom:11}}>
+              <label style={{display:"block",fontSize:12,color:D.muted,marginBottom:5,fontWeight:500}}>
+                {q.e||"•"} {q.label}
+              </label>
+              <Input value={ans[q.id]||""} onChange={v=>setAns(p=>({...p,[q.id]:v}))}
+                placeholder="התשובה שלך..."
+                style={{borderColor:ans[q.id]?.trim()?D.lime+"80":D.border}}/>
+            </div>
+          ))}
+        </GlassCard>
+
+        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
+          {upping?"מעלה...":"אני מוכן! ✓"}
+        </Btn>
+      </Wrap>
+    </Page>
+  );
+}
+
+// ── QUESTION SCREEN ───────────────────────────────────────────
+function Question({room,code,myName,isHost}){
+  const RT=room.roundTime||25;
+  const isDuel=Object.keys(room.players||{}).length===2;
+  const[cd,setCd]=useState(3);
+  const[tl,setTl]=useState(RT);
+  const[localPick,setLocalPick]=useState(null); // UI feedback before Firebase
+
+  const players=Object.values(room.players||{});
+  const seq=room.roundSequence||[];
+  const si=(room.round-1)%seq.length;
+  const cur=seq[si]||{};
+  const subj=room.players?.[cur.subjectName]||players[0];
+  const isSil=cur.qType==="sil";
+  const amSubj=myName===cur.subjectName;
+  const guesses=room.guesses||{};
+
+  // Duel specifics: guesser = the OTHER player
+  const duelGuesser=isDuel?players.find(p=>p.name!==cur.subjectName):null;
+  const amDuelGuesser=isDuel&&myName===duelGuesser?.name;
+
+  // Build MC options for duel
+  const lobbyQs=room.lobbyQuestions||[];
+  const matchQ=lobbyQs.find(q=>q.id===cur.qId);
+  const correctText=subj?.personalAnswers?.[cur.qId]||"";
+  // allAns removed — AI generates contextual decoys now
+  // Read pre-generated decoys from Firebase (generated by host at game start)
+  const decoyKey = `${cur.qId}_${cur.subjectName}`;
+  const rawOpts = (room.decoyMap||{})[decoyKey];
+  // Firebase arrays come back as objects with numeric keys — convert back
+  const opts = Array.isArray(rawOpts) ? rawOpts
+    : rawOpts ? Object.values(rawOpts) : [];
+  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;
+
+  useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
+  useEffect(()=>{if(cd<=0)return;const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
+  useEffect(()=>{
+    if(cd>0)return;
+    if(tl<=0){if(isHost)reveal();return;}
+    const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
+  },[cd,tl]);
+
+  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};
+
+  const reveal=()=>{
+    if(!isHost)return;
+    const correct=cur.subjectName;
+    const upd={};
+    Object.entries(guesses).forEach(([g,v])=>{
+      if(v.trim().toLowerCase()===correct.trim().toLowerCase()&&room.players[g])
+        upd[`rooms/${code}/players/${g}/score`]=(room.players[g].score||0)+10;
+    });
+    if(Object.keys(upd).length)update(ref(db),upd);
+    const done=room.round>=seq.length;
+    update(ref(db,`rooms/${code}`),{
+      phase:"results",correctAnswer:correct,
+      subjectTextAnswer:isSil?correct:correctText,
+      correctSubject:cur.subjectName,currentQLabel:cur.qLabel,currentGiphyQuery:cur.qGiphy||"celebration",
+    });
+  };
+
+  const nonSubj=players.filter(p=>p.name!==cur.subjectName);
+  const answered=nonSubj.filter(p=>guesses[p.name]).length;
+  const allDone=nonSubj.length>0&&answered===nonSubj.length;
+
+  // Countdown screen
+  if(cd>0) return(
+    <div style={{height:"100dvh",background:D.bg,display:"flex",flexDirection:"column",
+      alignItems:"center",justifyContent:"center",direction:"rtl",fontFamily:ff,color:D.white}}>
+      <style>{G}</style>
+      <ExitBtn/>
+      <p style={{color:D.muted,marginBottom:16,fontSize:14}}>סיבוב {room.round} מתוך {seq.length}</p>
+      <div key={cd} style={{fontFamily:ffd,fontSize:130,fontWeight:900,lineHeight:1,
+        background:`linear-gradient(135deg,${D.violet},${D.pink})`,
+        WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",
+        animation:"countdown .4s cubic-bezier(.22,.68,0,1.2) both"}}>{cd}</div>
+    </div>
+  );
+
+  // ── DUEL MODE UI ──────────────────────────────────────────────
+  if(isDuel) return(
+    <Page>
+      <ExitBtn/>
+      <Wrap>
+        {/* Header */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <Dots current={room.round} total={seq.length}/>
+            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round}/{seq.length}</p>
+          </div>
+          <TimerRing t={tl} total={RT}/>
+        </div>
+
+        {/* Subject + question — big center question, small avatar badge */}
+        <GlassCard className="fu" glow={D.violet}
+          style={{background:`linear-gradient(135deg,rgba(168,85,247,.15),rgba(244,114,182,.08))`,textAlign:"center",padding:"20px 16px"}}>
+          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>השאלה:</p>
+          <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
+            {cur.qEmoji} {cur.qLabel}
+          </p>
+          <div style={{display:"inline-flex",alignItems:"center",gap:10,
+            background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
+            borderRadius:99,padding:"6px 14px 6px 8px"}}>
+            <Avatar url={subj?.photoURL} name={subj?.name} size={28}/>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {cur.subjectName}</span>
+          </div>
+        </GlassCard>
+
+        {/* Subject sees: waiting */}
+        {amSubj&&(
+          <GlassCard className="fu d1" style={{textAlign:"center"}}>
+            <div style={{fontSize:40,marginBottom:8,animation:"float 2s ease-in-out infinite"}}>👤</div>
+            <p style={{color:D.violet,fontWeight:700,fontSize:16}}>השאלה עליך!</p>
+            <p style={{color:D.muted,fontSize:13,marginTop:4}}>{duelGuesser?.name} מנחש עכשיו...</p>
+          </GlassCard>
+        )}
+
+        {/* Guesser sees: MC options */}
+        {amDuelGuesser&&!isSil&&(
+          <GlassCard className="fu d1">
+            <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
+              מה {cur.subjectName} ענה? 🤔
+            </p>
+            {optsLoading&&(<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/><p style={{color:D.muted,fontSize:13,marginTop:8}}>מייצר תשובות...</p></div>)}
+            {opts.map((opt,i)=>{
+              const letters=["א","ב","ג","ד"];
+              const picked=localPick===opt;
+              const done=!!guesses[myName];
+              return(
+                <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(cur.subjectName);} }}
+                  style={{width:"100%",display:"flex",alignItems:"center",gap:12,
+                    padding:"14px 16px",borderRadius:14,marginBottom:8,cursor:done?"default":"pointer",
+                    background:picked?"rgba(168,85,247,.2)":done&&opt===correctText?"rgba(163,230,53,.12)":"rgba(255,255,255,.05)",
+                    border:`1.5px solid ${picked?D.violet:done&&opt===correctText?D.lime:D.border}`,
+                    transition:"all .18s",fontFamily:ff,textAlign:"right",
+                    animation:picked?"correctPop .3s ease":"none"}}>
+                  <span style={{width:30,height:30,borderRadius:8,display:"flex",alignItems:"center",
+                    justifyContent:"center",flexShrink:0,
+                    background:picked?D.violet:"rgba(255,255,255,.08)",
+                    color:picked?"#fff":D.muted,fontFamily:ffd,fontWeight:800,fontSize:13}}>
+                    {letters[i]}
+                  </span>
+                  <span style={{color:picked?D.white:D.offWhite,fontSize:15}}>{opt}</span>
+                </button>
+              );
+            })}
+            {guesses[myName]&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>✓ ניחוש נשלח</p>}
+          </GlassCard>
+        )}
+
+        {/* Sil round in duel */}
+        {amDuelGuesser&&isSil&&(
+          <GlassCard className="fu d1">
+            {subj?.silhouetteURL&&<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:180,objectFit:"contain",borderRadius:12,marginBottom:12}}/>}
+            <p style={{color:D.white,fontWeight:700,marginBottom:10}}>מי הדמות? 🕵️</p>
+            {players.map((p,i)=>(
+              <button key={i} onClick={()=>!guesses[myName]&&guess(p.name)}
+                style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"12px",borderRadius:12,marginBottom:6,
+                  background:guesses[myName]===p.name?"rgba(168,85,247,.2)":"rgba(255,255,255,.05)",
+                  border:`1.5px solid ${guesses[myName]===p.name?D.violet:D.border}`,fontFamily:ff}}>
+                <Avatar url={p.photoURL} name={p.name} size={32}/>
+                <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
+              </button>
+            ))}
+          </GlassCard>
+        )}
+
+        {/* Host reveal */}
+        {isHost&&<Btn onClick={reveal} variant={allDone?"lime":"primary"}>
+          {allDone?"כולם ענו! חשוף ⚡":"חשוף עכשיו ▶"}
+        </Btn>}
+      </Wrap>
+    </Page>
+  );
+
+  // ── MULTIPLAYER UI ─────────────────────────────────────────────
+  return(
+    <Page>
+      <ExitBtn/>
+      <Wrap>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <Dots current={room.round} total={seq.length}/>
+            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round}/{seq.length}</p>
+          </div>
+          <TimerRing t={tl} total={RT}/>
+        </div>
+
+        {/* Subject banner — question big + center, avatar small + framed */}
+        <GlassCard className="fu" glow={D.violet}
+          style={{background:`linear-gradient(135deg,rgba(168,85,247,.14),rgba(34,211,238,.07))`,textAlign:"center",padding:"20px 16px"}}>
+          {/* Big question */}
+          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>
+            {isSil?"מי הדמות בצללית?":"השאלה:"}
+          </p>
+          <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
+            {cur.qEmoji} {cur.qLabel}
+          </p>
+          {/* Small framed avatar + name */}
+          <div style={{display:"inline-flex",alignItems:"center",gap:10,
+            background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
+            borderRadius:99,padding:"6px 14px 6px 8px"}}>
+            <Avatar url={subj?.photoURL} name={subj?.name} size={28}/>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>{cur.subjectName}</span>
+          </div>
+        </GlassCard>
+
+        {/* Answer / silhouette */}
+        <GlassCard className="fu d1" style={{textAlign:"center"}}>
+          {isSil?(
+            subj?.silhouetteURL
+              ?<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:200,objectFit:"contain",borderRadius:12}}/>
+              :<p style={{color:D.muted,textAlign:"center",padding:20}}>ממתין...</p>
+          ):(
+            <>
+              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה שלו היתה:</p>
+              <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
+                "{subj?.personalAnswers?.[cur.qId]||"..."}"
+              </p>
+            </>
+          )}
+        </GlassCard>
+
+        {/* My turn or guess */}
+        {amSubj?(
+          <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
+            <div style={{fontSize:34,marginBottom:6}}>👤</div>
+            <p style={{color:D.violet,fontWeight:700}}>השאלה הזו עליך!</p>
+            <p style={{color:D.muted,fontSize:13,marginTop:4}}>האחרים מנחשים...</p>
+          </GlassCard>
+        ):(
+          <>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              {players.map((p,i)=>{
+                const picked=guesses[myName]===p.name;
+                return(
+                  <button key={i} onClick={()=>!guesses[myName]&&guess(p.name)}
+                    style={{padding:"12px 10px",borderRadius:14,cursor:guesses[myName]?"default":"pointer",
+                      display:"flex",alignItems:"center",gap:8,fontFamily:ff,
+                      background:picked?"rgba(168,85,247,.18)":"rgba(255,255,255,.05)",
+                      border:`1.5px solid ${picked?D.violet:D.border}`,
+                      boxShadow:picked?`0 0 14px ${D.violetGlow}`:"none",
+                      transition:"all .15s"}}>
+                    <Avatar url={p.photoURL} name={p.name} size={30}/>
+                    <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:14}}>{p.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>✓ ניחוש נשלח</p>}
+          </>
+        )}
+
+        {/* Host panel */}
+        {isHost&&(
+          <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
+            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>📊 {answered}/{nonSubj.length} ענו</p>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+              {nonSubj.map((p,i)=>{
+                const done=!!guesses[p.name];
+                return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
+                  background:done?D.greenBg:"rgba(255,255,255,.06)",
+                  color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
+                  {done?"✓":"⏳"} {p.name}
+                </span>;
+              })}
+            </div>
+            <Btn onClick={reveal} variant={allDone?"lime":"primary"}>
+              {allDone?"כולם ענו! חשוף ⚡":"חשוף עכשיו ▶"}
+            </Btn>
+          </GlassCard>
+        )}
+      </Wrap>
+    </Page>
+  );
+}
+
+// ── RESULTS ───────────────────────────────────────────────────
+function Results({room,code,isHost}){
+  const[gif,setGif]=useState(null);
+  const[gifLoading,setGL]=useState(true);
+  const ca=room.correctAnswer||"";
+  const ta=room.subjectTextAnswer||ca;
+  const cs=room.correctSubject||"";
+  const ql=room.currentQLabel||"";
+  const players=Object.values(room.players||{});
+  const guesses=room.guesses||{};
+  const sd=room.players?.[cs];
+  const seq=room.roundSequence||[];
+  const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
+  const ok=g=>g?.trim().toLowerCase()===ca.trim().toLowerCase();
+  const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
+
+  useEffect(()=>{
+    setGif(null);setGL(true);
+    fetchGif(room.currentGiphyQuery||"celebration").then(u=>{setGif(u);setGL(false);});
+  },[room.currentGiphyQuery]);
+
+  const next=()=>{
+    const nr=room.round+1;
+    update(ref(db,`rooms/${code}`),{
+      phase:nr>seq.length?"leaderboard":"question",
+      round:nr,guesses:null,correctAnswer:null,subjectTextAnswer:null,
+      correctSubject:null,currentQLabel:null,currentGiphyQuery:null,
+    });
+  };
+
+  return(
+    <Page>
+      <ExitBtn/>
+      <Wrap>
+        {/* Big reveal */}
+        <GlassCard className="si" glow={D.lime}
+          style={{background:`linear-gradient(135deg,rgba(163,230,53,.1),rgba(74,222,128,.08))`,textAlign:"center"}}>
+          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>{ql}</p>
+          {ta&&!isSil&&(
+            <p style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white,marginBottom:10,lineHeight:1.2}}>
+              "{ta}"
+            </p>
+          )}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
+            <Avatar url={sd?.photoURL} name={cs} size={56}/>
+            <div style={{textAlign:"right"}}>
+              <p style={{color:D.muted,fontSize:11,marginBottom:2}}>זה היה...</p>
+              <p style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>{cs}</p>
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* GIF */}
+        <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎉</div>}
+        </GlassCard>
+
+        {/* Scores */}
+        <GlassCard className="fu d1">
+          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>ניחושים:</p>
+          {players.map((p,i)=>{
+            const g=guesses[p.name];if(!g)return null;
+            const good=ok(g);
+            return(
+              <div key={i} className="fu" style={{animationDelay:`${i*.06}s`,
+                display:"flex",justifyContent:"space-between",alignItems:"center",
+                padding:"11px 14px",borderRadius:12,marginBottom:6,
+                background:good?D.greenBg:D.redBg,
+                border:`1px solid ${good?D.green+"30":D.red+"30"}`}}>
+                <span style={{fontFamily:ffd,fontWeight:900,fontSize:15,color:good?D.green:D.red}}>
+                  {good?"+10":"✗"}
+                </span>
+                <div style={{display:"flex",alignItems:"center",gap:8,textAlign:"right"}}>
+                  <div>
+                    <p style={{color:D.white,fontWeight:600,fontSize:14}}>{p.name}</p>
+                    <p style={{color:D.muted,fontSize:12}}>"{g}"</p>
+                  </div>
+                  <Avatar url={p.photoURL} name={p.name} size={32}/>
+                </div>
+              </div>
+            );
+          })}
+          {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
+            🎯 {scorers} שחקנים ניחשו נכון!
+          </p>}
+        </GlassCard>
+
+        {isHost?<Btn onClick={next} variant="lime">המשך ▶</Btn>
+          :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>מחכים למארח...</p></GlassCard>}
+      </Wrap>
+    </Page>
+  );
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────
+function Board({room,code,isHost}){
+  const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
+  const medals=["🥇","🥈","🥉"];
+  const restart=async()=>{
+    const pl=Object.values(room.players||{});
+    const qs=pickLobbyQs(room.roundsPerPlayer||4);
+    const r={};
+    pl.forEach(p=>{r[`rooms/${code}/players/${p.name}/score`]=0;r[`rooms/${code}/players/${p.name}/ready`]=false;r[`rooms/${code}/players/${p.name}/personalAnswers`]=null;});
+    await update(ref(db),r);
+    await update(ref(db,`rooms/${code}`),{phase:"lobby",round:0,lobbyQuestions:qs,guesses:null,roundSequence:null});
+    sessionStorage.clear();
+  };
+
+  return(
+    <Page>
+      <ExitBtn/>
+      <Wrap>
+        <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
+          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🏆</div>
+          <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
+            background:`linear-gradient(135deg,${D.gold},${D.amber})`,
+            WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+            תוצאות סופיות
+          </h2>
+        </div>
+
+        <GlassCard>
+          {list.map((p,i)=>(
+            <div key={i} className="fu" style={{animationDelay:`${i*.08}s`,
+              display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"14px 16px",borderRadius:16,marginBottom:8,
+              background:i===0?"rgba(251,191,36,.1)":"rgba(255,255,255,.04)",
+              border:`1.5px solid ${i===0?D.gold+"40":D.border}`,
+              boxShadow:i===0?`0 0 20px ${D.goldGlow}`:"none"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:28}}>{medals[i]||`${i+1}`}</span>
+                <div>
+                  <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,
+                    color:i===0?D.gold:D.white}}>{p.score}</span>
+                  <span style={{color:D.muted,fontSize:12,marginRight:4}}>נק'</span>
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
+                <Avatar url={p.photoURL} name={p.name} size={40}/>
+              </div>
+            </div>
+          ))}
+        </GlassCard>
+
+        {isHost&&<Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>}
+      </Wrap>
+    </Page>
+  );
+}
+
+// ── ROOT ──────────────────────────────────────────────────────
+export default function App(){
+  const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
+  const[mn,setMn]=useState(()=>sessionStorage.getItem(SS_NAME)||"");
+  const[room,setRoom]=useState(null);
+
+  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
+  useEffect(()=>{if(mn)sessionStorage.setItem(SS_NAME,mn);},[mn]);
+  useEffect(()=>{
+    if(!rc)return;
+    return onValue(ref(db,`rooms/${rc}`),s=>{
+      if(s.exists())setRoom(s.val());
+      else{sessionStorage.clear();setRc("");setMn("");}
+    });
+  },[rc]);
+
+  const join=(c,n)=>{setRc(c);setMn(n);};
+
+  if(rc&&room){
+    const ih=room.host===mn;
+    if(room.phase==="lobby")       return<Lobby    room={room} code={rc} myName={mn} isHost={ih}/>;
+    if(room.phase==="question")    return<Question room={room} code={rc} myName={mn} isHost={ih}/>;
+    if(room.phase==="results")     return<Results  room={room} code={rc} isHost={ih}/>;
+    if(room.phase==="leaderboard") return<Board    room={room} code={rc} isHost={ih}/>;
+  }
+  if(rc&&!room)return(
+    <div style={{height:"100dvh",background:D.bgFixed,display:"flex",flexDirection:"column",
+      alignItems:"center",justifyContent:"center",gap:12,fontFamily:ff,color:D.white}}>
+      <style>{G}</style><Spinner/><p style={{color:D.muted}}>מתחבר...</p>
+    </div>
+  );
+  return<Home onJoin={join}/>;
+}
