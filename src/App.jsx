@@ -314,10 +314,12 @@ function Home({onJoin}){
   const[time,setTime]=useState(null);
   const[busy,setBusy]=useState(false);
 
+  // For 2 players: rounds must be even so each gets equal turns
+  const evenUp = n => numP===2 ? (n%2===0?n:n+1) : n;
   const rOpts=[
-    {l:"קצר",v:Math.max(3,numP),s:`${Math.max(3,numP)} שאלות`},
-    {l:"רגיל",v:Math.max(6,numP*2),s:`${Math.max(6,numP*2)} שאלות`},
-    {l:"מרתוני",v:Math.max(10,numP*3),s:`${Math.max(10,numP*3)} שאלות`},
+    {l:"קצר",  v:evenUp(Math.max(4,numP)),   s:`${evenUp(Math.max(4,numP))} שאלות`},
+    {l:"רגיל", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} שאלות`},
+    {l:"מרתוני",v:evenUp(Math.max(10,numP*3)),s:`${evenUp(Math.max(10,numP*3))} שאלות`},
   ];
   const tOpts=[{l:"⚡ מהיר",v:15},{l:"⏱ רגיל",v:25},{l:"🧘 נינוח",v:40}];
 
@@ -597,16 +599,37 @@ function Lobby({room,code,myName,isHost}){
           </div>
           <p style={{color:D.muted,fontSize:12,marginBottom:14}}>נשמר אוטומטית — בטוח מרענון דפדפן</p>
           <Input value={ln} onChange={setLn} placeholder="שם משפחה" style={{marginBottom:12}}/>
-          {qs.map((q,i)=>(
-            <div key={q.id} style={{marginBottom:11}}>
-              <label style={{display:"block",fontSize:12,color:D.muted,marginBottom:5,fontWeight:500}}>
-                {q.e||"•"} {q.label}
-              </label>
+          {qs.map((q,i)=>{
+            if(!q||!q.id) return null;
+            const replaceQ=()=>{
+              const usedIds=qs.filter(Boolean).map(x=>x.id);
+              const avail=QUESTIONS.filter(x=>!usedIds.includes(x.id));
+              if(!avail.length) return;
+              const pick=avail[Math.floor(Math.random()*avail.length)];
+              update(ref(db,`rooms/${code}/lobbyQuestions`),{[i]:pick});
+              setAns(p=>{const n={...p};delete n[q.id];return n;});
+            };
+            return(
+            <div key={q.id} style={{marginBottom:14}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:6}}>
+                <label style={{fontSize:13,color:D.offWhite,fontWeight:600,lineHeight:1.4,flex:1,textAlign:"right"}}>
+                  {q.e||"•"} {q.label}
+                </label>
+              </div>
               <Input value={ans[q.id]||""} onChange={v=>setAns(p=>({...p,[q.id]:v}))}
                 placeholder="התשובה שלך..."
-                style={{borderColor:ans[q.id]?.trim()?D.lime+"80":D.border}}/>
+                style={{borderColor:ans[q.id]?.trim()?D.lime+"80":D.border,marginBottom:6}}/>
+              <button onClick={replaceQ} style={{
+                width:"100%",padding:"8px",borderRadius:10,
+                background:"rgba(168,85,247,.15)",
+                border:`1px solid ${D.violet}50`,
+                color:D.violet,fontSize:13,fontWeight:700,
+                cursor:"pointer",fontFamily:ff}}>
+                🔄 לא מתאים לי — החלף שאלה
+              </button>
             </div>
-          ))}
+            );
+          })}
         </GlassCard>
 
         <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
@@ -895,7 +918,7 @@ function Question({room,code,myName,isHost}){
 }
 
 // ── RESULTS ───────────────────────────────────────────────────
-function Results({room,code,isHost}){
+function Results({room,code,isHost,myName}){
   const[gif,setGif]=useState(null);
   const[gifLoading,setGL]=useState(true);
   const ca=room.correctAnswer||"";
@@ -905,6 +928,8 @@ function Results({room,code,isHost}){
   const players=Object.values(room.players||{});
   const guesses=room.guesses||{};
   const sd=room.players?.[cs];
+  const myGuess=guesses[myName];
+  const myCorrect=myGuess!==undefined&&ok(myGuess);
   const seq=room.roundSequence||[];
   const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
   const ok=g=>g?.trim().toLowerCase()===ca.trim().toLowerCase();
@@ -952,8 +977,28 @@ function Results({room,code,isHost}){
         </GlassCard>
 
         {/* Scores */}
+                {/* Personal result feedback */}
+        {myGuess!==undefined&&(
+          <GlassCard className="si" style={{
+            textAlign:"center",
+            background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
+            border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
+          }}>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"🎯":"😅"}</div>
+            <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
+              {myCorrect?"ניחשת נכון!":"לא הצלחת הפעם"}
+            </p>
+            {myCorrect?<div style={{display:"inline-flex",alignItems:"center",gap:6,
+              background:"rgba(163,230,53,.15)",borderRadius:99,padding:"6px 18px",marginTop:4}}>
+              <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>+10</span>
+              <span style={{color:D.muted,fontSize:13}}>נקודות!</span>
+            </div>:<p style={{color:D.muted,fontSize:13,marginTop:4}}>
+              ניחשת: <span style={{color:D.red}}>"{myGuess}"</span>
+            </p>}
+          </GlassCard>
+        )}
         <GlassCard className="fu d1">
-          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>ניחושים:</p>
+          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
           {players.map((p,i)=>{
             const g=guesses[p.name];if(!g)return null;
             const good=ok(g);
@@ -1067,7 +1112,7 @@ export default function App(){
     const ih=room.host===mn;
     if(room.phase==="lobby")       return<Lobby    room={room} code={rc} myName={mn} isHost={ih}/>;
     if(room.phase==="question")    return<Question room={room} code={rc} myName={mn} isHost={ih}/>;
-    if(room.phase==="results")     return<Results  room={room} code={rc} isHost={ih}/>;
+    if(room.phase==="results")     return<Results  room={room} code={rc} isHost={ih} myName={mn}/>;
     if(room.phase==="leaderboard") return<Board    room={room} code={rc} isHost={ih}/>;
   }
   if(rc&&!room)return(
