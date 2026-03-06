@@ -122,8 +122,19 @@ const SS_CODE="sid_code", SS_NAME="sid_name";
 // ── Helpers ───────────────────────────────────────────────────
 function buildSequence(players, lobbyQs) {
   const n = players.length;
-  // Use the SAME questions that were saved in lobbyQuestions, so qIds match personalAnswers
-  const seq = lobbyQs.map((q,i)=>({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:players[i%n].name}));
+  // Each player uses their OWN questions (myQuestions), falling back to shared lobbyQs
+  const seq = [];
+  const rpp = lobbyQs.length; // rounds per player = number of questions
+  for(let i=0; i<rpp; i++){
+    const player = players[i%n];
+    // Use this player's personal questions if available
+    const playerQs = player.myQuestions
+      ? (Array.isArray(player.myQuestions) ? player.myQuestions : Object.values(player.myQuestions))
+      : lobbyQs;
+    const q = playerQs[i] || lobbyQs[i] || lobbyQs[0];
+    if(!q) continue;
+    seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
+  }
   seq.push({qId:SIL.id,qType:"sil",qLabel:SIL.label,qGiphy:SIL.giphy,qEmoji:SIL.e,subjectName:players[Math.floor(Math.random()*n)].name});
   return seq;
 }
@@ -454,7 +465,24 @@ function Home({onJoin}){
 // ── LOBBY ─────────────────────────────────────────────────────
 function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
-  const qs=room.lobbyQuestions||[];
+  // Each player has their own question set (falls back to room's shared questions)
+  const myQs = room.players?.[myName]?.myQuestions;
+  const qs = myQs
+    ? (Array.isArray(myQs) ? myQs : Object.values(myQs))
+    : (Array.isArray(room.lobbyQuestions) ? room.lobbyQuestions : Object.values(room.lobbyQuestions||{}));
+
+  // On first load: if player has no personal questions yet, copy from lobbyQuestions
+  useEffect(()=>{
+    if(!myQs && room.lobbyQuestions) {
+      const shared = Array.isArray(room.lobbyQuestions)
+        ? room.lobbyQuestions
+        : Object.values(room.lobbyQuestions);
+      // Shuffle a personal copy for variety
+      const personal = [...shared].sort(()=>Math.random()-.5);
+      update(ref(db,`rooms/${code}/players/${myName}`),{myQuestions: personal});
+    }
+  // eslint-disable-next-line
+  },[]);
   const KA=`ans_${code}_${myName}`,KL=`ln_${code}_${myName}`;
   const[ans,setAns]=useState(()=>{try{return JSON.parse(sessionStorage.getItem(KA)||"{}")}catch{return{}}});
   const[ln,setLn]=useState(()=>sessionStorage.getItem(KL)||"");
@@ -606,7 +634,9 @@ function Lobby({room,code,myName,isHost}){
               const avail=QUESTIONS.filter(x=>!usedIds.includes(x.id));
               if(!avail.length) return;
               const pick=avail[Math.floor(Math.random()*avail.length)];
-              update(ref(db,`rooms/${code}/lobbyQuestions`),{[i]:pick});
+              // Save ONLY to this player's personal questions
+              const newQs=[...qs]; newQs[i]=pick;
+              update(ref(db,`rooms/${code}/players/${myName}`),{myQuestions: newQs});
               setAns(p=>{const n={...p};delete n[q.id];return n;});
             };
             return(
@@ -1112,7 +1142,7 @@ export default function App(){
     const ih=room.host===mn;
     if(room.phase==="lobby")       return<Lobby    room={room} code={rc} myName={mn} isHost={ih}/>;
     if(room.phase==="question")    return<Question room={room} code={rc} myName={mn} isHost={ih}/>;
-    if(room.phase==="results")     return<Results  room={room} code={rc} isHost={ih} myName={mn}/>;
+    if(room.phase==="results")     return<Results  room={room} code={rc} isHost={ih} myName={mn}/>
     if(room.phase==="leaderboard") return<Board    room={room} code={rc} isHost={ih}/>;
   }
   if(rc&&!room)return(
