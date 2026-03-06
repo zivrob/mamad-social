@@ -958,11 +958,11 @@ function Results({room,code,isHost,myName}){
   const players=Object.values(room.players||{});
   const guesses=room.guesses||{};
   const sd=room.players?.[cs];
+  const ok=g=>g?.trim().toLowerCase()===ca.trim().toLowerCase();
   const myGuess=guesses[myName];
   const myCorrect=myGuess!==undefined&&ok(myGuess);
   const seq=room.roundSequence||[];
   const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
-  const ok=g=>g?.trim().toLowerCase()===ca.trim().toLowerCase();
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
 
   useEffect(()=>{
