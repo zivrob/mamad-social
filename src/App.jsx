@@ -120,22 +120,47 @@ const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"myste
 const SS_CODE="sid_code", SS_NAME="sid_name";
 
 // ── Helpers ───────────────────────────────────────────────────
+function getPlayerQs(player, lobbyQs) {
+  return player.myQuestions
+    ? (Array.isArray(player.myQuestions) ? player.myQuestions : Object.values(player.myQuestions))
+    : lobbyQs;
+}
+
 function buildSequence(players, lobbyQs) {
   const n = players.length;
-  // Each player uses their OWN questions (myQuestions), falling back to shared lobbyQs
   const seq = [];
-  const rpp = lobbyQs.length; // rounds per player = number of questions
-  for(let i=0; i<rpp; i++){
-    const player = players[i%n];
-    // Use this player's personal questions if available
-    const playerQs = player.myQuestions
-      ? (Array.isArray(player.myQuestions) ? player.myQuestions : Object.values(player.myQuestions))
-      : lobbyQs;
-    const q = playerQs[i] || lobbyQs[i] || lobbyQs[0];
-    if(!q) continue;
-    seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
+
+  if(n === 2) {
+    // DUEL MODE: each round both players answer simultaneously — A about B, B about A
+    // No silhouette round (the answer is obvious with only 2 players)
+    const [p0, p1] = players;
+    const qs0 = getPlayerQs(p0, lobbyQs); // questions answered by p0 (p1 will guess about p0)
+    const qs1 = getPlayerQs(p1, lobbyQs); // questions answered by p1 (p0 will guess about p1)
+    const rounds = Math.max(qs0.length, qs1.length);
+    for(let i=0; i<rounds; i++){
+      const q0 = qs0[i % qs0.length];
+      const q1 = qs1[i % qs1.length];
+      if(!q0||!q1) continue;
+      seq.push({
+        qType:"duel_round",
+        // p0 is subject (p1 guesses): 
+        subjectName: p0.name, qId: q0.id, qLabel: q0.label, qGiphy: q0.giphy||"", qEmoji: q0.e||"",
+        // p1 is also subject (p0 guesses):
+        subject2Name: p1.name, qId2: q1.id, qLabel2: q1.label, qGiphy2: q1.giphy||"", qEmoji2: q1.e||"",
+      });
+    }
+  } else {
+    // MULTIPLAYER: one subject per round, include silhouette at end
+    const rpp = lobbyQs.length;
+    for(let i=0; i<rpp; i++){
+      const player = players[i%n];
+      const playerQs = getPlayerQs(player, lobbyQs);
+      const q = playerQs[i] || lobbyQs[i] || lobbyQs[0];
+      if(!q) continue;
+      seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
+    }
+    seq.push({qId:SIL.id,qType:"sil",qLabel:SIL.label,qGiphy:SIL.giphy,qEmoji:SIL.e,subjectName:players[Math.floor(Math.random()*n)].name});
   }
-  seq.push({qId:SIL.id,qType:"sil",qLabel:SIL.label,qGiphy:SIL.giphy,qEmoji:SIL.e,subjectName:players[Math.floor(Math.random()*n)].name});
   return seq;
 }
 function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}
@@ -513,19 +538,23 @@ function Lobby({room,code,myName,isHost}){
     // Build decoy map instantly from static bank
     const decoyMap={};
     if(pl.length===2){
-      seq.forEach(item=>{
-        if(item.qType==="sil") return;
-        const subj=pl.find(p=>p.name===item.subjectName);
-        const correct=(subj?.personalAnswers?.[item.qId]||"").trim();
-        if(!correct) return;
-        const qDef=QUESTIONS.find(q=>q.id===item.qId);
+      const buildOpts=(qId,subjectName)=>{
+        const subj=pl.find(p=>p.name===subjectName);
+        const correct=(subj?.personalAnswers?.[qId]||"").trim();
+        if(!correct) return null;
+        const qDef=QUESTIONS.find(q=>q.id===qId);
         const pool=(qDef?.d||[]).filter(d=>d.trim().toLowerCase()!==correct.toLowerCase());
-        const shuffled=pool.sort(()=>Math.random()-.5);
+        const shuffled=[...pool].sort(()=>Math.random()-.5);
         const decoys=shuffled.slice(0,3);
-        // pad if not enough
         while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אחר");
-        const opts=[...decoys,correct].sort(()=>Math.random()-.5);
-        decoyMap[`${item.qId}_${item.subjectName}`]=opts;
+        return [...decoys,correct].sort(()=>Math.random()-.5);
+      };
+      seq.forEach(item=>{
+        if(item.qType!=="duel_round") return;
+        const o1=buildOpts(item.qId, item.subjectName);
+        if(o1) decoyMap[item.qId+"_"+item.subjectName]=o1;
+        const o2=buildOpts(item.qId2, item.subject2Name);
+        if(o2) decoyMap[item.qId2+"_"+item.subject2Name]=o2;
       });
     }
     update(ref(db,`rooms/${code}`),{phase:"question",round:1,roundSequence:seq,guesses:null,decoyMap});
@@ -694,10 +723,16 @@ function Question({room,code,myName,isHost}){
   // Build MC options for duel
   const lobbyQs=room.lobbyQuestions||[];
   const matchQ=lobbyQs.find(q=>q.id===cur.qId);
-  const correctText=subj?.personalAnswers?.[cur.qId]||"";
+  const correctText=cur.qType==="duel_round"?"":subj?.personalAnswers?.[cur.qId]||"";
   // allAns removed — AI generates contextual decoys now
   // Read pre-generated decoys from Firebase (generated by host at game start)
-  const decoyKey = `${cur.qId}_${cur.subjectName}`;
+  // In duel_round, each player guesses about different subject
+  const amP0duel = isDuel && myName === cur.subjectName;
+  const duelTargetName = isDuel ? (amP0duel ? cur.subject2Name : cur.subjectName) : null;
+  const duelTargetQId  = isDuel ? (amP0duel ? cur.qId2        : cur.qId)         : null;
+  const decoyKey = isDuel
+    ? (duelTargetQId+"_"+duelTargetName)
+    : `${cur.qId}_${cur.subjectName}`;
   const rawOpts = (room.decoyMap||{})[decoyKey];
   // Firebase arrays come back as objects with numeric keys — convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
@@ -716,24 +751,52 @@ function Question({room,code,myName,isHost}){
 
   const reveal=()=>{
     if(!isHost)return;
-    const correct=cur.subjectName;
     const upd={};
-    Object.entries(guesses).forEach(([g,v])=>{
-      if(v.trim().toLowerCase()===correct.trim().toLowerCase()&&room.players[g])
-        upd[`rooms/${code}/players/${g}/score`]=(room.players[g].score||0)+10;
-    });
-    if(Object.keys(upd).length)update(ref(db),upd);
-    const done=room.round>=seq.length;
-    update(ref(db,`rooms/${code}`),{
-      phase:"results",correctAnswer:correct,
-      subjectTextAnswer:isSil?correct:correctText,
-      correctSubject:cur.subjectName,currentQLabel:cur.qLabel,currentGiphyQuery:cur.qGiphy||"celebration",
-    });
+    if(cur.qType==="duel_round"){
+      // Score each player based on their own guess about the other
+      const [p0,p1]=[cur.subjectName,cur.subject2Name];
+      // p1 guessed about p0 (correct = p0's answer to qId)
+      const p0ans=(room.players?.[p0]?.personalAnswers?.[cur.qId]||"").trim().toLowerCase();
+      // p0 guessed about p1 (correct = p1's answer to qId2)
+      const p1ans=(room.players?.[p1]?.personalAnswers?.[cur.qId2]||"").trim().toLowerCase();
+      const g1=guesses[p1]?.trim().toLowerCase(); // p1's guess about p0
+      const g0=guesses[p0]?.trim().toLowerCase(); // p0's guess about p1
+      if(g1===p0ans&&room.players[p1]) upd[`rooms/${code}/players/${p1}/score`]=(room.players[p1].score||0)+10;
+      if(g0===p1ans&&room.players[p0]) upd[`rooms/${code}/players/${p0}/score`]=(room.players[p0].score||0)+10;
+      if(Object.keys(upd).length)update(ref(db),upd);
+      update(ref(db,`rooms/${code}`),{
+        phase:"results",
+        duelResult:{
+          p0,p1,
+          p0ans: room.players?.[p0]?.personalAnswers?.[cur.qId]||"",
+          p1ans: room.players?.[p1]?.personalAnswers?.[cur.qId2]||"",
+          p0qLabel:cur.qLabel, p1qLabel:cur.qLabel2,
+          p0guessed:guesses[p0]||"", p1guessed:guesses[p1]||"",
+          p0correct:g0===p1ans, p1correct:g1===p0ans,
+        },
+        correctAnswer:"__duel__",
+        currentGiphyQuery:"celebration party",
+        guesses,
+      });
+    } else {
+      const correct=cur.subjectName;
+      Object.entries(guesses).forEach(([g,v])=>{
+        if(v.trim().toLowerCase()===correct.trim().toLowerCase()&&room.players[g])
+          upd[`rooms/${code}/players/${g}/score`]=(room.players[g].score||0)+10;
+      });
+      if(Object.keys(upd).length)update(ref(db),upd);
+      update(ref(db,`rooms/${code}`),{
+        phase:"results",correctAnswer:correct,
+        subjectTextAnswer:isSil?correct:correctText,
+        correctSubject:cur.subjectName,currentQLabel:cur.qLabel,currentGiphyQuery:cur.qGiphy||"celebration",
+      });
+    }
   };
 
-  const nonSubj=players.filter(p=>p.name!==cur.subjectName);
-  const answered=nonSubj.filter(p=>guesses[p.name]).length;
-  const allDone=nonSubj.length>0&&answered===nonSubj.length;
+  // In duel_round: ALL players are guessers (both guess simultaneously)
+  const nonSubj = cur.qType==="duel_round" ? players : players.filter(p=>p.name!==cur.subjectName);
+  const answered = nonSubj.filter(p=>guesses[p.name]).length;
+  const allDone = nonSubj.length>0&&answered===nonSubj.length;
 
   // Countdown screen
   if(cd>0) return(
@@ -750,7 +813,29 @@ function Question({room,code,myName,isHost}){
   );
 
   // ── DUEL MODE UI ──────────────────────────────────────────────
-  if(isDuel) return(
+  if(isDuel) {
+    // Both players guess simultaneously each round
+    // mySubject = the player I'm guessing about
+    // myQuestion = the question THEY answered that I need to guess
+    const [p0, p1] = players;
+    const isP0 = myName === p0?.name;
+    // I guess about the OTHER player
+    const mySubject   = isP0 ? p1 : p0;
+    const myQId       = isP0 ? cur.qId2   : cur.qId;
+    const myQLabel    = isP0 ? cur.qLabel2 : cur.qLabel;
+    const myQEmoji    = isP0 ? cur.qEmoji2 : cur.qEmoji;
+    const myCorrectTxt= mySubject?.personalAnswers?.[myQId]||"";
+
+    // Decoy options keyed per player
+    const myDecoyKey  = isP0 ? (cur.qId2+"_"+cur.subject2Name) : (cur.qId+"_"+cur.subjectName);
+    const rawMyOpts   = (room.decoyMap||{})[myDecoyKey];
+    const myOpts      = Array.isArray(rawMyOpts) ? rawMyOpts
+                        : rawMyOpts ? Object.values(rawMyOpts) : [];
+    const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;
+
+    const myGuess = guesses[myName];
+
+    return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -763,79 +848,50 @@ function Question({room,code,myName,isHost}){
           <TimerRing t={tl} total={RT}/>
         </div>
 
-        {/* Subject + question — big center question, small avatar badge */}
+        {/* My question card */}
         <GlassCard className="fu" glow={D.violet}
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.15),rgba(244,114,182,.08))`,textAlign:"center",padding:"20px 16px"}}>
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>השאלה:</p>
           <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
-            {cur.qEmoji} {cur.qLabel}
+            {myQEmoji} {myQLabel}
           </p>
           <div style={{display:"inline-flex",alignItems:"center",gap:10,
             background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
             borderRadius:99,padding:"6px 14px 6px 8px"}}>
-            <Avatar url={subj?.photoURL} name={subj?.name} size={28}/>
-            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {cur.subjectName}</span>
+            <Avatar url={mySubject?.photoURL} name={mySubject?.name} size={28}/>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {mySubject?.name}</span>
           </div>
         </GlassCard>
 
-        {/* Subject sees: waiting */}
-        {amSubj&&(
-          <GlassCard className="fu d1" style={{textAlign:"center"}}>
-            <div style={{fontSize:40,marginBottom:8,animation:"float 2s ease-in-out infinite"}}>👤</div>
-            <p style={{color:D.violet,fontWeight:700,fontSize:16}}>השאלה עליך!</p>
-            <p style={{color:D.muted,fontSize:13,marginTop:4}}>{duelGuesser?.name} מנחש עכשיו...</p>
-          </GlassCard>
-        )}
-
-        {/* Guesser sees: MC options */}
-        {amDuelGuesser&&!isSil&&(
-          <GlassCard className="fu d1">
-            <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
-              מה {cur.subjectName} ענה? 🤔
-            </p>
-            {optsLoading&&(<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/><p style={{color:D.muted,fontSize:13,marginTop:8}}>מייצר תשובות...</p></div>)}
-            {opts.map((opt,i)=>{
-              const letters=["א","ב","ג","ד"];
-              const picked=localPick===opt;
-              const done=!!guesses[myName];
-              return(
-                <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(cur.subjectName);} }}
-                  style={{width:"100%",display:"flex",alignItems:"center",gap:12,
-                    padding:"14px 16px",borderRadius:14,marginBottom:8,cursor:done?"default":"pointer",
-                    background:picked?"rgba(168,85,247,.2)":done&&opt===correctText?"rgba(163,230,53,.12)":"rgba(255,255,255,.05)",
-                    border:`1.5px solid ${picked?D.violet:done&&opt===correctText?D.lime:D.border}`,
-                    transition:"all .18s",fontFamily:ff,textAlign:"right",
-                    animation:picked?"correctPop .3s ease":"none"}}>
-                  <span style={{width:30,height:30,borderRadius:8,display:"flex",alignItems:"center",
-                    justifyContent:"center",flexShrink:0,
-                    background:picked?D.violet:"rgba(255,255,255,.08)",
-                    color:picked?"#fff":D.muted,fontFamily:ffd,fontWeight:800,fontSize:13}}>
-                    {letters[i]}
-                  </span>
-                  <span style={{color:picked?D.white:D.offWhite,fontSize:15}}>{opt}</span>
-                </button>
-              );
-            })}
-            {guesses[myName]&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>✓ ניחוש נשלח</p>}
-          </GlassCard>
-        )}
-
-        {/* Sil round in duel */}
-        {amDuelGuesser&&isSil&&(
-          <GlassCard className="fu d1">
-            {subj?.silhouetteURL&&<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:180,objectFit:"contain",borderRadius:12,marginBottom:12}}/>}
-            <p style={{color:D.white,fontWeight:700,marginBottom:10}}>מי הדמות? 🕵️</p>
-            {players.map((p,i)=>(
-              <button key={i} onClick={()=>!guesses[myName]&&guess(p.name)}
-                style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"12px",borderRadius:12,marginBottom:6,
-                  background:guesses[myName]===p.name?"rgba(168,85,247,.2)":"rgba(255,255,255,.05)",
-                  border:`1.5px solid ${guesses[myName]===p.name?D.violet:D.border}`,fontFamily:ff}}>
-                <Avatar url={p.photoURL} name={p.name} size={32}/>
-                <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
+        {/* MC Options */}
+        <GlassCard className="fu d1">
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
+            מה {mySubject?.name} ענה? 🤔
+          </p>
+          {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
+          {myOpts.map((opt,i)=>{
+            const letters=["א","ב","ג","ד"];
+            const picked=localPick===opt;
+            const done=!!myGuess;
+            return(
+              <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(mySubject?.name||"");} }}
+                style={{width:"100%",display:"flex",alignItems:"center",gap:12,
+                  padding:"14px 16px",borderRadius:14,marginBottom:8,cursor:done?"default":"pointer",
+                  background:picked?"rgba(168,85,247,.2)":"rgba(255,255,255,.05)",
+                  border:`1.5px solid ${picked?D.violet:D.border}`,
+                  transition:"all .18s",fontFamily:ff,textAlign:"right"}}>
+                <span style={{width:30,height:30,borderRadius:8,display:"flex",alignItems:"center",
+                  justifyContent:"center",flexShrink:0,
+                  background:picked?D.violet:"rgba(255,255,255,.08)",
+                  color:picked?"#fff":D.muted,fontFamily:ffd,fontWeight:800,fontSize:13}}>
+                  {letters[i]}
+                </span>
+                <span style={{color:picked?D.white:D.offWhite,fontSize:15}}>{opt}</span>
               </button>
-            ))}
-          </GlassCard>
-        )}
+            );
+          })}
+          {myGuess&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>✓ ניחוש נשלח</p>}
+        </GlassCard>
 
         {/* Host reveal */}
         {isHost&&<Btn onClick={reveal} variant={allDone?"lime":"primary"}>
@@ -843,9 +899,10 @@ function Question({room,code,myName,isHost}){
         </Btn>}
       </Wrap>
     </Page>
-  );
+    );
+  }
 
-  // ── MULTIPLAYER UI ─────────────────────────────────────────────
+// ── MULTIPLAYER UI ─────────────────────────────────────────────
   return(
     <Page>
       <ExitBtn/>
@@ -964,6 +1021,7 @@ function Results({room,code,isHost,myName}){
   const seq=room.roundSequence||[];
   const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
+  const dr=room.duelResult||null; // duel round result object
 
   useEffect(()=>{
     setGif(null);setGL(true);
@@ -984,6 +1042,30 @@ function Results({room,code,isHost,myName}){
       <ExitBtn/>
       <Wrap>
         {/* Big reveal */}
+        {dr ? (
+          // DUEL RESULT: show both players' Q&A + correct/wrong
+          <GlassCard className="si" glow={D.lime} style={{textAlign:"center"}}>
+            <p style={{color:D.muted,fontSize:12,marginBottom:12}}>תוצאות הסיבוב</p>
+            {[{name:dr.p0,ans:dr.p0ans,qLabel:dr.p0qLabel,guessed:dr.p1guessed,correct:dr.p1correct,guesserName:dr.p1},
+              {name:dr.p1,ans:dr.p1ans,qLabel:dr.p1qLabel,guessed:dr.p0guessed,correct:dr.p0correct,guesserName:dr.p0}
+            ].map((row,i)=>(
+              <div key={i} style={{marginBottom:14,padding:"12px",borderRadius:14,
+                background:row.correct?"rgba(74,222,128,.1)":"rgba(248,113,113,.08)",
+                border:`1px solid ${row.correct?D.green+"40":D.red+"30"}`}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,justifyContent:"center"}}>
+                  <Avatar url={room.players?.[row.name]?.photoURL} name={row.name} size={32}/>
+                  <div style={{textAlign:"right"}}>
+                    <p style={{color:D.muted,fontSize:11}}>{row.qLabel}</p>
+                    <p style={{fontFamily:ffd,fontSize:16,fontWeight:900,color:D.lime}}>"{row.ans}"</p>
+                  </div>
+                </div>
+                <p style={{fontSize:13,color:row.correct?D.green:D.red}}>
+                  {row.guesserName}: {row.correct?"✅ ניחש נכון! +10":"❌ ניחש: "+`"${row.guessed}"`}
+                </p>
+              </div>
+            ))}
+          </GlassCard>
+        ) : (
         <GlassCard className="si" glow={D.lime}
           style={{background:`linear-gradient(135deg,rgba(163,230,53,.1),rgba(74,222,128,.08))`,textAlign:"center"}}>
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>{ql}</p>
@@ -1000,6 +1082,7 @@ function Results({room,code,isHost,myName}){
             </div>
           </div>
         </GlassCard>
+        )}
 
         {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -1008,7 +1091,7 @@ function Results({room,code,isHost,myName}){
 
         {/* Scores */}
                 {/* Personal result feedback */}
-        {myGuess!==undefined&&(
+        {myGuess!==undefined&&!dr&&(
           <GlassCard className="si" style={{
             textAlign:"center",
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
