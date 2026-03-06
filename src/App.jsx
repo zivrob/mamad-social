@@ -116,17 +116,163 @@ const QUESTIONS = [
   {id:"q29",label:"מה המאכל שאתה הכי טוב בהכנתו?",  giphy:"cooking chef kitchen",     e:"👨‍🍳",d:["פסטה","שקשוקה","סטייק","עוגה","סלט","ריזוטו","לחם","עוגיות","אורז מוקפץ","מרק עוף"]},
   {id:"q30",label:"מה הדבר שאתה הכי גאה בו?",       giphy:"proud achievement",        e:"😤", d:["ההישג שלי בעבודה","המשפחה שלי","הכושר שלי","הידע שלי","החברים שלי","הסבלנות שלי","הכישרון שלי"]},
 ]
+
+// ── Story Mode Data ───────────────────────────────────────────
+const STORIES = [
+  {
+    id: "s01",
+    title: "יום חופש מושלם",
+    paragraphs: [
+      {
+        text: "התעוררתי בבוקר ולא היה לי שום דבר מחויב. החלטתי לפנק את עצמי ולהתחיל את היום עם ",
+        blank: { id:"b01", label:"ארוחת בוקר", opts:["שקשוקה","גרנולה עם יוגורט","חביתה עם גבינה","אבוקדו טוסט"] }
+      },
+      {
+        text: ". אחרי שאכלתי יצאתי החוצה והתחלתי את היום עם ",
+        blank: { id:"b02", label:"פעילות בוקר", opts:["ריצה בפארק","קפה בבית קפה","פגישה עם חבר","טיול עם הכלב"] }
+      },
+      {
+        text: ". בצהריים הגעתי הביתה ושמתי על הרקע ",
+        blank: { id:"b03", label:"מה שמים ברקע", opts:["פודקאסט","מוזיקה שקטה","סדרה ישנה","שקט מוחלט"] }
+      },
+      {
+        text: " ונרגעתי. בערב בחרתי לאכול ",
+        blank: { id:"b04", label:"ארוחת ערב", opts:["פיצה","סושי","בישול ביתי","שווארמה"] }
+      },
+      {
+        text: " ולסיים את הלילה עם ",
+        blank: { id:"b05", label:"סיום לילה", opts:["סרט","ספר","שיחה עם חבר","גיימינג"] }
+      },
+      { text: ". יום מושלם.", blank: null }
+    ]
+  },
+  {
+    id: "s02",
+    title: "הטיול שחלמתי עליו",
+    paragraphs: [
+      {
+        text: "סוף סוף חסכתי כסף לטיול גדול. היעד שבחרתי: ",
+        blank: { id:"b06", label:"יעד טיול", opts:["יפן","איטליה","ניו יורק","תאילנד"] }
+      },
+      {
+        text: ". הדבר הראשון שתכננתי לעשות שם הוא ",
+        blank: { id:"b07", label:"פעילות ראשונה", opts:["לאכול אוכל מקומי","לבקר במוזיאון","לטייל בטבע","לקנות זכרונות"] }
+      },
+      {
+        text: ". לקחתי איתי לטיול ",
+        blank: { id:"b08", label:"מי מלווה", opts:["חבר טוב","בן/בת זוג","לבד","כל המשפחה"] }
+      },
+      {
+        text: " וכמובן שהאוכל שציפיתי לו הכי הוא ",
+        blank: { id:"b09", label:"אוכל מקומי", opts:["פסטה טרייה","ראמן אמיתי","פיצה ניאפוליטנה","פאד תאי"] }
+      },
+      {
+        text: ". בלילות תכננתי ",
+        blank: { id:"b10", label:"בילוי לילי", opts:["לצאת לברים","לטייל ברחובות","לנוח במלון","לצפות בשקיעה"] }
+      },
+      { text: ". הטיול הזה ישנה אותי.", blank: null }
+    ]
+  },
+  {
+    id: "s03",
+    title: "ערב עם חברים",
+    paragraphs: [
+      {
+        text: "החברים הגיעו ב-8. הכנתי להם ",
+        blank: { id:"b11", label:"מה להגיש", opts:["פיצה ממסעדה","בישול ביתי","סושי הזמנה","נשנושים ויין"] }
+      },
+      {
+        text: ". אחרי האוכל החלטנו לשחק ",
+        blank: { id:"b12", label:"משחק קבוצתי", opts:["קוויז ידע כללי","מחוות","כרטיסי שאלות","וידאו גיים"] }
+      },
+      {
+        text: ". האווירה הייתה ",
+        blank: { id:"b13", label:"אווירה", opts:["מגוחכת לחלוטין","רגועה ונעימה","אנרגטית ורועשת","עמוקה ומשמעותית"] }
+      },
+      {
+        text: " וכמובן שכולם רצו עוד מ",
+        blank: { id:"b14", label:"מה הלהיט של הערב", opts:["הקינוח שהכנתי","המוזיקה שבחרתי","השיחה על החיים","הצחוקים"] }
+      },
+      {
+        text: ". החלק הטוב ביותר בערב היה ",
+        blank: { id:"b15", label:"רגע הפסגה", opts:["הרגע שכולם צחקו","שיחה עמוקה אחד על אחד","הסוף שכולם ישנו אצלי","שנגמר באיחור"] }
+      },
+      { text: ". אני אוהב/ת ערבים כאלה.", blank: null }
+    ]
+  },
+  {
+    id: "s04",
+    title: "שבוע בחיי",
+    paragraphs: [
+      {
+        text: "הבוקר שלי מתחיל בדרך כלל עם ",
+        blank: { id:"b16", label:"שגרת בוקר", opts:["קפה ראשון","ספורט","גלילת טלפון","מקלחת ארוכה"] }
+      },
+      {
+        text: ". הדבר שהכי מעיק עלי בשבוע הוא ",
+        blank: { id:"b17", label:"מה מעיק", opts:["פקקים","ישיבות מיותרות","להחליט מה לאכול","המון הודעות"] }
+      },
+      {
+        text: ". אבל מה שמחזיק אותי הוא ",
+        blank: { id:"b18", label:"מה מחזיק אותך", opts:["הידיעה שיש סוף שבוע","החברים שלי","פרויקט שאני אוהב","הרגלים קטנים"] }
+      },
+      {
+        text: ". בשעות הפנאי אני בדרך כלל ",
+        blank: { id:"b19", label:"פנאי", opts:["צופה בסדרות","יוצא לספורט","מבשל משהו חדש","משחק משחקים"] }
+      },
+      {
+        text: " ולפני שאני נרדם אני ",
+        blank: { id:"b20", label:"לפני שינה", opts:["גולל טלפון","קורא ספר","מאזין לפודקאסט","חושב יותר מדי"] }
+      },
+      { text: ". ככה נראים החיים שלי.", blank: null }
+    ]
+  },
+  {
+    id: "s05",
+    title: "אם הייתי עשיר לשבוע",
+    paragraphs: [
+      {
+        text: "קיבלתי מיליון שקל לשבוע אחד. הדבר הראשון שקניתי: ",
+        blank: { id:"b21", label:"קנייה ראשונה", opts:["כרטיס טיסה ראשון","ארוחה במסעדה יוקרתית","בגדים חדשים","משהו לבית"] }
+      },
+      {
+        text: ". אחר כך לקחתי את כל החברים ל",
+        blank: { id:"b22", label:"יציאה עם חברים", opts:["וילה עם בריכה","מסעדת שף","ספא יוקרתי","סיבוב בעולם"] }
+      },
+      {
+        text: ". גרתי לשבוע ב",
+        blank: { id:"b23", label:"מגורים", opts:["פנטהאוז בתל אביב","וילה בים","בוטיק הוטל בחו"ל","אחוזה בכפר"] }
+      },
+      {
+        text: ". בסוף השבוע נשאר לי קצת כסף ובחרתי לתרום אותו ל",
+        blank: { id:"b24", label:"תרומה", opts:["ילדים בסיכון","הצלת בעלי חיים","מחקר רפואי","קהילה מקומית"] }
+      },
+      { text: ". כסף לא קונה הכל, אבל זה היה שבוע מדהים.", blank: null }
+    ]
+  }
+];
+
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
 
 // ── Helpers ───────────────────────────────────────────────────
-function getPlayerQs(player, lobbyQs) {
+function getPlayerQs(player, lobbyQs, story) {
+  if(story) {
+    // In story mode, "questions" are the blanks from the story
+    return story.paragraphs.filter(p=>p.blank).map(p=>({
+      id: p.blank.id,
+      label: p.blank.label,
+      giphy: "fun game party",
+      e: "📖",
+      d: p.blank.opts, // the 4 options ARE the decoys+correct
+    }));
+  }
   return player.myQuestions
     ? (Array.isArray(player.myQuestions) ? player.myQuestions : Object.values(player.myQuestions))
     : lobbyQs;
 }
 
-function buildSequence(players, lobbyQs) {
+function buildSequence(players, lobbyQs, story=null) {
   const n = players.length;
   const seq = [];
 
@@ -134,8 +280,8 @@ function buildSequence(players, lobbyQs) {
     // DUEL MODE: each round both players answer simultaneously — A about B, B about A
     // No silhouette round (the answer is obvious with only 2 players)
     const [p0, p1] = players;
-    const qs0 = getPlayerQs(p0, lobbyQs); // questions answered by p0 (p1 will guess about p0)
-    const qs1 = getPlayerQs(p1, lobbyQs); // questions answered by p1 (p0 will guess about p1)
+    const qs0 = getPlayerQs(p0, lobbyQs, story); // questions answered by p0 (p1 will guess about p0)
+    const qs1 = getPlayerQs(p1, lobbyQs, story); // questions answered by p1 (p0 will guess about p1)
     const rounds = Math.max(qs0.length, qs1.length);
     for(let i=0; i<rounds; i++){
       const q0 = qs0[i % qs0.length];
@@ -154,7 +300,7 @@ function buildSequence(players, lobbyQs) {
     const rpp = lobbyQs.length;
     for(let i=0; i<rpp; i++){
       const player = players[i%n];
-      const playerQs = getPlayerQs(player, lobbyQs);
+      const playerQs = getPlayerQs(player, lobbyQs, story);
       const q = playerQs[i] || lobbyQs[i] || lobbyQs[0];
       if(!q) continue;
       seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
@@ -352,6 +498,7 @@ function Home({onJoin}){
 
   // For 2 players: rounds must be even so each gets equal turns
   const evenUp = n => numP===2 ? (n%2===0?n:n+1) : n;
+  const [gameMode, setGameMode] = useState("free"); // "free" | "story"
   const rOpts=[
     {l:"קצר",  v:evenUp(Math.max(4,numP)),   s:`${evenUp(Math.max(4,numP))} שאלות`},
     {l:"רגיל", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} שאלות`},
@@ -364,7 +511,7 @@ function Home({onJoin}){
     setBusy(true);
     const c=Math.floor(1000+Math.random()*9000).toString();
     const qs=pickLobbyQs(rnd);
-    await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
+    await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
     sessionStorage.setItem(SS_CODE,c);sessionStorage.setItem(SS_NAME,name.trim());
     onJoin(c,name.trim());setBusy(false);
   };
@@ -403,6 +550,19 @@ function Home({onJoin}){
         </GlassCard>
 
         <GlassCard className="fu d2">
+          <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>מצב משחק:</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
+            {[{v:"free",icon:"❓",label:"שאלות חופשיות",desc:"ממלאים טקסט"},{v:"story",icon:"📖",label:"מצב סיפור",desc:"בחירה מתוך סיפור"}].map(m=>(
+              <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
+                padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
+                background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
+                border:`2px solid ${gameMode===m.v?D.violet:D.border}`,transition:"all .2s",textAlign:"center"}}>
+                <div style={{fontSize:22,marginBottom:4}}>{m.icon}</div>
+                <p style={{color:gameMode===m.v?D.white:D.offWhite,fontWeight:700,fontSize:12,marginBottom:2}}>{m.label}</p>
+                <p style={{color:D.muted,fontSize:10}}>{m.desc}</p>
+              </button>
+            ))}
+          </div>
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>כמות שאלות:</p>
           <div style={{display:"flex",gap:8}}>
             {rOpts.map(o=>(
@@ -488,6 +648,128 @@ function Home({onJoin}){
 }
 
 // ── LOBBY ─────────────────────────────────────────────────────
+
+// ── Story Form Component ──────────────────────────────────────
+function StoryForm({story, ans, setAns, code, myName}){
+  const [current, setCurrent] = useState(0); // current blank index
+  const blanks = story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
+  const filled = blanks.filter(b=>ans[b.id]).length;
+
+  // Save to Firebase personalAnswers when ans changes
+  const saveAns = (id, val) => {
+    const newAns = {...ans, [id]: val};
+    setAns(newAns);
+    // Also persist to Firebase
+    update(ref(db,`rooms/${code}/players/${myName}/personalAnswers`), {[id]: val});
+  };
+
+  // Build rendered paragraphs with inline blanks
+  const activeBId = blanks[current]?.id;
+
+  return(
+    <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
+      {/* Progress bar */}
+      <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
+        <div style={{height:"100%",width:`${(filled/Math.max(1,blanks.length))*100}%`,
+          background:`linear-gradient(90deg,${D.violet},${D.lime})`,transition:"width .4s"}}/>
+      </div>
+      <div style={{padding:"16px 16px 20px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <p style={{color:D.muted,fontSize:12}}>{filled}/{blanks.length} הושלמו</p>
+          <p style={{fontFamily:ffd,fontSize:15,fontWeight:800,color:D.violet}}>{story.title}</p>
+        </div>
+
+        {/* Story text with inline blanks */}
+        <div style={{fontSize:15,lineHeight:1.9,color:D.offWhite,textAlign:"right",direction:"rtl"}}>
+          {story.paragraphs.map((para,pi)=>(
+            <span key={pi}>
+              {para.text}
+              {para.blank && (
+                <span
+                  onClick={()=>setCurrent(blanks.findIndex(b=>b.id===para.blank.id))}
+                  style={{
+                    display:"inline-block",
+                    minWidth:80,
+                    padding:"2px 10px",
+                    borderRadius:8,
+                    margin:"0 4px",
+                    cursor:"pointer",
+                    fontWeight:800,
+                    fontSize:14,
+                    transition:"all .2s",
+                    background: ans[para.blank.id]
+                      ? "rgba(163,230,53,.2)"
+                      : activeBId===para.blank.id
+                        ? "rgba(168,85,247,.3)"
+                        : "rgba(255,255,255,.08)",
+                    border: `1.5px solid ${
+                      ans[para.blank.id] ? D.lime :
+                      activeBId===para.blank.id ? D.violet : D.border}`,
+                    color: ans[para.blank.id] ? D.lime :
+                      activeBId===para.blank.id ? D.white : D.muted,
+                  }}>
+                  {ans[para.blank.id] || "___"}
+                </span>
+              )}
+            </span>
+          ))}
+        </div>
+
+        {/* Option buttons for active blank */}
+        {blanks[current] && (
+          <div style={{marginTop:20}}>
+            <p style={{color:D.muted,fontSize:12,marginBottom:10,textAlign:"right"}}>
+              בחר עבור: <span style={{color:D.violet,fontWeight:700}}>{blanks[current].label}</span>
+            </p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              {blanks[current].opts.map((opt,oi)=>{
+                const selected = ans[blanks[current].id]===opt;
+                return(
+                  <button key={oi} onClick={()=>{
+                    saveAns(blanks[current].id, opt);
+                    // Auto-advance to next unfilled blank
+                    const nextIdx = blanks.findIndex((b,i)=>i>current&&!ans[b.id]);
+                    if(nextIdx!==-1) setCurrent(nextIdx);
+                    else {
+                      const anyEmpty = blanks.findIndex(b=>!ans[b.id]&&b.id!==blanks[current].id);
+                      if(anyEmpty!==-1) setCurrent(anyEmpty);
+                    }
+                  }} style={{
+                    padding:"10px 8px",borderRadius:12,cursor:"pointer",fontFamily:ff,
+                    background:selected?"rgba(163,230,53,.2)":"rgba(255,255,255,.05)",
+                    border:`1.5px solid ${selected?D.lime:D.border}`,
+                    color:selected?D.lime:D.offWhite,
+                    fontSize:13,fontWeight:selected?700:400,
+                    transition:"all .18s",textAlign:"center"}}>
+                    {selected && <span style={{marginLeft:4}}>✓ </span>}
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Navigation between blanks */}
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:12}}>
+              <button onClick={()=>setCurrent(Math.max(0,current-1))}
+                disabled={current===0}
+                style={{background:"none",border:`1px solid ${D.border}`,borderRadius:8,
+                  padding:"6px 12px",color:current===0?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
+                ◀ הקודם
+              </button>
+              <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{current+1} / {blanks.length}</span>
+              <button onClick={()=>setCurrent(Math.min(blanks.length-1,current+1))}
+                disabled={current===blanks.length-1}
+                style={{background:"none",border:`1px solid ${D.border}`,borderRadius:8,
+                  padding:"6px 12px",color:current===blanks.length-1?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
+                הבא ▶
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </GlassCard>
+  );
+}
+
 function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
   // Each player has their own question set (falls back to room's shared questions)
@@ -528,13 +810,21 @@ function Lobby({room,code,myName,isHost}){
 
   const ready=()=>{
     if(!ln.trim())return alert("חובה שם משפחה!");
-    if(!me?.photoURL)return alert("חובה להעלות סלפי!");
-    if(qs.some(q=>!ans[q.id]?.trim()))return alert("ענה על כל השאלות");
+    const isDuelMode = Object.keys(room.players||{}).length===2;
+    if(!isDuelMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
+    if(room.gameMode==="story"){
+      const story=STORIES.find(s=>s.id===room.storyId)||STORIES[0];
+      const blanks=story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
+      if(blanks.some(b=>!ans[b.id]))return alert("בחר תשובה לכל המשפטים בסיפור");
+    } else {
+      if(qs.some(q=>!ans[q.id]?.trim()))return alert("ענה על כל השאלות");
+    }
     update(ref(db,`rooms/${code}/players/${myName}`),{personalAnswers:ans,lastName:ln,ready:true});
   };
   const start=()=>{
     const pl=Object.values(room.players||{});
-    const seq=buildSequence(pl,room.lobbyQuestions||[]);
+    const story=room.gameMode==="story"?STORIES.find(s=>s.id===room.storyId)||STORIES[0]:null;
+  const seq=buildSequence(pl,room.lobbyQuestions||[],story);
     // Build decoy map instantly from static bank
     const decoyMap={};
     if(pl.length===2){
@@ -623,8 +913,8 @@ function Lobby({room,code,myName,isHost}){
           </div>
         </div>
 
-        {/* Photos */}
-        <GlassCard className="fu d1">
+        {/* Photos — hidden in duel mode (no silhouette round) */}
+        {Object.keys(room.players||{}).length!==2&&<GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>📸 תמונות</p>
           {[{t:"sil",lbl:"צללית (לחידה):",has:me?.silhouetteURL,cap:undefined,icons:["📷 בחר","🔄 החלף"]},
             {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}
@@ -643,9 +933,13 @@ function Lobby({room,code,myName,isHost}){
               </label>
             </div>
           ))}
-        </GlassCard>
+        </GlassCard>}}
 
-        {/* Questions */}
+        {/* Questions — Free mode or Story mode */}
+        {room.gameMode === "story" ? (
+          <StoryForm story={STORIES.find(s=>s.id===room.storyId)||STORIES[0]}
+            ans={ans} setAns={setAns} code={code} myName={myName}/>
+        ) : (        {/* Questions */}
         <GlassCard className="fu d2">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <p style={{color:D.white,fontWeight:700,fontSize:15}}>❓ שאלות</p>
@@ -690,6 +984,7 @@ function Lobby({room,code,myName,isHost}){
             );
           })}
         </GlassCard>
+        )}
 
         <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
           {upping?"מעלה...":"אני מוכן! ✓"}
