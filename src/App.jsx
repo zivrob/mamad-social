@@ -857,7 +857,7 @@ function Lobby({room,code,myName,isHost}){
         {room.gameMode === "story" ? (
           <StoryForm story={STORIES.find(s=>s.id===room.storyId)||STORIES[0]}
             ans={ans} setAns={setAns} code={code} myName={myName}/>
-        ) : (        {/* Questions */}
+        ) : (
         <GlassCard className="fu d2">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <p style={{color:D.white,fontWeight:700,fontSize:15}}>❓ שאלות</p>
