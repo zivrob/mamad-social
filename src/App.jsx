@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v1.8";
+const APP_VERSION = "v1.9";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -731,124 +731,154 @@ function StoryForm({story, ans, setAns, code, myName}){
 // ── Slider Form Component ────────────────────────────────────
 function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
+  const [anim, setAnim] = useState(null); // "left" | "right" | null
+  const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
+  const q = questions[cur];
+
   useEffect(function(){
     var el = document.getElementById("slider-thumb-style");
     if(!el){
       el = document.createElement("style");
       el.id = "slider-thumb-style";
-      el.textContent = [
-        "input[type=range]::-webkit-slider-thumb{",
-        "-webkit-appearance:none;width:24px;height:24px;",
-        "border-radius:50%;background:white;cursor:pointer;",
-        "box-shadow:0 0 8px rgba(168,85,247,.6);}",
-        "input[type=range]::-moz-range-thumb{",
-        "width:24px;height:24px;border-radius:50%;",
-        "background:white;cursor:pointer;border:none;",
-        "box-shadow:0 0 8px rgba(168,85,247,.6);}"
-      ].join("");
+      el.textContent = "input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:white;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.3);}input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:white;cursor:pointer;border:none;}";
       document.head.appendChild(el);
     }
   }, []);
-  const filled = questions.filter(function(q){return ans[q.id] !== undefined;}).length;
-  const q = questions[cur];
 
-  function handleSlide(qId, val){
-    var newAns = Object.assign({}, ans, {[qId]: val});
+  function choose(side){
+    // side: "left" | "right"
+    var val = side==="left" ? 0 : 100;
+    var newAns = Object.assign({}, ans, {[q.id]: val});
     setAns(newAns);
-    update(ref(db,"rooms/"+code+"/players/"+myName+"/personalAnswers"), {[qId]: val});
+    update(ref(db,"rooms/"+code+"/players/"+myName+"/personalAnswers"), {[q.id]: val});
+    setAnim(side);
+    setTimeout(function(){
+      setAnim(null);
+      if(cur < questions.length-1) setCur(cur+1);
+    }, 320);
   }
 
-  if(!q) return null;
-  var val = ans[q.id] !== undefined ? ans[q.id] : 50;
-  var pct = Math.round(filled * 100 / Math.max(1, questions.length));
+  function handleSwipe(e){
+    // Touch swipe support
+    var start = e.touches[0].clientX;
+    function onEnd(ev){
+      var dx = ev.changedTouches[0].clientX - start;
+      if(Math.abs(dx) > 60) choose(dx < 0 ? "right" : "left");
+      document.removeEventListener("touchend", onEnd);
+    }
+    document.addEventListener("touchend", onEnd);
+  }
+
+  if(!q) return(
+    <GlassCard className="fu d2" style={{textAlign:"center",padding:32}}>
+      <p style={{fontSize:32,marginBottom:8}}>{"✅"}</p>
+      <p style={{color:D.lime,fontWeight:700,fontSize:16}}>כל השאלות הושלמו!</p>
+    </GlassCard>
+  );
+
+  var chosen = ans[q.id]!==undefined ? (ans[q.id]===0 ? "left" : "right") : null;
+  var _tot = questions.length || 1; var pct = Math.round(filled * 100 / _tot);
 
   return(
-    <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
-      <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
+    <div>
+      <div style={{height:4,background:"rgba(255,255,255,.08)",borderRadius:2,marginBottom:16}}>
         <div style={{height:"100%",width:pct+"%",
-          background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",transition:"width .4s"}}/>
+          background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",
+          borderRadius:2,transition:"width .4s"}}/>
       </div>
-      <div style={{padding:"20px 16px 24px"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-          <span style={{color:D.muted,fontSize:12}}>{filled} מתוך {questions.length}</span>
-          <span style={{color:D.muted,fontSize:12}}>{cur+1} מתוך {questions.length}</span>
-        </div>
 
-        <p style={{color:D.white,fontWeight:800,fontSize:18,textAlign:"center",marginBottom:28,fontFamily:ffd}}>{q.label}</p>
+      <div style={{textAlign:"center",marginBottom:12}}>
+        <span style={{color:D.muted,fontSize:12}}>{filled} מתוך {questions.length} הושלמו</span>
+      </div>
 
-        <div style={{position:"relative",padding:"0 8px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
-            <span style={{
-              fontWeight:700,fontSize:14,
-              color:val<=40?D.violet:D.muted,
-              transition:"color .2s",
-              padding:"4px 10px",borderRadius:20,
-              background:val<=40?"rgba(168,85,247,.2)":"transparent"}}>
-              {q.left}
-            </span>
-            <span style={{
-              fontWeight:700,fontSize:14,
-              color:val>=60?D.lime:D.muted,
-              transition:"color .2s",
-              padding:"4px 10px",borderRadius:20,
-              background:val>=60?"rgba(163,230,53,.2)":"transparent"}}>
-              {q.right}
-            </span>
-          </div>
+      {/* Card */}
+      <div onTouchStart={handleSwipe}
+        style={{
+          position:"relative",
+          background:"rgba(255,255,255,.06)",
+          border:"1.5px solid "+D.border,
+          borderRadius:24,
+          padding:"28px 20px 24px",
+          backdropFilter:"blur(20px)",
+          transform: anim==="left"?"translateX(-60px) rotate(-8deg) scale(.95)":
+                     anim==="right"?"translateX(60px) rotate(8deg) scale(.95)":"translateX(0)",
+          opacity: anim ? 0 : 1,
+          transition:"transform .28s ease,opacity .28s ease",
+          overflow:"hidden"}}>
 
-          <div style={{position:"relative",height:48,display:"flex",alignItems:"center"}}>
-            <div style={{
-              position:"absolute",left:0,right:0,height:6,borderRadius:3,
-              background:"rgba(255,255,255,.1)"}}>
-              <div style={{
-                position:"absolute",left:0,width:val+"%",height:"100%",
-                borderRadius:3,
-                background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",
-                transition:"width .05s"}}/>
-            </div>
-            <input type="range" min={0} max={100} value={val}
-              onChange={function(e){handleSlide(q.id, Number(e.target.value));}}
-              style={{
-                position:"relative",zIndex:2,width:"100%",
-                WebkitAppearance:"none",appearance:"none",
-                background:"transparent",cursor:"pointer",height:48,margin:0}}/>
-          </div>
+        {/* Tint overlay when chosen */}
+        {chosen==="left" &&
+          <div style={{position:"absolute",inset:0,borderRadius:24,
+            background:"rgba(168,85,247,.12)",pointerEvents:"none"}}/>}
+        {chosen==="right" &&
+          <div style={{position:"absolute",inset:0,borderRadius:24,
+            background:"rgba(163,230,53,.12)",pointerEvents:"none"}}/>}
 
-          {val===50 &&
-            <p style={{textAlign:"center",color:D.muted,fontSize:11,marginTop:4}}>גרור לבחור</p>
-          }
-          {val!==50 &&
-            <p style={{textAlign:"center",fontSize:11,marginTop:4,
-              color:val<50?D.violet:D.lime,fontWeight:700}}>
-              {val<=15 ? "לגמרי "+q.left :
-               val<=40 ? "יותר "+q.left :
-               val>=85 ? "לגמרי "+q.right :
-               val>=60 ? "יותר "+q.right : "באמצע"}
-            </p>
-          }
-        </div>
+        <p style={{color:D.white,fontWeight:800,fontSize:17,textAlign:"center",
+          marginBottom:28,fontFamily:ffd,lineHeight:1.3}}>{q.label}</p>
 
-        <div style={{display:"flex",justifyContent:"space-between",marginTop:24,gap:8}}>
-          <button onClick={function(){setCur(Math.max(0,cur-1));}}
-            disabled={cur===0}
-            style={{flex:1,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
-              background:"rgba(255,255,255,.04)",
-              border:"1px solid "+D.border,
-              color:cur===0?D.muted:D.offWhite,fontSize:13}}>
-            הקודם
+        <div style={{display:"flex",gap:12,alignItems:"stretch"}}>
+          {/* LEFT button */}
+          <button onClick={function(){choose("left");}}
+            style={{
+              flex:1,padding:"20px 12px",borderRadius:18,cursor:"pointer",
+              fontFamily:ffd,fontWeight:800,fontSize:16,
+              background:chosen==="left"?"rgba(168,85,247,.35)":"rgba(168,85,247,.1)",
+              border:"2px solid "+(chosen==="left"?D.violet:"rgba(168,85,247,.3)"),
+              color:chosen==="left"?D.white:D.offWhite,
+              transition:"all .18s",textAlign:"center",
+              boxShadow:chosen==="left"?"0 0 20px rgba(168,85,247,.4)":"none"}}>
+            <div style={{fontSize:28,marginBottom:6}}>{"👈"}</div>
+            {q.left}
+            {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>הבחירה שלי</div>}
           </button>
-          {cur<questions.length-1 &&
-            <button onClick={function(){setCur(cur+1);}}
-              style={{flex:2,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
-                background:ans[q.id]!==undefined?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
-                border:"1px solid "+(ans[q.id]!==undefined?D.violet:D.border),
-                color:ans[q.id]!==undefined?D.white:D.muted,fontSize:13,fontWeight:700}}>
-              הבא
-            </button>
-          }
+
+          {/* RIGHT button */}
+          <button onClick={function(){choose("right");}}
+            style={{
+              flex:1,padding:"20px 12px",borderRadius:18,cursor:"pointer",
+              fontFamily:ffd,fontWeight:800,fontSize:16,
+              background:chosen==="right"?"rgba(163,230,53,.35)":"rgba(163,230,53,.1)",
+              border:"2px solid "+(chosen==="right"?D.lime:"rgba(163,230,53,.3)"),
+              color:chosen==="right"?D.white:D.offWhite,
+              transition:"all .18s",textAlign:"center",
+              boxShadow:chosen==="right"?"0 0 20px rgba(163,230,53,.4)":"none"}}>
+            <div style={{fontSize:28,marginBottom:6}}>{"👉"}</div>
+            {q.right}
+            {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>הבחירה שלי</div>}
+          </button>
+        </div>
+
+        {/* Dots nav */}
+        <div style={{display:"flex",justifyContent:"center",gap:5,marginTop:20}}>
+          {questions.map(function(qq,i){
+            return(
+              <div key={i} onClick={function(){setCur(i);}}
+                style={{width:i===cur?18:6,height:6,borderRadius:99,cursor:"pointer",
+                  transition:"all .2s",
+                  background:ans[qq.id]!==undefined?D.lime:i===cur?D.violet:"rgba(255,255,255,.15)"}}/>
+            );
+          })}
         </div>
       </div>
-    </GlassCard>
+
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:12,gap:8}}>
+        <button onClick={function(){setCur(Math.max(0,cur-1));}} disabled={cur===0}
+          style={{flex:1,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
+            background:"rgba(255,255,255,.04)",border:"1px solid "+D.border,
+            color:cur===0?D.muted:D.offWhite,fontSize:13}}>
+          הקודם
+        </button>
+        <button onClick={function(){setCur(Math.min(questions.length-1,cur+1));}}
+          disabled={cur===questions.length-1}
+          style={{flex:2,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
+            background:chosen?"rgba(168,85,247,.2)":"rgba(255,255,255,.04)",
+            border:"1px solid "+(chosen?D.violet:D.border),
+            color:chosen?D.white:D.muted,fontSize:13,fontWeight:chosen?700:400}}>
+          הבא
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -893,7 +923,8 @@ function Lobby({room,code,myName,isHost}){
   const ready=()=>{
     if(!ln.trim())return alert("חובה שם משפחה!");
     const isDuelMode = Object.keys(room.players||{}).length===2;
-    if(!isDuelMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
+    const noPhotoMode = isDuelMode || room.gameMode==="story" || room.gameMode==="slider";
+    if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
     if(room.gameMode==="story"){
       const story=STORIES.find(s=>s.id===room.storyId)||STORIES[0];
       const blanks=story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
@@ -1000,7 +1031,7 @@ function Lobby({room,code,myName,isHost}){
         </div>
 
         {/* Photos — hidden in duel mode (no silhouette round) */}
-        {Object.keys(room.players||{}).length!==2&&<GlassCard className="fu d1">
+        {Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'&&<GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>📸 תמונות</p>
           {[{t:"sil",lbl:"צללית (לחידה):",has:me?.silhouetteURL,cap:undefined,icons:["📷 בחר","🔄 החלף"]},
             {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}
