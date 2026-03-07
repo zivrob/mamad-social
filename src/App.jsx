@@ -235,48 +235,34 @@ const SLIDER_QS = [
   {id:"sl60",left:"חוויות",right:"רגיעה",label:"מטרת הטיול?"},
 ]
 
+async function generateSliderQsAI(n){
+  try{
+    const resp = await fetch("/api/gen",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({n, existing: SLIDER_QS.map(q=>q.left+"_"+q.right)})
+    });
+    if(!resp.ok) throw new Error("api "+resp.status);
+    const data = await resp.json();
+    if(!Array.isArray(data)||data.length<1) throw new Error("empty");
+    return data.slice(0,n);
+  }catch(e){
+    console.warn("AI gen failed, fallback:", e.message);
+    return pickSliderQs(n);
+  }
+}
+
 function pickSliderQs(n){
   const shuffled = [...SLIDER_QS].sort(()=>Math.random()-0.5);
   return shuffled.slice(0, Math.min(n, SLIDER_QS.length));
 }
 
-async function generateSliderQsAI(n){
-  try{
-    const used = SLIDER_QS.map(q=>q.left+"/"+q.right).join(", ");
-    const resp = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
-        max_tokens:1000,
-        messages:[{role:"user",content:`צור ${n} שאלות בינאריות חדשות לסיבוב היכרות בין חברים בעברית.
-כל שאלה מציגה שתי אפשרויות מנוגדות (כמו: "בוקר vs לילה").
-החזר JSON בלבד, ללא markdown, במבנה הזה בדיוק:
-[{"id":"ai01","left":"מילה1","right":"מילה2","label":"שאלה?"},...]
-דרישות:
-- קצר ותמציתי (מקסימום 3-4 מילים לכל צד)
-- רלוונטי לאנשים ישראלים
-- מגוון: אורח חיים, אוכל, אישיות, עבודה, חברות, נסיעות, בילוי
-- לא לחזור על אלה שכבר קיימות: ${used}
-- תחזיר בדיוק ${n} שאלות`}]
-      })
-    });
-    if(!resp.ok) throw new Error("api error");
-    const data = await resp.json();
-    const text = data.content.filter(b=>b.type==="text").map(b=>b.text).join("");
-    const clean = text.replace(/```json|```/g,"").trim();
-    const parsed = JSON.parse(clean);
-    if(!Array.isArray(parsed)||parsed.length<1) throw new Error("bad response");
-    return parsed.slice(0,n);
-  }catch(e){
-    console.warn("AI slider gen failed, using local bank:", e);
-    return pickSliderQs(n);
-  }
-}
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.2";
+const APP_VERSION = "v3.4";
+// Firebase key sanitizer — removes chars not allowed in Firebase paths
+function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -1040,9 +1026,9 @@ function Lobby({room,code,myName,isHost}){
       seq.forEach(item=>{
         if(item.qType!=="duel_round") return;
         const o1=buildOpts(item.qId, item.subjectName);
-        if(o1) decoyMap[item.qId+"_"+item.subjectName]=o1;
+        if(o1) decoyMap[fbKey(item.qId)+"_"+fbKey(item.subjectName)]=o1;
         const o2=buildOpts(item.qId2, item.subject2Name);
-        if(o2) decoyMap[item.qId2+"_"+item.subject2Name]=o2;
+        if(o2) decoyMap[fbKey(item.qId2)+"_"+fbKey(item.subject2Name)]=o2;
       });
     } else {
       // Multiplayer (3+): build decoys for each round
@@ -1056,7 +1042,7 @@ function Lobby({room,code,myName,isHost}){
         if(sliderQ){
           const correct=rawAns===0?sliderQ.left:sliderQ.right;
           const wrong=rawAns===0?sliderQ.right:sliderQ.left;
-          decoyMap[item.qId+"_"+item.subjectName]=[wrong,correct].sort(()=>Math.random()-.5);
+          decoyMap[fbKey(item.qId)+"_"+fbKey(item.subjectName)]=[wrong,correct].sort(()=>Math.random()-.5);
           return;
         }
         // Story/free: string answer with decoys from question bank
@@ -1070,7 +1056,7 @@ function Lobby({room,code,myName,isHost}){
         const shuffled=[...pool].sort(()=>Math.random()-.5);
         const decoys=shuffled.slice(0,3);
         while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אחר");
-        decoyMap[item.qId+"_"+item.subjectName]=[...decoys,correct].sort(()=>Math.random()-.5);
+        decoyMap[fbKey(item.qId)+"_"+fbKey(item.subjectName)]=[...decoys,correct].sort(()=>Math.random()-.5);
       });
     }
     update(ref(db,`rooms/${code}`),{phase:"question",round:1,roundSequence:seq,guesses:null,decoyMap});
@@ -1268,8 +1254,8 @@ function Question({room,code,myName,isHost}){
   const duelTargetName = isDuel ? (amP0duel ? cur.subject2Name : cur.subjectName) : null;
   const duelTargetQId  = isDuel ? (amP0duel ? cur.qId2        : cur.qId)         : null;
   const decoyKey = isDuel
-    ? (duelTargetQId+"_"+duelTargetName)
-    : `${cur.qId}_${cur.subjectName}`;
+    ? (fbKey(duelTargetQId)+"_"+fbKey(duelTargetName))
+    : (fbKey(cur.qId)+"_"+fbKey(cur.subjectName));
   const rawOpts = (room.decoyMap||{})[decoyKey];
   // Firebase arrays come back as objects with numeric keys — convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
@@ -1375,7 +1361,7 @@ function Question({room,code,myName,isHost}){
     const myCorrectTxt= mySubject?.personalAnswers?.[myQId]||"";
 
     // Decoy options keyed per player
-    const myDecoyKey  = isP0 ? (cur.qId2+"_"+cur.subject2Name) : (cur.qId+"_"+cur.subjectName);
+    const myDecoyKey  = isP0 ? (fbKey(cur.qId2)+"_"+fbKey(cur.subject2Name)) : (fbKey(cur.qId)+"_"+fbKey(cur.subjectName));
     const rawMyOpts   = (room.decoyMap||{})[myDecoyKey];
     const myOpts      = Array.isArray(rawMyOpts) ? rawMyOpts
                         : rawMyOpts ? Object.values(rawMyOpts) : [];
