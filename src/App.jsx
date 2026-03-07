@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.5";
+const APP_VERSION = "v2.6";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -1412,39 +1412,40 @@ function Question({room,code,myName,isHost}){
 
         {/* Answer or silhouette */}
         <GlassCard className="fu d1" style={{textAlign:"center"}}>
-          {isSil?(
+          {isSil&&(
             subj?.silhouetteURL
               ?<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:200,objectFit:"contain",borderRadius:12}}/>
               :<p style={{color:D.muted,textAlign:"center",padding:20}}>ממתין...</p>
-          ):(
-            <>
+          )}
+          {!isSil&&(
+            <div>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה שלו היתה:</p>
               <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
-                "{(()=>{const _r=subj?.personalAnswers?.[cur.qId]; const _sq=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})() }"
+                {(()=>{var _r=subj&&subj.personalAnswers&&subj.personalAnswers[cur.qId]; var _sq=room.sliderQuestions&&room.sliderQuestions.find(function(q){return q.id===cur.qId;}); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})()}
               </p>
-            </>
+            </div>
           )}
         </GlassCard>
 
         {/* My turn or guess */}
-        {amSubj?(
+        {amSubj&&(
           <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
-            <div style={{fontSize:34,marginBottom:6}}>👤</div>
+            <div style={{fontSize:34,marginBottom:6}}>{"👤"}</div>
             <p style={{color:D.violet,fontWeight:700}}>השאלה הזו עליך!</p>
             <p style={{color:D.muted,fontSize:13,marginTop:4}}>האחרים מנחשים...</p>
           </GlassCard>
-        ):(
-          <>
+        )}
+        {!amSubj&&isSil&&(
+          <div>
             <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
-              {players.map((p,i)=>{
-                const picked=guesses[myName]===p.name;
+              {players.map(function(p,i){
+                var picked=guesses[myName]===p.name;
                 return(
-                  <button key={i} onClick={()=>!guesses[myName]&&guess(p.name)}
+                  <button key={i} onClick={function(){if(!guesses[myName])guess(p.name);}}
                     style={{padding:"12px 10px",borderRadius:14,cursor:guesses[myName]?"default":"pointer",
                       display:"flex",alignItems:"center",gap:8,fontFamily:ff,
                       background:picked?"rgba(168,85,247,.18)":"rgba(255,255,255,.05)",
-                      border:`1.5px solid ${picked?D.violet:D.border}`,
-                      boxShadow:picked?`0 0 14px ${D.violetGlow}`:"none",
+                      border:"1.5px solid "+(picked?D.violet:D.border),
                       transition:"all .15s"}}>
                     <Avatar url={p.photoURL} name={p.name} size={30}/>
                     <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:14}}>{p.name}</span>
@@ -1452,22 +1453,23 @@ function Question({room,code,myName,isHost}){
                 );
               })}
             </div>
-            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>✓ ניחוש נשלח</p>}
-          </>
-        ):(
-          <>
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>{"✓"} ניחוש נשלח</p>}
+          </div>
+        )}
+        {!amSubj&&!isSil&&(
+          <div>
             {optsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
-            {opts.map((opt,i)=>{
-              const letters=["א","ב","ג","ד"];
-              const picked=localPick===opt;
-              const done=!!guesses[myName];
+            {opts.map(function(opt,i){
+              var letters=["א","ב","ג","ד"];
+              var picked=localPick===opt;
+              var done=!!guesses[myName];
               return(
-                <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(opt);}}}
+                <button key={i} onClick={function(){if(!done){setLocalPick(opt);guess(opt);}}}
                   style={{width:"100%",display:"flex",alignItems:"center",gap:12,
                     padding:"14px 16px",borderRadius:14,marginBottom:8,
                     cursor:done?"default":"pointer",
                     background:picked?"rgba(168,85,247,.18)":"rgba(255,255,255,.05)",
-                    border:`1.5px solid ${picked?D.violet:D.border}`,
+                    border:"1.5px solid "+(picked?D.violet:D.border),
                     transition:"all .15s",fontFamily:ff}}>
                   <span style={{width:26,height:26,borderRadius:8,display:"flex",alignItems:"center",
                     justifyContent:"center",fontWeight:700,fontSize:12,flexShrink:0,
@@ -1479,8 +1481,8 @@ function Question({room,code,myName,isHost}){
                 </button>
               );
             })}
-            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>✓ ניחוש נשלח</p>}
-          </>
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>{"✓"} ניחוש נשלח</p>}
+          </div>
         )}
 
         {/* Host panel */}
