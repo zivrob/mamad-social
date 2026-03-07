@@ -205,8 +205,8 @@ function pickSliderQs(n){
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
 const APP_VERSION = "v1.8";
-const G2 = G2;
-const G3 = G3;
+const G2 = "repeat(2,1fr)";
+const G3 = "repeat(3,1fr)";
 
 // ── Helpers ───────────────────────────────────────────────────
 function getPlayerQs(player, lobbyQs, story, sliderQs) {
