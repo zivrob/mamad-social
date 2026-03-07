@@ -511,7 +511,7 @@ function Home({onJoin}){
 
         <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>מצב משחק:</p>
-          <div style={{display:"grid",gridTemplateColumns:G3p:8,marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
             {[{v:"free",icon:"❓",label:"שאלות חופשיות",desc:"ממלאים טקסט"},{v:"story",icon:"📖",label:"מצב סיפור",desc:"בחירה מתוך סיפור"},{v:"slider",icon:"🎚️",label:"מצב סליידר",desc:"ימין או שמאל"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
