@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.6";
+const APP_VERSION = "v2.7";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -1520,9 +1520,17 @@ function Results({room,code,isHost,myName}){
   const players=Object.values(room.players||{});
   const guesses=room.guesses||{};
   const sd=room.players?.[cs];
-  const ok=g=>g?.trim().toLowerCase()===ca.trim().toLowerCase();
+  // For duel rounds: check correctness per-player from duelResult
+  const ok=function(g, playerName){
+    if(dr){
+      if(playerName===dr.p0) return dr.p0correct;
+      if(playerName===dr.p1) return dr.p1correct;
+      return false;
+    }
+    return g&&g.trim().toLowerCase()===ca.trim().toLowerCase();
+  };
   const myGuess=guesses[myName];
-  const myCorrect=myGuess!==undefined&&ok(myGuess);
+  const myCorrect=myGuess!==undefined&&ok(myGuess, myName);
   const seq=room.roundSequence||[];
   const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
@@ -1619,7 +1627,7 @@ function Results({room,code,isHost,myName}){
           <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
           {players.map((p,i)=>{
             const g=guesses[p.name];if(!g)return null;
-            const good=ok(g);
+            const good=ok(g, p.name);
             return(
               <div key={i} className="fu" style={{animationDelay:`${i*.06}s`,
                 display:"flex",justifyContent:"space-between",alignItems:"center",
