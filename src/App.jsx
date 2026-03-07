@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.2";
+const APP_VERSION = "v2.3";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -972,6 +972,34 @@ function Lobby({room,code,myName,isHost}){
         const o2=buildOpts(item.qId2, item.subject2Name);
         if(o2) decoyMap[item.qId2+"_"+item.subject2Name]=o2;
       });
+    } else {
+      // Multiplayer (3+): build decoys for each round
+      seq.forEach(item=>{
+        if(item.qType==="sil") return; // sil round has no decoys
+        const subj=pl.find(p=>p.name===item.subjectName);
+        if(!subj) return;
+        const rawAns=subj.personalAnswers?.[item.qId];
+        if(rawAns===undefined||rawAns===null) return;
+        const sliderQ=sliderQs&&sliderQs.find(q=>q.id===item.qId);
+        if(sliderQ){
+          const correct=rawAns===0?sliderQ.left:sliderQ.right;
+          const wrong=rawAns===0?sliderQ.right:sliderQ.left;
+          decoyMap[item.qId+"_"+item.subjectName]=[wrong,correct].sort(()=>Math.random()-.5);
+          return;
+        }
+        // Story/free: string answer with decoys from question bank
+        const correct=String(rawAns).trim();
+        if(!correct) return;
+        const storyQ=story&&story.paragraphs.find(p=>p.blank&&p.blank.id===item.qId);
+        const qDef=QUESTIONS.find(q=>q.id===item.qId);
+        const pool=storyQ
+          ?storyQ.blank.opts.filter(d=>d!==correct)
+          :(qDef?.d||[]).filter(d=>d.toLowerCase()!==correct.toLowerCase());
+        const shuffled=[...pool].sort(()=>Math.random()-.5);
+        const decoys=shuffled.slice(0,3);
+        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אחר");
+        decoyMap[item.qId+"_"+item.subjectName]=[...decoys,correct].sort(()=>Math.random()-.5);
+      });
     }
     update(ref(db,`rooms/${code}`),{phase:"question",round:1,roundSequence:seq,guesses:null,decoyMap});
   };
@@ -1205,8 +1233,8 @@ function Question({room,code,myName,isHost}){
         phase:"results",
         duelResult:{
           p0,p1,
-          p0ans: room.players?.[p0]?.personalAnswers?.[cur.qId]||"",
-          p1ans: room.players?.[p1]?.personalAnswers?.[cur.qId2]||"",
+          p0ans: (()=>{const _r=room.players?.[p0]?.personalAnswers?.[cur.qId]; const _sq=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):String(_r||'');})(),
+          p1ans: (()=>{const _r=room.players?.[p1]?.personalAnswers?.[cur.qId2]; const _sq=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId2); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):String(_r||'');})(),
           p0qLabel:cur.qLabel, p1qLabel:cur.qLabel2,
           p0guessed:guesses[p0]||"", p1guessed:guesses[p1]||"",
           p0correct:g0===p1ans, p1correct:g1===p0ans,
@@ -1216,17 +1244,26 @@ function Question({room,code,myName,isHost}){
         guesses,
       });
     } else {
-      const correct=cur.subjectName;
+      const isSilRound = cur.qType==="sil";
+      // For sil round: correct=subjectName. For regular: correct=subject's actual answer
+      const subj=players.find(p=>p.name===cur.subjectName);
+      const rawCorrect=subj?.personalAnswers?.[cur.qId];
+      const sliderQDef=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId);
+      const correctLabel=isSilRound
+        ? cur.subjectName
+        : sliderQDef&&rawCorrect!==undefined
+          ? (rawCorrect===0?sliderQDef.left:sliderQDef.right)
+          : String(rawCorrect||"");
       Object.entries(guesses).forEach(([g,v])=>{
         const gv=String(v).trim().toLowerCase();
-        const cv=String(correct).trim().toLowerCase();
+        const cv=correctLabel.trim().toLowerCase();
         if(gv===cv&&room.players[g])
           upd[`rooms/${code}/players/${g}/score`]=(room.players[g].score||0)+10;
       });
       if(Object.keys(upd).length)update(ref(db),upd);
       update(ref(db,`rooms/${code}`),{
-        phase:"results",correctAnswer:correct,
-        subjectTextAnswer:isSil?correct:correctText,
+        phase:"results",correctAnswer:correctLabel,
+        subjectTextAnswer:correctLabel,
         correctSubject:cur.subjectName,currentQLabel:cur.qLabel,currentGiphyQuery:cur.qGiphy||"celebration",
       });
     }
