@@ -204,7 +204,9 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v1.7";
+const APP_VERSION = "v1.8";
+const G2 = G2;
+const G3 = G3;
 
 // ── Helpers ───────────────────────────────────────────────────
 function getPlayerQs(player, lobbyQs, story, sliderQs) {
@@ -509,7 +511,7 @@ function Home({onJoin}){
 
         <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>מצב משחק:</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr"p:8,marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:G3p:8,marginBottom:16}}>
             {[{v:"free",icon:"❓",label:"שאלות חופשיות",desc:"ממלאים טקסט"},{v:"story",icon:"📖",label:"מצב סיפור",desc:"בחירה מתוך סיפור"},{v:"slider",icon:"🎚️",label:"מצב סליידר",desc:"ימין או שמאל"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
@@ -685,7 +687,7 @@ function StoryForm({story, ans, setAns, code, myName}){
             <p style={{color:D.muted,fontSize:12,marginBottom:10,textAlign:"right"}}>
               בחר עבור: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
             </p>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
               {curBlank.opts.map(function(opt,oi){
                 var sel = ans[curBlank.id]===opt;
                 return(
@@ -1344,7 +1346,7 @@ function Question({room,code,myName,isHost}){
           </GlassCard>
         ):(
           <>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
               {players.map((p,i)=>{
                 const picked=guesses[myName]===p.name;
                 return(
