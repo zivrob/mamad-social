@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.8";
+const APP_VERSION = "v3.0";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -1557,28 +1557,63 @@ function Results({room,code,isHost,myName}){
       <Wrap>
         {/* Big reveal */}
         {dr ? (
-          // DUEL RESULT: show both players' Q&A + correct/wrong
-          <GlassCard className="si" glow={D.lime} style={{textAlign:"center"}}>
-            <p style={{color:D.muted,fontSize:12,marginBottom:12}}>תוצאות הסיבוב</p>
-            {[{name:dr.p0,ans:dr.p0ans,qLabel:dr.p0qLabel,guessed:dr.p1guessed,correct:dr.p1correct,guesserName:dr.p1},
-              {name:dr.p1,ans:dr.p1ans,qLabel:dr.p1qLabel,guessed:dr.p0guessed,correct:dr.p0correct,guesserName:dr.p0}
-            ].map((row,i)=>(
-              <div key={i} style={{marginBottom:14,padding:"12px",borderRadius:14,
-                background:row.correct?"rgba(74,222,128,.1)":"rgba(248,113,113,.08)",
-                border:`1px solid ${row.correct?D.green+"40":D.red+"30"}`}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,justifyContent:"center"}}>
-                  <Avatar url={room.players?.[row.name]?.photoURL} name={row.name} size={32}/>
-                  <div style={{textAlign:"right"}}>
-                    <p style={{color:D.muted,fontSize:11}}>{row.qLabel}</p>
-                    <p style={{fontFamily:ffd,fontSize:16,fontWeight:900,color:D.lime}}>"{row.ans}"</p>
+          // DUEL RESULT: redesigned clear layout
+          <div>
+            {[
+              {subjectName:dr.p0, subjectAns:dr.p0ans, qLabel:dr.p0qLabel,
+               guesserName:dr.p1, guessed:dr.p1guessed, correct:dr.p1correct},
+              {subjectName:dr.p1, subjectAns:dr.p1ans, qLabel:dr.p1qLabel,
+               guesserName:dr.p0, guessed:dr.p0guessed, correct:dr.p0correct}
+            ].map(function(row,i){
+              return(
+                <GlassCard key={i} className="si" style={{
+                  marginBottom:10,padding:0,overflow:"hidden",
+                  border:"1.5px solid "+(row.correct?"rgba(74,222,128,.4)":"rgba(248,113,113,.3)")}}>
+                  {/* Color bar top */}
+                  <div style={{height:4,background:row.correct
+                    ?"linear-gradient(90deg,"+D.lime+",rgba(74,222,128,.4))"
+                    :"linear-gradient(90deg,rgba(248,113,113,.8),rgba(248,113,113,.3))"}}/>
+                  <div style={{padding:"14px 16px"}}>
+                    {/* Question + subject's answer */}
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+                      <Avatar url={room.players?.[row.subjectName]?.photoURL} name={row.subjectName} size={36}/>
+                      <div style={{flex:1,textAlign:"right"}}>
+                        <p style={{color:D.muted,fontSize:11,marginBottom:2}}>{row.qLabel}</p>
+                        <p style={{fontFamily:ffd,fontSize:17,fontWeight:900,color:D.white}}>
+                          {row.subjectName} ענה: <span style={{color:D.lime}}>{row.subjectAns}</span>
+                        </p>
+                      </div>
+                    </div>
+                    {/* Divider */}
+                    <div style={{height:1,background:"rgba(255,255,255,.08)",marginBottom:10}}/>
+                    {/* Guesser result */}
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={28}/>
+                        <div style={{textAlign:"right"}}>
+                          <p style={{color:D.muted,fontSize:11}}>ניחוש של {row.guesserName}</p>
+                          <p style={{fontWeight:700,fontSize:14,
+                            color:row.correct?D.lime:"rgba(248,113,113,.9)"}}>
+                            {row.guessed}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{
+                        width:44,height:44,borderRadius:22,display:"flex",
+                        alignItems:"center",justifyContent:"center",fontSize:22,
+                        background:row.correct?"rgba(74,222,128,.15)":"rgba(248,113,113,.12)"}}>
+                        {row.correct?"✅":"❌"}
+                      </div>
+                    </div>
+                    {row.correct&&(
+                      <p style={{textAlign:"center",color:D.lime,fontSize:12,
+                        fontWeight:700,marginTop:8}}>+10 נקודות!</p>
+                    )}
                   </div>
-                </div>
-                <p style={{fontSize:13,color:row.correct?D.green:D.red}}>
-                  {row.guesserName}: {row.correct?"✅ ניחש נכון! +10":"❌ ניחש: "+`"${row.guessed}"`}
-                </p>
-              </div>
-            ))}
-          </GlassCard>
+                </GlassCard>
+              );
+            })}
+          </div>
         ) : (
         <GlassCard className="si" glow={D.lime}
           style={{background:`linear-gradient(135deg,rgba(163,230,53,.1),rgba(74,222,128,.08))`,textAlign:"center"}}>
@@ -1626,23 +1661,38 @@ function Results({room,code,isHost,myName}){
         )}
         <GlassCard className="fu d1">
           <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
-          {players.map((p,i)=>{
-            const g=guesses[p.name];if(!g)return null;
-            const good=ok(g, p.name);
+          {players.map(function(p,i){
+            var g=guesses[p.name];
+            if(!g) return null;
+            var good=ok(g, p.name);
+            // In duel: show what they were guessing ABOUT
+            var _dr=room.duelResult||null;
+            var aboutName=_dr?(p.name===_dr.p0?_dr.p1:_dr.p0):cs;
+            var correctAns=_dr?(p.name===_dr.p0?_dr.p1ans:_dr.p0ans):ca;
             return(
-              <div key={i} className="fu" style={{animationDelay:`${i*.06}s`,
+              <div key={i} className="fu" style={{animationDelay:(i*.06)+"s",
                 display:"flex",justifyContent:"space-between",alignItems:"center",
                 padding:"11px 14px",borderRadius:12,marginBottom:6,
                 background:good?D.greenBg:D.redBg,
-                border:`1px solid ${good?D.green+"30":D.red+"30"}`}}>
-                <span style={{fontFamily:ffd,fontWeight:900,fontSize:15,color:good?D.green:D.red}}>
-                  {good?"+10":"✗"}
-                </span>
-                <div style={{display:"flex",alignItems:"center",gap:8,textAlign:"right"}}>
-                  <div>
-                    <p style={{color:D.white,fontWeight:600,fontSize:14}}>{p.name}</p>
-                    <p style={{color:D.muted,fontSize:12}}>"{g}"</p>
+                border:"1px solid "+(good?D.green+"30":D.red+"30")}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{width:36,height:36,borderRadius:18,display:"flex",
+                    alignItems:"center",justifyContent:"center",fontSize:18,
+                    background:good?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
+                    {good?"✅":"❌"}
                   </div>
+                  <div style={{textAlign:"right"}}>
+                    <p style={{color:D.white,fontWeight:700,fontSize:14}}>{p.name}</p>
+                    <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
+                      {good?"ניחש נכון: ":"ניחש: "}<span style={{fontWeight:700}}>{g}</span>
+                    </p>
+                    {!good&&_dr&&(
+                      <p style={{color:D.muted,fontSize:11}}>התשובה הנכונה: {correctAns}</p>
+                    )}
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  {_dr&&<span style={{color:D.muted,fontSize:11}}>על {aboutName}</span>}
                   <Avatar url={p.photoURL} name={p.name} size={32}/>
                 </div>
               </div>
