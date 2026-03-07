@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.1";
+const APP_VERSION = "v2.2";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -901,14 +901,14 @@ function Lobby({room,code,myName,isHost}){
     }
   // eslint-disable-next-line
   },[]);
-  const KA=`ans_${code}_${myName}`,KL=`ln_${code}_${myName}`;
+  const KA=`ans_${code}_${myName}`;
   const[ans,setAns]=useState(()=>{try{return JSON.parse(sessionStorage.getItem(KA)||"{}")}catch{return{}}});
-  const[ln,setLn]=useState(()=>sessionStorage.getItem(KL)||"");
+  
   const[upping,setUp]=useState(false);
   const[upT,setUpT]=useState("");
 
   useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
-  useEffect(()=>{if(ln)sessionStorage.setItem(KL,ln)},[ln]);
+  
 
   const up=async(file,type)=>{
     setUp(true);setUpT(type);
@@ -920,7 +920,6 @@ function Lobby({room,code,myName,isHost}){
   const onFile=(e,t)=>{const f=e.target.files?.[0];if(f)up(f,t);e.target.value="";};
 
   const ready=()=>{
-    if(!ln.trim())return alert("חובה שם משפחה!");
     const isDuelMode = Object.keys(room.players||{}).length===2;
     const noPhotoMode = isDuelMode || room.gameMode==="story" || room.gameMode==="slider";
     if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
@@ -934,7 +933,7 @@ function Lobby({room,code,myName,isHost}){
     } else {
       if(qs.some(q=>!ans[q.id]?.trim()))return alert("ענה על כל השאלות");
     }
-    update(ref(db,`rooms/${code}/players/${myName}`),{personalAnswers:ans,lastName:ln,ready:true});
+    update(ref(db,`rooms/${code}/players/${myName}`),{personalAnswers:ans,ready:true});
   };
   const start=()=>{
     const pl=Object.values(room.players||{});
@@ -1070,11 +1069,6 @@ function Lobby({room,code,myName,isHost}){
             </div>
           ))}
         </GlassCard>}}
-
-        {/* Last name — always visible */}
-        <GlassCard className="fu d1" style={{marginBottom:8}}>
-          <Input value={ln} onChange={setLn} placeholder="שם משפחה" style={{marginBottom:0}}/>
-        </GlassCard>
 
         {/* Questions — Free mode or Story mode */}
         {room.gameMode === "story" ? (
