@@ -22,49 +22,40 @@ const db = getDatabase(initializeApp({
 // Direction: "Late-night game show" — deep indigo base, electric violet + neon lime accents,
 // glassmorphism cards, chunky rounded corners, bold Clash Display font.
 const D = {
-  // Backgrounds
-  bg:        "linear-gradient(145deg,#0E0A1F 0%,#1A1035 50%,#0E0A1F 100%)",
-  bgFixed:   "#0E0A1F",
-  card:      "rgba(255,255,255,.06)",
-  cardHover: "rgba(255,255,255,.10)",
-  cardSolid: "#1C1535",
-  // Accents
-  violet:    "#A855F7",
-  violetGlow:"rgba(168,85,247,.3)",
-  lime:      "#A3E635",
-  limeGlow:  "rgba(163,230,53,.25)",
-  gold:      "#FBBF24",
-  goldGlow:  "rgba(251,191,36,.25)",
-  pink:      "#F472B6",
-  cyan:      "#22D3EE",
-  // Neutrals
-  white:     "#FFFFFF",
-  offWhite:  "rgba(255,255,255,.88)",
-  muted:     "rgba(255,255,255,.45)",
-  subtle:    "rgba(255,255,255,.12)",
-  border:    "rgba(255,255,255,.10)",
-  // Status
-  green:     "#4ADE80",
-  greenBg:   "rgba(74,222,128,.12)",
-  red:       "#F87171",
-  redBg:     "rgba(248,113,113,.12)",
-  amber:     "#FCD34D",
-  // Radii
-  r:   "16px",
-  rLg: "24px",
-  rXl: "32px",
-  // Shadows
-  shadow:    "0 4px 24px rgba(0,0,0,.4)",
-  shadowGlow:"0 0 40px rgba(168,85,247,.2)",
-  glow: (col) => `0 0 24px ${col}`,
-};
+  // Backgrounds — warm dark slate, easier on the eyes
+  bg:        "linear-gradient(145deg,#1A1A2E 0%,#16213E 50%,#1A1A2E 100%)",
+  bgFixed:   "#1A1A2E",
+  card:      "rgba(255,255,255,.07)",
+  cardHover: "rgba(255,255,255,.11)",
+  border:    "rgba(255,255,255,.12)",
+
+  // Text
+  white:     "#F0EAD6",
+  offWhite:  "#C8BFA8",
+  muted:     "#8A8070",
+
+  // Accents — softer, warmer tones
+  violet:    "#9B72CF",
+  violetGlow:"rgba(155,114,207,.15)",
+  lime:      "#7EC8A0",
+  gold:      "#D4A853",
+  pink:      "#C47F9A",
+  red:       "#C46A6A",
+  green:     "#7EC8A0",
+  greenBg:   "rgba(126,200,160,.12)",
+  redBg:     "rgba(196,106,106,.12)",
+
+  // Helpers
+  border2:   "rgba(155,114,207,.35)",
+  glow: (col) => "0 0 24px "+col,
+}
 
 // ── Global CSS ────────────────────────────────────────────────
 const G = `
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  html,body{min-height:100%;background:#0E0A1F;direction:rtl;overscroll-behavior:none;}
-  button,input{font-family:'Plus Jakarta Sans',sans-serif;}
+  html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
+  button,input{font-family:'Heebo',sans-serif;}
   button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
   ::-webkit-scrollbar{width:4px;}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
@@ -175,27 +166,74 @@ const STORIES = [
 
 // ── Slider Mode Data ─────────────────────────────────────────
 const SLIDER_QS = [
-  {id:"sl01", left:"בוקר", right:"לילה", label:"מתי את·ה הכי חי·ה?"},
-  {id:"sl02", left:"ים", right:"הרים", label:"חופשה מושלמת?"},
-  {id:"sl03", left:"לבד", right:"עם אנשים", label:"תעדיף·י לבלות?"},
-  {id:"sl04", left:"ספונטני", right:"מתוכנן", label:"סגנון חיים?"},
-  {id:"sl05", left:"קפה", right:"תה", label:"משקה בוקר?"},
-  {id:"sl06", left:"פנים", right:"חוץ", label:"איפה את·ה מרגיש·ה טוב יותר?"},
-  {id:"sl07", left:"מוזיקה", right:"שקט", label:"בזמן עבודה?"},
-  {id:"sl08", left:"ספר", right:"סרט", label:"ערב חופשי?"},
-  {id:"sl09", left:"מתוק", right:"מלוח", label:"חטיף מועדף?"},
-  {id:"sl10", left:"לדבר", right:"להקשיב", label:"בשיחה את·ה יותר?"},
-  {id:"sl11", left:"עיר", right:"טבע", label:"איפה הייית גר·ה?"},
-  {id:"sl12", left:"לוגי", right:"רגשי", label:"מקבל·ת החלטות?"},
-  {id:"sl13", left:"מהיר", right:"איטי", label:"קצב אכילה?"},
-  {id:"sl14", left:"חם", right:"קר", label:"מזג אוויר מועדף?"},
-  {id:"sl15", left:"לשמור", right:"לזרוק", label:"כשמסדרים בית?"},
-  {id:"sl16", left:"פרפקציוניסט", right:"בסדר גמור", label:"גישה לעבודה?"},
-  {id:"sl17", left:"כלב", right:"חתול", label:"חיית מחמד?"},
-  {id:"sl18", left:"לטוס", right:"לנסוע", label:"דרך הגעה לטיול?"},
-  {id:"sl19", left:"ריצה", right:"יוגה", label:"ספורט מועדף?"},
-  {id:"sl20", left:"נטפליקס", right:"לצאת", label:"שישי בערב?"},
-];
+  // אורח חיים
+  {id:"sl01",left:"בוקר",right:"לילה",label:"מתי את·ה הכי חי·ה?"},
+  {id:"sl02",left:"ים",right:"הרים",label:"חופשה מושלמת?"},
+  {id:"sl03",left:"לבד",right:"עם אנשים",label:"תעדיף·י לבלות?"},
+  {id:"sl04",left:"ספונטני",right:"מתוכנן",label:"סגנון חיים?"},
+  {id:"sl05",left:"קפה",right:"תה",label:"משקה הבוקר?"},
+  {id:"sl06",left:"פנים",right:"חוץ",label:"איפה את·ה מרגיש·ה טוב יותר?"},
+  {id:"sl07",left:"מוזיקה",right:"שקט",label:"בזמן עבודה?"},
+  {id:"sl08",left:"ספר",right:"סרט",label:"ערב חופשי?"},
+  {id:"sl09",left:"מתוק",right:"מלוח",label:"חטיף מועדף?"},
+  {id:"sl10",left:"לדבר",right:"להקשיב",label:"בשיחה את·ה יותר?"},
+  {id:"sl11",left:"עיר",right:"טבע",label:"איפה הייית גר·ה?"},
+  {id:"sl12",left:"לוגי",right:"רגשי",label:"מקבל·ת החלטות?"},
+  {id:"sl13",left:"מהיר",right:"איטי",label:"קצב אכילה?"},
+  {id:"sl14",left:"חם",right:"קר",label:"מזג אוויר מועדף?"},
+  {id:"sl15",left:"לשמור",right:"לזרוק",label:"כשמסדרים בית?"},
+  {id:"sl16",left:"פרפקציוניסט",right:"בסדר גמור",label:"גישה לעבודה?"},
+  {id:"sl17",left:"כלב",right:"חתול",label:"חיית מחמד?"},
+  {id:"sl18",left:"לטוס",right:"לנסוע",label:"דרך הגעה לטיול?"},
+  {id:"sl19",left:"ריצה",right:"יוגה",label:"ספורט מועדף?"},
+  {id:"sl20",left:"נטפליקס",right:"לצאת",label:"שישי בערב?"},
+  // אוכל
+  {id:"sl21",left:"פיצה",right:"המבורגר",label:"ארוחת ערב?"},
+  {id:"sl22",left:"חריף",right:"עדין",label:"טעם מועדף?"},
+  {id:"sl23",left:"בישול בבית",right:"מסעדה",label:"ארוחה טובה?"},
+  {id:"sl24",left:"שוקולד מריר",right:"שוקולד חלב",label:"שוקולד?"},
+  {id:"sl25",left:"בייגלה",right:"פופקורן",label:"נשנוש בסרט?"},
+  {id:"sl26",left:"ארוחת בוקר",right:"ארוחת לילה",label:"ארוחה מועדפת?"},
+  {id:"sl27",left:"ירקות",right:"פירות",label:"נשנוש בריא?"},
+  {id:"sl28",left:"אוכל אסייתי",right:"אוכל ים תיכוני",label:"מטבח מועדף?"},
+  // אישיות
+  {id:"sl29",left:"מוביל",right:"עוקב",label:"בקבוצה את·ה?"},
+  {id:"sl30",left:"שומר סוד",right:"מספר לכולם",label:"כשיש לך חדשות?"},
+  {id:"sl31",left:"מתכנן",right:"מאלתר",label:"לפני אירוע?"},
+  {id:"sl32",left:"ישיר",right:"דיפלומטי",label:"כשיש בעיה?"},
+  {id:"sl33",left:"פסימי",right:"אופטימי",label:"ראיית עתיד?"},
+  {id:"sl34",left:"חברתי",right:"מסתגר",label:"במסיבה?"},
+  {id:"sl35",left:"יצירתי",right:"מעשי",label:"פתרון בעיות?"},
+  {id:"sl36",left:"ספקן",right:"מאמין",label:"גישה לחיים?"},
+  {id:"sl37",left:"מינימליסט",right:"קולקציונר",label:"בבית?"},
+  {id:"sl38",left:"רציני",right:"הומוריסטי",label:"סגנון דיבור?"},
+  // טכנולוגיה ובידור
+  {id:"sl39",left:"אנדרואיד",right:"אייפון",label:"סמארטפון?"},
+  {id:"sl40",left:"סרט",right:"סדרה",label:"ערב בית?"},
+  {id:"sl41",left:"ספר נייר",right:"אודיובוק",label:"קריאה?"},
+  {id:"sl42",left:"רדיו",right:"ספוטיפיי",label:"מוזיקה בנסיעה?"},
+  {id:"sl43",left:"חדשות",right:"פודקאסט",label:"בזמן ריצה?"},
+  {id:"sl44",left:"וואטסאפ",right:"שיחת טלפון",label:"תקשורת?"},
+  {id:"sl45",left:"שחייה",right:"אופניים",label:"פעילות קיץ?"},
+  // כסף ועבודה
+  {id:"sl46",left:"לחסוך",right:"ליהנות",label:"כשיש כסף?"},
+  {id:"sl47",left:"שכיר",right:"עצמאי",label:"סגנון עבודה?"},
+  {id:"sl48",left:"מקצוע אהוב",right:"משכורת גבוהה",label:"בבחירת עבודה?"},
+  {id:"sl49",left:"לעבוד מהבית",right:"ללכת למשרד",label:"יום עבודה?"},
+  {id:"sl50",left:"פרויקט אחד",right:"כמה פרויקטים",label:"אופן עבודה?"},
+  // חברות ויחסים
+  {id:"sl51",left:"חבר אחד טוב",right:"הרבה חברים",label:"חברות?"},
+  {id:"sl52",left:"ביקור פתע",right:"תיאום מראש",label:"חברים אצלך?"},
+  {id:"sl53",left:"לתת מתנה",right:"לקבל מתנה",label:"מה מרגש יותר?"},
+  {id:"sl54",left:"לסלוח מהר",right:"לזכור זמן",label:"כשנפגעת?"},
+  {id:"sl55",left:"לדבר על רגשות",right:"להמשיך הלאה",label:"בעיות רגשיות?"},
+  // נסיעות
+  {id:"sl56",left:"חוף ים",right:"גלישה בעיר",label:"יעד חלומי?"},
+  {id:"sl57",left:"מלון",right:"אירבנבי",label:"לינה בחו·ל?"},
+  {id:"sl58",left:"טיול מאורגן",right:"טיול עצמאי",label:"חופשה?"},
+  {id:"sl59",left:"אירופה",right:"אסיה",label:"יבשת מועדפת?"},
+  {id:"sl60",left:"חוויות",right:"רגיעה",label:"מטרת הטיול?"},
+]
 
 function pickSliderQs(n){
   const shuffled = [...SLIDER_QS].sort(()=>Math.random()-0.5);
@@ -204,7 +242,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.0";
+const APP_VERSION = "v3.1";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -322,8 +360,8 @@ async function fetchGif(q){
 }
 
 // ── Primitive Components ──────────────────────────────────────
-const ff = "'Plus Jakarta Sans',sans-serif";
-const ffd = "'Nunito',sans-serif";
+const ff = "'Heebo',sans-serif";
+const ffd = "'Heebo',sans-serif";
 
 function GlassCard({children,style={},glow}){
   return(
@@ -1579,8 +1617,8 @@ function Results({room,code,isHost,myName}){
                       <Avatar url={room.players?.[row.subjectName]?.photoURL} name={row.subjectName} size={36}/>
                       <div style={{flex:1,textAlign:"right"}}>
                         <p style={{color:D.muted,fontSize:11,marginBottom:2}}>{row.qLabel}</p>
-                        <p style={{fontFamily:ffd,fontSize:17,fontWeight:900,color:D.white}}>
-                          {row.subjectName} ענה: <span style={{color:D.lime}}>{row.subjectAns}</span>
+                        <p style={{fontFamily:ffd,fontSize:18,fontWeight:900,color:D.lime}}>
+                          {row.subjectAns}
                         </p>
                       </div>
                     </div>
@@ -1591,9 +1629,9 @@ function Results({room,code,isHost,myName}){
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
                         <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={28}/>
                         <div style={{textAlign:"right"}}>
-                          <p style={{color:D.muted,fontSize:11}}>ניחוש של {row.guesserName}</p>
-                          <p style={{fontWeight:700,fontSize:14,
-                            color:row.correct?D.lime:"rgba(248,113,113,.9)"}}>
+                          <p style={{color:D.muted,fontSize:11}}>ניחש:</p>
+                          <p style={{fontWeight:800,fontSize:15,
+                            color:row.correct?D.lime:"rgba(196,106,106,.9)"}}>
                             {row.guessed}
                           </p>
                         </div>
