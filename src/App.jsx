@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.3";
+const APP_VERSION = "v2.5";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -1350,7 +1350,7 @@ function Question({room,code,myName,isHost}){
             const picked=localPick===opt;
             const done=!!myGuess;
             return(
-              <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(mySubject?.name||"");} }}
+              <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(opt);} }}
                 style={{width:"100%",display:"flex",alignItems:"center",gap:12,
                   padding:"14px 16px",borderRadius:14,marginBottom:8,cursor:done?"default":"pointer",
                   background:picked?"rgba(168,85,247,.2)":"rgba(255,255,255,.05)",
@@ -1420,7 +1420,7 @@ function Question({room,code,myName,isHost}){
             <>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה שלו היתה:</p>
               <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
-                "{subj?.personalAnswers?.[cur.qId]||"..."}"
+                "{(()=>{const _r=subj?.personalAnswers?.[cur.qId]; const _sq=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})() }"
               </p>
             </>
           )}
@@ -1453,6 +1453,33 @@ function Question({room,code,myName,isHost}){
               })}
             </div>
             {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>✓ ניחוש נשלח</p>}
+          </>
+        ):(
+          <>
+            {optsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
+            {opts.map((opt,i)=>{
+              const letters=["א","ב","ג","ד"];
+              const picked=localPick===opt;
+              const done=!!guesses[myName];
+              return(
+                <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(opt);}}}
+                  style={{width:"100%",display:"flex",alignItems:"center",gap:12,
+                    padding:"14px 16px",borderRadius:14,marginBottom:8,
+                    cursor:done?"default":"pointer",
+                    background:picked?"rgba(168,85,247,.18)":"rgba(255,255,255,.05)",
+                    border:`1.5px solid ${picked?D.violet:D.border}`,
+                    transition:"all .15s",fontFamily:ff}}>
+                  <span style={{width:26,height:26,borderRadius:8,display:"flex",alignItems:"center",
+                    justifyContent:"center",fontWeight:700,fontSize:12,flexShrink:0,
+                    background:picked?"rgba(168,85,247,.3)":"rgba(255,255,255,.08)",
+                    color:picked?D.white:D.muted}}>{letters[i]}</span>
+                  <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:15,textAlign:"right"}}>
+                    {opt}
+                  </span>
+                </button>
+              );
+            })}
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>✓ ניחוש נשלח</p>}
           </>
         )}
 
