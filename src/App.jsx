@@ -575,6 +575,17 @@ function Home({onJoin}){
 // ── LOBBY ─────────────────────────────────────────────────────
 
 // ── Story Form Component ──────────────────────────────────────
+function getBlankStyle(filled, active){
+  return {
+    display:"inline-block", minWidth:80, padding:"2px 10px",
+    borderRadius:8, margin:"0 4px", cursor:"pointer",
+    fontWeight:800, fontSize:14, transition:"all .2s",
+    background: filled ? "rgba(163,230,53,.2)" : active ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)",
+    border: "1.5px solid " + (filled ? D.lime : active ? D.violet : D.border),
+    color: filled ? D.lime : active ? D.white : D.muted,
+  };
+}
+
 function StoryForm({story, ans, setAns, code, myName}){
   const [current, setCurrent] = useState(0); // current blank index
   const blanks = story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
@@ -590,12 +601,13 @@ function StoryForm({story, ans, setAns, code, myName}){
 
   // Build rendered paragraphs with inline blanks
   const activeBId = blanks[current]?.id;
+  const pct = blanks.length ? Math.round(filled * 100 / blanks.length) : 0;
 
   return(
     <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
       {/* Progress bar */}
       <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
-        <div style={{height:"100%",width:`${(filled/Math.max(1,blanks.length))*100}%`,
+        <div style={{height:"100%",width:pct+"%",
           background:`linear-gradient(90deg,${D.violet},${D.lime})`,transition:"width .4s"}}/>
       </div>
       <div style={{padding:"16px 16px 20px"}}>
@@ -612,27 +624,7 @@ function StoryForm({story, ans, setAns, code, myName}){
               {para.blank && (
                 <span
                   onClick={()=>setCurrent(blanks.findIndex(b=>b.id===para.blank.id))}
-                  style={{
-                    display:"inline-block",
-                    minWidth:80,
-                    padding:"2px 10px",
-                    borderRadius:8,
-                    margin:"0 4px",
-                    cursor:"pointer",
-                    fontWeight:800,
-                    fontSize:14,
-                    transition:"all .2s",
-                    background: ans[para.blank.id]
-                      ? "rgba(163,230,53,.2)"
-                      : activeBId===para.blank.id
-                        ? "rgba(168,85,247,.3)"
-                        : "rgba(255,255,255,.08)",
-                    border: `1.5px solid ${
-                      ans[para.blank.id] ? D.lime :
-                      activeBId===para.blank.id ? D.violet : D.border}`,
-                    color: ans[para.blank.id] ? D.lime :
-                      activeBId===para.blank.id ? D.white : D.muted,
-                  }}>
+                  style={getBlankStyle(ans[para.blank.id], activeBId===para.blank.id)}>
                   {ans[para.blank.id] || "___"}
                 </span>
               )}
@@ -1155,7 +1147,7 @@ function Question({room,code,myName,isHost}){
           </div>
         </GlassCard>
 
-        {/* Answer / silhouette */}
+        {/* Answer or silhouette */}
         <GlassCard className="fu d1" style={{textAlign:"center"}}>
           {isSil?(
             subj?.silhouetteURL
