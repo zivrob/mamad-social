@@ -575,40 +575,48 @@ function Home({onJoin}){
 // ── LOBBY ─────────────────────────────────────────────────────
 
 // ── Story Form Component ──────────────────────────────────────
-function getBlankStyle(filled, active){
-  return {
-    display:"inline-block", minWidth:80, padding:"2px 10px",
-    borderRadius:8, margin:"0 4px", cursor:"pointer",
-    fontWeight:800, fontSize:14, transition:"all .2s",
-    background: filled ? "rgba(163,230,53,.2)" : active ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)",
-    border: "1.5px solid " + (filled ? D.lime : active ? D.violet : D.border),
-    color: filled ? D.lime : active ? D.white : D.muted,
-  };
+function getBlankStyle(isFilled, isActive){
+  var bg = isFilled ? "rgba(163,230,53,.2)" : isActive ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)";
+  var bd = "1.5px solid " + (isFilled ? D.lime : isActive ? D.violet : D.border);
+  var cl = isFilled ? D.lime : isActive ? D.white : D.muted;
+  return {display:"inline-block",minWidth:80,padding:"2px 10px",borderRadius:8,
+    margin:"0 4px",cursor:"pointer",fontWeight:800,fontSize:14,transition:"all .2s",
+    background:bg, border:bd, color:cl};
 }
 
 function StoryForm({story, ans, setAns, code, myName}){
-  const [current, setCurrent] = useState(0); // current blank index
-  const blanks = story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
-  const filled = blanks.filter(b=>ans[b.id]).length;
+  const [cur, setCur] = useState(0);
+  const blanks = story.paragraphs.filter(function(p){return p.blank;}).map(function(p){return p.blank;});
+  const filled = blanks.filter(function(b){return ans[b.id];}).length;
+  const total_b = blanks.length || 1;
+  const pct = Math.round(filled * 100 / total_b);
+  const activeBId = blanks[cur] ? blanks[cur].id : "";
 
-  // Save to Firebase personalAnswers when ans changes
-  const saveAns = (id, val) => {
-    const newAns = {...ans, [id]: val};
+  function saveAns(id, val){
+    var newAns = Object.assign({}, ans, {[id]: val});
     setAns(newAns);
-    // Also persist to Firebase
-    update(ref(db,`rooms/${code}/players/${myName}/personalAnswers`), {[id]: val});
-  };
+    update(ref(db,"rooms/"+code+"/players/"+myName+"/personalAnswers"), {[id]: val});
+  }
 
-  // Build rendered paragraphs with inline blanks
-  const activeBId = blanks[current]?.id;
-  const pct = blanks.length ? Math.round(filled * 100 / blanks.length) : 0;
+  function handleOptClick(bId, opt){
+    saveAns(bId, opt);
+    var nextIdx = -1;
+    for(var k=cur+1; k<blanks.length; k++){
+      if(!ans[blanks[k].id]){ nextIdx=k; break; }
+    }
+    if(nextIdx !== -1){ setCur(nextIdx); return; }
+    for(var k=0; k<blanks.length; k++){
+      if(!ans[blanks[k].id] && blanks[k].id !== bId){ setCur(k); return; }
+    }
+  }
+
+  var curBlank = blanks[cur];
 
   return(
     <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
-      {/* Progress bar */}
       <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
         <div style={{height:"100%",width:pct+"%",
-          background:`linear-gradient(90deg,${D.violet},${D.lime})`,transition:"width .4s"}}/>
+          background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",transition:"width .4s"}}/>
       </div>
       <div style={{padding:"16px 16px 20px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
@@ -616,74 +624,66 @@ function StoryForm({story, ans, setAns, code, myName}){
           <p style={{fontFamily:ffd,fontSize:15,fontWeight:800,color:D.violet}}>{story.title}</p>
         </div>
 
-        {/* Story text with inline blanks */}
         <div style={{fontSize:15,lineHeight:1.9,color:D.offWhite,textAlign:"right",direction:"rtl"}}>
-          {story.paragraphs.map((para,pi)=>(
-            <span key={pi}>
-              {para.text}
-              {para.blank && (
-                <span
-                  onClick={()=>setCurrent(blanks.findIndex(b=>b.id===para.blank.id))}
-                  style={getBlankStyle(ans[para.blank.id], activeBId===para.blank.id)}>
-                  {ans[para.blank.id] || "___"}
-                </span>
-              )}
-            </span>
-          ))}
+          {story.paragraphs.map(function(para,pi){
+            var bFilled = para.blank ? ans[para.blank.id] : null;
+            var bActive = para.blank ? activeBId===para.blank.id : false;
+            var blankIdx = para.blank ? blanks.findIndex(function(b){return b.id===para.blank.id;}) : -1;
+            return(
+              <span key={pi}>
+                {para.text}
+                {para.blank &&
+                  <span onClick={function(){setCur(blankIdx);}}
+                    style={getBlankStyle(bFilled, bActive)}>
+                    {bFilled || "___"}
+                  </span>
+                }
+              </span>
+            );
+          })}
         </div>
 
-        {/* Option buttons for active blank */}
-        {blanks[current] && (
+        {curBlank &&
           <div style={{marginTop:20}}>
             <p style={{color:D.muted,fontSize:12,marginBottom:10,textAlign:"right"}}>
-              בחר עבור: <span style={{color:D.violet,fontWeight:700}}>{blanks[current].label}</span>
+              בחר עבור: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
             </p>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              {blanks[current].opts.map((opt,oi)=>{
-                const selected = ans[blanks[current].id]===opt;
+              {curBlank.opts.map(function(opt,oi){
+                var sel = ans[curBlank.id]===opt;
                 return(
-                  <button key={oi} onClick={()=>{
-                    saveAns(blanks[current].id, opt);
-                    // Auto-advance to next unfilled blank
-                    const nextIdx = blanks.findIndex((b,i)=>i>current&&!ans[b.id]);
-                    if(nextIdx!==-1) setCurrent(nextIdx);
-                    else {
-                      const anyEmpty = blanks.findIndex(b=>!ans[b.id]&&b.id!==blanks[current].id);
-                      if(anyEmpty!==-1) setCurrent(anyEmpty);
-                    }
-                  }} style={{
-                    padding:"10px 8px",borderRadius:12,cursor:"pointer",fontFamily:ff,
-                    background:selected?"rgba(163,230,53,.2)":"rgba(255,255,255,.05)",
-                    border:`1.5px solid ${selected?D.lime:D.border}`,
-                    color:selected?D.lime:D.offWhite,
-                    fontSize:13,fontWeight:selected?700:400,
-                    transition:"all .18s",textAlign:"center"}}>
-                    {selected && <span style={{marginLeft:4}}>✓ </span>}
+                  <button key={oi}
+                    onClick={function(){handleOptClick(curBlank.id, opt);}}
+                    style={{padding:"10px 8px",borderRadius:12,cursor:"pointer",fontFamily:ff,
+                      background:sel?"rgba(163,230,53,.2)":"rgba(255,255,255,.05)",
+                      border:"1.5px solid "+(sel?D.lime:D.border),
+                      color:sel?D.lime:D.offWhite,
+                      fontSize:13,fontWeight:sel?700:400,
+                      transition:"all .18s",textAlign:"center"}}>
+                    {sel && <span style={{marginLeft:4}}>"v "</span>}
                     {opt}
                   </button>
                 );
               })}
             </div>
-            {/* Navigation between blanks */}
             <div style={{display:"flex",justifyContent:"space-between",marginTop:12}}>
-              <button onClick={()=>setCurrent(Math.max(0,current-1))}
-                disabled={current===0}
-                style={{background:"none",border:`1px solid ${D.border}`,borderRadius:8,
-                  padding:"6px 12px",color:current===0?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
-                ◀ הקודם
+              <button onClick={function(){setCur(Math.max(0,cur-1));}}
+                disabled={cur===0}
+                style={{background:"none",border:"1px solid "+D.border,borderRadius:8,
+                  padding:"6px 12px",color:cur===0?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
+                "הקודם"
               </button>
-              <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{current+1} מתוך {blanks.length}</span>
-              <button onClick={()=>setCurrent(Math.min(blanks.length-1,current+1))}
-                disabled={current===blanks.length-1}
-                style={{background:"none",border:`1px solid ${D.border}`,borderRadius:8,
-                  padding:"6px 12px",color:current===blanks.length-1?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
-                הבא ▶
+              <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{cur+1} מתוך {blanks.length}</span>
+              <button onClick={function(){setCur(Math.min(blanks.length-1,cur+1));}}
+                disabled={cur===blanks.length-1}
+                style={{background:"none",border:"1px solid "+D.border,borderRadius:8,
+                  padding:"6px 12px",color:cur===blanks.length-1?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
+                "הבא"
               </button>
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
     </GlassCard>
   );
 }
