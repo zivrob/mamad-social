@@ -172,20 +172,55 @@ const STORIES = [
   }
 ];
 
+
+// ── Slider Mode Data ─────────────────────────────────────────
+const SLIDER_QS = [
+  {id:"sl01", left:"בוקר", right:"לילה", label:"מתי את·ה הכי חי·ה?"},
+  {id:"sl02", left:"ים", right:"הרים", label:"חופשה מושלמת?"},
+  {id:"sl03", left:"לבד", right:"עם אנשים", label:"תעדיף·י לבלות?"},
+  {id:"sl04", left:"ספונטני", right:"מתוכנן", label:"סגנון חיים?"},
+  {id:"sl05", left:"קפה", right:"תה", label:"משקה בוקר?"},
+  {id:"sl06", left:"פנים", right:"חוץ", label:"איפה את·ה מרגיש·ה טוב יותר?"},
+  {id:"sl07", left:"מוזיקה", right:"שקט", label:"בזמן עבודה?"},
+  {id:"sl08", left:"ספר", right:"סרט", label:"ערב חופשי?"},
+  {id:"sl09", left:"מתוק", right:"מלוח", label:"חטיף מועדף?"},
+  {id:"sl10", left:"לדבר", right:"להקשיב", label:"בשיחה את·ה יותר?"},
+  {id:"sl11", left:"עיר", right:"טבע", label:"איפה הייית גר·ה?"},
+  {id:"sl12", left:"לוגי", right:"רגשי", label:"מקבל·ת החלטות?"},
+  {id:"sl13", left:"מהיר", right:"איטי", label:"קצב אכילה?"},
+  {id:"sl14", left:"חם", right:"קר", label:"מזג אוויר מועדף?"},
+  {id:"sl15", left:"לשמור", right:"לזרוק", label:"כשמסדרים בית?"},
+  {id:"sl16", left:"פרפקציוניסט", right:"בסדר גמור", label:"גישה לעבודה?"},
+  {id:"sl17", left:"כלב", right:"חתול", label:"חיית מחמד?"},
+  {id:"sl18", left:"לטוס", right:"לנסוע", label:"דרך הגעה לטיול?"},
+  {id:"sl19", left:"ריצה", right:"יוגה", label:"ספורט מועדף?"},
+  {id:"sl20", left:"נטפליקס", right:"לצאת", label:"שישי בערב?"},
+];
+
+function pickSliderQs(n){
+  const shuffled = [...SLIDER_QS].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0, Math.min(n, SLIDER_QS.length));
+}
+
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v1.5";
+const APP_VERSION = "v1.6";
 
 // ── Helpers ───────────────────────────────────────────────────
-function getPlayerQs(player, lobbyQs, story) {
+function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
-    // In story mode, "questions" are the blanks from the story
     return story.paragraphs.filter(p=>p.blank).map(p=>({
-      id: p.blank.id,
-      label: p.blank.label,
-      giphy: "fun game party",
-      e: "📖",
-      d: p.blank.opts, // the 4 options ARE the decoys+correct
+      id: p.blank.id, label: p.blank.label,
+      giphy: "fun game party", e: "📖",
+      d: p.blank.opts,
+    }));
+  }
+  if(sliderQs && sliderQs.length) {
+    return sliderQs.map(q=>({
+      id: q.id, label: q.label,
+      giphy: "sliding scale", e: "🎚️",
+      left: q.left, right: q.right,
+      d: [q.left, "יותר "+q.left, "יותר "+q.right, q.right],
     }));
   }
   return player.myQuestions
@@ -193,7 +228,7 @@ function getPlayerQs(player, lobbyQs, story) {
     : lobbyQs;
 }
 
-function buildSequence(players, lobbyQs, story=null) {
+function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
   const n = players.length;
   const seq = [];
 
@@ -201,8 +236,8 @@ function buildSequence(players, lobbyQs, story=null) {
     // DUEL MODE: each round both players answer simultaneously — A about B, B about A
     // No silhouette round (the answer is obvious with only 2 players)
     const [p0, p1] = players;
-    const qs0 = getPlayerQs(p0, lobbyQs, story); // questions answered by p0 (p1 will guess about p0)
-    const qs1 = getPlayerQs(p1, lobbyQs, story); // questions answered by p1 (p0 will guess about p1)
+    const qs0 = getPlayerQs(p0, lobbyQs, story, sliderQs); // questions answered by p0 (p1 will guess about p0)
+    const qs1 = getPlayerQs(p1, lobbyQs, story, sliderQs); // questions answered by p1 (p0 will guess about p1)
     const rounds = Math.max(qs0.length, qs1.length);
     for(let i=0; i<rounds; i++){
       const q0 = qs0[i % qs0.length];
@@ -221,7 +256,7 @@ function buildSequence(players, lobbyQs, story=null) {
     const rpp = lobbyQs.length;
     for(let i=0; i<rpp; i++){
       const player = players[i%n];
-      const playerQs = getPlayerQs(player, lobbyQs, story);
+      const playerQs = getPlayerQs(player, lobbyQs, story, sliderQs);
       const q = playerQs[i] || lobbyQs[i] || lobbyQs[0];
       if(!q) continue;
       seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
@@ -397,7 +432,10 @@ function Page({children,center=false,style={}}){
       direction:"rtl",fontFamily:ff,color:D.white,
       display:"flex",flexDirection:"column",alignItems:"center",
       justifyContent:center?"center":"flex-start",...style}}>
-      <style>{G}</style>
+      <style>{G}
+      input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:white;cursor:pointer;box-shadow:0 0 8px rgba(168,85,247,.6);}
+      input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:white;cursor:pointer;border:none;box-shadow:0 0 8px rgba(168,85,247,.6);}
+</style>
       {children}
     </div>
   );
@@ -432,7 +470,8 @@ function Home({onJoin}){
     setBusy(true);
     const c=Math.floor(1000+Math.random()*9000).toString();
     const qs=pickLobbyQs(rnd);
-    await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
+    await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,
+      sliderQuestions:gameMode==="slider"?pickSliderQs(rnd):null,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
     sessionStorage.setItem(SS_CODE,c);sessionStorage.setItem(SS_NAME,name.trim());
     onJoin(c,name.trim());setBusy(false);
   };
@@ -472,8 +511,8 @@ function Home({onJoin}){
 
         <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>מצב משחק:</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-            {[{v:"free",icon:"❓",label:"שאלות חופשיות",desc:"ממלאים טקסט"},{v:"story",icon:"📖",label:"מצב סיפור",desc:"בחירה מתוך סיפור"}].map(m=>(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr"p:8,marginBottom:16}}>
+            {[{v:"free",icon:"❓",label:"שאלות חופשיות",desc:"ממלאים טקסט"},{v:"story",icon:"📖",label:"מצב סיפור",desc:"בחירה מתוך סיפור"},{v:"slider",icon:"🎚️",label:"מצב סליידר",desc:"ימין או שמאל"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
@@ -688,6 +727,113 @@ function StoryForm({story, ans, setAns, code, myName}){
   );
 }
 
+
+// ── Slider Form Component ────────────────────────────────────
+function SliderForm({questions, ans, setAns, code, myName}){
+  const [cur, setCur] = useState(0);
+  const filled = questions.filter(function(q){return ans[q.id] !== undefined;}).length;
+  const q = questions[cur];
+
+  function handleSlide(qId, val){
+    var newAns = Object.assign({}, ans, {[qId]: val});
+    setAns(newAns);
+    update(ref(db,"rooms/"+code+"/players/"+myName+"/personalAnswers"), {[qId]: val});
+  }
+
+  if(!q) return null;
+  var val = ans[q.id] !== undefined ? ans[q.id] : 50;
+  var pct = Math.round(filled * 100 / Math.max(1, questions.length));
+
+  return(
+    <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
+      <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
+        <div style={{height:"100%",width:pct+"%",
+          background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",transition:"width .4s"}}/>
+      </div>
+      <div style={{padding:"20px 16px 24px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <span style={{color:D.muted,fontSize:12}}>{filled} מתוך {questions.length}</span>
+          <span style={{color:D.muted,fontSize:12}}>{cur+1} מתוך {questions.length}</span>
+        </div>
+
+        <p style={{color:D.white,fontWeight:800,fontSize:18,textAlign:"center",marginBottom:28,fontFamily:ffd}}>{q.label}</p>
+
+        <div style={{position:"relative",padding:"0 8px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{
+              fontWeight:700,fontSize:14,
+              color:val<=40?D.violet:D.muted,
+              transition:"color .2s",
+              padding:"4px 10px",borderRadius:20,
+              background:val<=40?"rgba(168,85,247,.2)":"transparent"}}>
+              {q.left}
+            </span>
+            <span style={{
+              fontWeight:700,fontSize:14,
+              color:val>=60?D.lime:D.muted,
+              transition:"color .2s",
+              padding:"4px 10px",borderRadius:20,
+              background:val>=60?"rgba(163,230,53,.2)":"transparent"}}>
+              {q.right}
+            </span>
+          </div>
+
+          <div style={{position:"relative",height:48,display:"flex",alignItems:"center"}}>
+            <div style={{
+              position:"absolute",left:0,right:0,height:6,borderRadius:3,
+              background:"rgba(255,255,255,.1)"}}>
+              <div style={{
+                position:"absolute",left:0,width:val+"%",height:"100%",
+                borderRadius:3,
+                background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",
+                transition:"width .05s"}}/>
+            </div>
+            <input type="range" min={0} max={100} value={val}
+              onChange={function(e){handleSlide(q.id, Number(e.target.value));}}
+              style={{
+                position:"relative",zIndex:2,width:"100%",
+                WebkitAppearance:"none",appearance:"none",
+                background:"transparent",cursor:"pointer",height:48,margin:0}}/>
+          </div>
+
+          {val===50 &&
+            <p style={{textAlign:"center",color:D.muted,fontSize:11,marginTop:4}}>גרור לבחור</p>
+          }
+          {val!==50 &&
+            <p style={{textAlign:"center",fontSize:11,marginTop:4,
+              color:val<50?D.violet:D.lime,fontWeight:700}}>
+              {val<=15 ? "לגמרי "+q.left :
+               val<=40 ? "יותר "+q.left :
+               val>=85 ? "לגמרי "+q.right :
+               val>=60 ? "יותר "+q.right : "באמצע"}
+            </p>
+          }
+        </div>
+
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:24,gap:8}}>
+          <button onClick={function(){setCur(Math.max(0,cur-1));}}
+            disabled={cur===0}
+            style={{flex:1,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
+              background:"rgba(255,255,255,.04)",
+              border:"1px solid "+D.border,
+              color:cur===0?D.muted:D.offWhite,fontSize:13}}>
+            הקודם
+          </button>
+          {cur<questions.length-1 &&
+            <button onClick={function(){setCur(cur+1);}}
+              style={{flex:2,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
+                background:ans[q.id]!==undefined?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
+                border:"1px solid "+(ans[q.id]!==undefined?D.violet:D.border),
+                color:ans[q.id]!==undefined?D.white:D.muted,fontSize:13,fontWeight:700}}>
+              הבא
+            </button>
+          }
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
+
 function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
   // Each player has their own question set (falls back to room's shared questions)
@@ -734,6 +880,9 @@ function Lobby({room,code,myName,isHost}){
       const story=STORIES.find(s=>s.id===room.storyId)||STORIES[0];
       const blanks=story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
       if(blanks.some(b=>!ans[b.id]))return alert("בחר תשובה לכל המשפטים בסיפור");
+    } else if(room.gameMode==="slider"){
+      const sqs=room.sliderQuestions||[];
+      if(sqs.some(q=>ans[q.id]===undefined))return alert("הזז את הסליידר לכל השאלות");
     } else {
       if(qs.some(q=>!ans[q.id]?.trim()))return alert("ענה על כל השאלות");
     }
@@ -742,7 +891,8 @@ function Lobby({room,code,myName,isHost}){
   const start=()=>{
     const pl=Object.values(room.players||{});
     const story=room.gameMode==="story"?STORIES.find(s=>s.id===room.storyId)||STORIES[0]:null;
-  const seq=buildSequence(pl,room.lobbyQuestions||[],story);
+  const sliderQs=room.gameMode==="slider"?(room.sliderQuestions||[]):null;
+  const seq=buildSequence(pl,room.lobbyQuestions||[],story,sliderQs);
     // Build decoy map instantly from static bank
     const decoyMap={};
     if(pl.length===2){
@@ -853,10 +1003,17 @@ function Lobby({room,code,myName,isHost}){
           ))}
         </GlassCard>}}
 
+        {/* Last name — always visible */}
+        <GlassCard className="fu d1" style={{marginBottom:8}}>
+          <Input value={ln} onChange={setLn} placeholder="שם משפחה" style={{marginBottom:0}}/>
+        </GlassCard>
+
         {/* Questions — Free mode or Story mode */}
         {room.gameMode === "story" ? (
           <StoryForm story={STORIES.find(s=>s.id===room.storyId)||STORIES[0]}
             ans={ans} setAns={setAns} code={code} myName={myName}/>
+        ) : room.gameMode === "slider" ? (
+          <SliderForm questions={room.sliderQuestions||[]} ans={ans} setAns={setAns} code={code} myName={myName}/>
         ) : (
         <GlassCard className="fu d2">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
@@ -867,7 +1024,6 @@ function Lobby({room,code,myName,isHost}){
             </span>
           </div>
           <p style={{color:D.muted,fontSize:12,marginBottom:14}}>נשמר אוטומטית — בטוח מרענון דפדפן</p>
-          <Input value={ln} onChange={setLn} placeholder="שם משפחה" style={{marginBottom:12}}/>
           {qs.map((q,i)=>{
             if(!q||!q.id) return null;
             const replaceQ=()=>{
