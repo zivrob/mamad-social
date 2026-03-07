@@ -252,6 +252,25 @@ async function generateSliderQsAI(n){
   }
 }
 
+async function generateStoryAI(){
+  try{
+    const resp = await fetch("/api/gen",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({type:"story"})
+    });
+    if(!resp.ok) throw new Error("api "+resp.status);
+    const story = await resp.json();
+    if(!story.paragraphs||!story.title) throw new Error("bad story");
+    // Give it a unique id
+    story.id = "ai_"+Date.now().toString(36);
+    return story;
+  }catch(e){
+    console.warn("Story AI gen failed, using local:", e.message);
+    return null; // caller falls back to local STORIES
+  }
+}
+
 function pickSliderQs(n){
   const shuffled = [...SLIDER_QS].sort(()=>Math.random()-0.5);
   return shuffled.slice(0, Math.min(n, SLIDER_QS.length));
@@ -260,7 +279,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.5";
+const APP_VERSION = "v3.6";
 // Firebase key sanitizer — removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
@@ -531,7 +550,15 @@ function Home({onJoin}){
     const qs=pickLobbyQs(rnd);
     const tid = isTournament ? ("t"+Date.now().toString(36)) : null;
     if(tid){ await set(ref(db,"tournaments/"+tid),{players:{},gameCount:0,createdAt:Date.now()}); }
-    await set(ref(db,"rooms/"+c),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,
+    // Generate AI story if story mode
+    var aiStory=null, storyIdVal=null;
+    if(gameMode==="story"){
+      aiStory = await generateStoryAI();
+      storyIdVal = aiStory ? aiStory.id : STORIES[Math.floor(Math.random()*STORIES.length)].id;
+    }
+    await set(ref(db,"rooms/"+c),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,
+      storyId:storyIdVal,
+      aiStory:aiStory||null,
       sliderQuestions:gameMode==="slider"?await generateSliderQsAI(rnd):null,
       tournamentId:tid,
       players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
@@ -1007,7 +1034,7 @@ function Lobby({room,code,myName,isHost}){
     const noPhotoMode = false; // selfie required in all modes
     if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
     if(room.gameMode==="story"){
-      const story=STORIES.find(s=>s.id===room.storyId)||STORIES[0];
+      const story=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]);
       const blanks=story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
       if(blanks.some(b=>!ans[b.id]))return alert("בחר תשובה לכל המשפטים בסיפור");
     } else if(room.gameMode==="slider"){
@@ -1020,7 +1047,7 @@ function Lobby({room,code,myName,isHost}){
   };
   const start=()=>{
     const pl=Object.values(room.players||{});
-    const story=room.gameMode==="story"?STORIES.find(s=>s.id===room.storyId)||STORIES[0]:null;
+    const story=room.gameMode==="story"?(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]):null;
   const sliderQs=room.gameMode==="slider"?(room.sliderQuestions||[]):null;
   const seq=buildSequence(pl,room.lobbyQuestions||[],story,sliderQs);
     // Build decoy map instantly from static bank
@@ -1139,12 +1166,12 @@ function Lobby({room,code,myName,isHost}){
   const filled = room.gameMode==="slider"
     ? (room.sliderQuestions||[]).filter(q=>ans[q.id]!==undefined).length
     : room.gameMode==="story"
-      ? (()=>{const st=STORIES.find(s=>s.id===room.storyId)||STORIES[0]; return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
+      ? (()=>{const st=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]); return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
       : qs.filter(q=>ans[q.id]?.trim()).length;
   const filledTotal = room.gameMode==="slider"
     ? (room.sliderQuestions||[]).length
     : room.gameMode==="story"
-      ? (()=>{const st=STORIES.find(s=>s.id===room.storyId)||STORIES[0]; return st.paragraphs.filter(p=>p.blank).length;})()
+      ? (()=>{const st=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]); return st.paragraphs.filter(p=>p.blank).length;})()
       : qs.length;
   return(
     <Page style={{paddingBottom:100}}>
@@ -1185,7 +1212,7 @@ function Lobby({room,code,myName,isHost}){
 
         {/* Questions — Free mode or Story mode */}
         {room.gameMode === "story" ? (
-          <StoryForm story={STORIES.find(s=>s.id===room.storyId)||STORIES[0]}
+          <StoryForm story={(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0])}
             ans={ans} setAns={setAns} code={code} myName={myName}/>
         ) : room.gameMode === "slider" ? (
           <SliderForm questions={room.sliderQuestions||[]} ans={ans} setAns={setAns} code={code} myName={myName}/>
@@ -1830,8 +1857,15 @@ function Board({room,code,isHost}){
     const r={};
     pl.forEach(p=>{r["rooms/"+code+"/players/"+p.name+"/score"]=0;r["rooms/"+code+"/players/"+p.name+"/ready"]=false;r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;});
     await update(ref(db),r);
+    var newAiStory=null;
+    if(room.gameMode==="story"){
+      newAiStory=await generateStoryAI();
+    }
     await update(ref(db,"rooms/"+code),{phase:"lobby",round:0,lobbyQuestions:qs,
-      sliderQuestions:sliderQs,guesses:null,roundSequence:null,duelResult:null});
+      sliderQuestions:sliderQs,
+      aiStory:newAiStory||null,
+      storyId:newAiStory?newAiStory.id:(room.storyId||null),
+      guesses:null,roundSequence:null,duelResult:null});
   };
 
   const endTournament=async()=>{
@@ -1913,8 +1947,15 @@ function TournamentBoard({room,code,isHost}){
     const r={};
     pl.forEach(p=>{r["rooms/"+code+"/players/"+p.name+"/score"]=0;r["rooms/"+code+"/players/"+p.name+"/ready"]=false;r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;});
     await update(ref(db),r);
+    var newAiStory=null;
+    if(room.gameMode==="story"){
+      newAiStory=await generateStoryAI();
+    }
     await update(ref(db,"rooms/"+code),{phase:"lobby",round:0,lobbyQuestions:qs,
-      sliderQuestions:sliderQs,guesses:null,roundSequence:null,duelResult:null});
+      sliderQuestions:sliderQs,
+      aiStory:newAiStory||null,
+      storyId:newAiStory?newAiStory.id:(room.storyId||null),
+      guesses:null,roundSequence:null,duelResult:null});
   };
 
   const closeTournament=async()=>{
