@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v1.6";
+const APP_VERSION = "v1.7";
 
 // ── Helpers ───────────────────────────────────────────────────
 function getPlayerQs(player, lobbyQs, story, sliderQs) {
@@ -433,8 +433,6 @@ function Page({children,center=false,style={}}){
       display:"flex",flexDirection:"column",alignItems:"center",
       justifyContent:center?"center":"flex-start",...style}}>
       <style>{G}
-      input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:white;cursor:pointer;box-shadow:0 0 8px rgba(168,85,247,.6);}
-      input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:white;cursor:pointer;border:none;box-shadow:0 0 8px rgba(168,85,247,.6);}
 </style>
       {children}
     </div>
@@ -731,6 +729,24 @@ function StoryForm({story, ans, setAns, code, myName}){
 // ── Slider Form Component ────────────────────────────────────
 function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
+  useEffect(function(){
+    var el = document.getElementById("slider-thumb-style");
+    if(!el){
+      el = document.createElement("style");
+      el.id = "slider-thumb-style";
+      el.textContent = [
+        "input[type=range]::-webkit-slider-thumb{",
+        "-webkit-appearance:none;width:24px;height:24px;",
+        "border-radius:50%;background:white;cursor:pointer;",
+        "box-shadow:0 0 8px rgba(168,85,247,.6);}",
+        "input[type=range]::-moz-range-thumb{",
+        "width:24px;height:24px;border-radius:50%;",
+        "background:white;cursor:pointer;border:none;",
+        "box-shadow:0 0 8px rgba(168,85,247,.6);}"
+      ].join("");
+      document.head.appendChild(el);
+    }
+  }, []);
   const filled = questions.filter(function(q){return ans[q.id] !== undefined;}).length;
   const q = questions[cur];
 
