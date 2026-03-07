@@ -240,9 +240,43 @@ function pickSliderQs(n){
   return shuffled.slice(0, Math.min(n, SLIDER_QS.length));
 }
 
+async function generateSliderQsAI(n){
+  try{
+    const used = SLIDER_QS.map(q=>q.left+"/"+q.right).join(", ");
+    const resp = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        messages:[{role:"user",content:`צור ${n} שאלות בינאריות חדשות לסיבוב היכרות בין חברים בעברית.
+כל שאלה מציגה שתי אפשרויות מנוגדות (כמו: "בוקר vs לילה").
+החזר JSON בלבד, ללא markdown, במבנה הזה בדיוק:
+[{"id":"ai01","left":"מילה1","right":"מילה2","label":"שאלה?"},...]
+דרישות:
+- קצר ותמציתי (מקסימום 3-4 מילים לכל צד)
+- רלוונטי לאנשים ישראלים
+- מגוון: אורח חיים, אוכל, אישיות, עבודה, חברות, נסיעות, בילוי
+- לא לחזור על אלה שכבר קיימות: ${used}
+- תחזיר בדיוק ${n} שאלות`}]
+      })
+    });
+    if(!resp.ok) throw new Error("api error");
+    const data = await resp.json();
+    const text = data.content.filter(b=>b.type==="text").map(b=>b.text).join("");
+    const clean = text.replace(/```json|```/g,"").trim();
+    const parsed = JSON.parse(clean);
+    if(!Array.isArray(parsed)||parsed.length<1) throw new Error("bad response");
+    return parsed.slice(0,n);
+  }catch(e){
+    console.warn("AI slider gen failed, using local bank:", e);
+    return pickSliderQs(n);
+  }
+}
+
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.1";
+const APP_VERSION = "v3.2";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -509,7 +543,7 @@ function Home({onJoin}){
     const c=Math.floor(1000+Math.random()*9000).toString();
     const qs=pickLobbyQs(rnd);
     await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,
-      sliderQuestions:gameMode==="slider"?pickSliderQs(rnd):null,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
+      sliderQuestions:gameMode==="slider"?await generateSliderQsAI(rnd):null,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
     sessionStorage.setItem(SS_CODE,c);sessionStorage.setItem(SS_NAME,name.trim());
     onJoin(c,name.trim());setBusy(false);
   };
@@ -1134,7 +1168,7 @@ function Lobby({room,code,myName,isHost}){
               </label>
             </div>
           ))}
-        </GlassCard>}}
+        </GlassCard>}
 
         {/* Questions — Free mode or Story mode */}
         {room.gameMode === "story" ? (
