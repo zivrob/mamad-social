@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.7";
+const APP_VERSION = "v2.8";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -1522,9 +1522,10 @@ function Results({room,code,isHost,myName}){
   const sd=room.players?.[cs];
   // For duel rounds: check correctness per-player from duelResult
   const ok=function(g, playerName){
-    if(dr){
-      if(playerName===dr.p0) return dr.p0correct;
-      if(playerName===dr.p1) return dr.p1correct;
+    var _dr=room.duelResult||null;
+    if(_dr){
+      if(playerName===_dr.p0) return _dr.p0correct;
+      if(playerName===_dr.p1) return _dr.p1correct;
       return false;
     }
     return g&&g.trim().toLowerCase()===ca.trim().toLowerCase();
