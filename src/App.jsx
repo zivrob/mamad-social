@@ -600,7 +600,7 @@ function StoryForm({story, ans, setAns, code, myName}){
       </div>
       <div style={{padding:"16px 16px 20px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <p style={{color:D.muted,fontSize:12}}>{filled}/{blanks.length} הושלמו</p>
+          <p style={{color:D.muted,fontSize:12}}>{filled} מתוך {blanks.length} הושלמו</p>
           <p style={{fontFamily:ffd,fontSize:15,fontWeight:800,color:D.violet}}>{story.title}</p>
         </div>
 
@@ -680,7 +680,7 @@ function StoryForm({story, ans, setAns, code, myName}){
                   padding:"6px 12px",color:current===0?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
                 ◀ הקודם
               </button>
-              <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{current+1} / {blanks.length}</span>
+              <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{current+1} מתוך {blanks.length}</span>
               <button onClick={()=>setCurrent(Math.min(blanks.length-1,current+1))}
                 disabled={current===blanks.length-1}
                 style={{background:"none",border:`1px solid ${D.border}`,borderRadius:8,
@@ -798,7 +798,7 @@ function Lobby({room,code,myName,isHost}){
           <GlassCard className="fu d1">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <span style={{color:D.muted,fontSize:13}}>שחקנים</span>
-              <span style={{color:D.violet,fontWeight:700,fontSize:13}}>{rc}/{pl.length} מוכנים</span>
+              <span style={{color:D.violet,fontWeight:700,fontSize:13}}>{rc} מתוך {pl.length} מוכנים</span>
             </div>
             {pl.map((p,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -871,7 +871,7 @@ function Lobby({room,code,myName,isHost}){
             <p style={{color:D.white,fontWeight:700,fontSize:15}}>❓ שאלות</p>
             <span style={{background:filled===qs.length?D.greenBg:"rgba(255,255,255,.08)",
               color:filled===qs.length?D.green:D.muted,borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700}}>
-              {filled}/{qs.length}
+              {filled} מתוך {qs.length}
             </span>
           </div>
           <p style={{color:D.muted,fontSize:12,marginBottom:14}}>נשמר אוטומטית — בטוח מרענון דפדפן</p>
@@ -1064,7 +1064,7 @@ function Question({room,code,myName,isHost}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <Dots current={room.round} total={seq.length}/>
-            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round}/{seq.length}</p>
+            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
           </div>
           <TimerRing t={tl} total={RT}/>
         </div>
@@ -1131,7 +1131,7 @@ function Question({room,code,myName,isHost}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <Dots current={room.round} total={seq.length}/>
-            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round}/{seq.length}</p>
+            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
           </div>
           <TimerRing t={tl} total={RT}/>
         </div>
@@ -1204,7 +1204,7 @@ function Question({room,code,myName,isHost}){
         {/* Host panel */}
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
-            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>📊 {answered}/{nonSubj.length} ענו</p>
+            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>📊 {answered} מתוך {nonSubj.length} ענו</p>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
               {nonSubj.map((p,i)=>{
                 const done=!!guesses[p.name];
