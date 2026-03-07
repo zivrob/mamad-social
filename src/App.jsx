@@ -260,7 +260,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.4";
+const APP_VERSION = "v3.5";
 // Firebase key sanitizer — removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
@@ -516,6 +516,7 @@ function Home({onJoin}){
   // For 2 players: rounds must be even so each gets equal turns
   const evenUp = n => numP===2 ? (n%2===0?n:n+1) : n;
   const [gameMode, setGameMode] = useState("free"); // "free" | "story"
+  const [isTournament, setIsTournament] = useState(false);
   const rOpts=[
     {l:"קצר",  v:evenUp(Math.max(4,numP)),   s:`${evenUp(Math.max(4,numP))} שאלות`},
     {l:"רגיל", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} שאלות`},
@@ -528,8 +529,12 @@ function Home({onJoin}){
     setBusy(true);
     const c=Math.floor(1000+Math.random()*9000).toString();
     const qs=pickLobbyQs(rnd);
-    await set(ref(db,`rooms/${c}`),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,
-      sliderQuestions:gameMode==="slider"?await generateSliderQsAI(rnd):null,players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
+    const tid = isTournament ? ("t"+Date.now().toString(36)) : null;
+    if(tid){ await set(ref(db,"tournaments/"+tid),{players:{},gameCount:0,createdAt:Date.now()}); }
+    await set(ref(db,"rooms/"+c),{host:name.trim(),phase:"lobby",round:0,roundsPerPlayer:rnd,roundTime:time,lobbyQuestions:qs,gameMode:gameMode,storyId:gameMode==="story"?(STORIES[Math.floor(Math.random()*STORIES.length)].id):null,
+      sliderQuestions:gameMode==="slider"?await generateSliderQsAI(rnd):null,
+      tournamentId:tid,
+      players:{[name.trim()]:{name:name.trim(),score:0,ready:false}}});
     sessionStorage.setItem(SS_CODE,c);sessionStorage.setItem(SS_NAME,name.trim());
     onJoin(c,name.trim());setBusy(false);
   };
@@ -610,6 +615,26 @@ function Home({onJoin}){
             ))}
           </div>
         </GlassCard>
+
+        {/* Tournament toggle */}
+        <div onClick={function(){setIsTournament(!isTournament);}}
+          style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"14px 18px",borderRadius:16,cursor:"pointer",
+            background:isTournament?"rgba(212,168,83,.12)":"rgba(255,255,255,.05)",
+            border:"1.5px solid "+(isTournament?"rgba(212,168,83,.4)":D.border)}}>
+          <div>
+            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>🏟 מצב טורניר</p>
+            <p style={{color:D.muted,fontSize:12}}>נקודות מצטברות על פני כמה משחקים</p>
+          </div>
+          <div style={{width:44,height:24,borderRadius:12,
+            background:isTournament?"rgba(212,168,83,.6)":"rgba(255,255,255,.15)",
+            position:"relative",transition:"background .2s"}}>
+            <div style={{width:20,height:20,borderRadius:10,background:D.white,
+              position:"absolute",top:2,
+              left:isTournament?2:22,
+              transition:"left .2s"}}/>
+          </div>
+        </div>
 
         <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🚀"}</Btn>
       </Wrap>
@@ -979,7 +1004,7 @@ function Lobby({room,code,myName,isHost}){
 
   const ready=()=>{
     const isDuelMode = Object.keys(room.players||{}).length===2;
-    const noPhotoMode = isDuelMode || room.gameMode==="story" || room.gameMode==="slider";
+    const noPhotoMode = false; // selfie required in all modes
     if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
     if(room.gameMode==="story"){
       const story=STORIES.find(s=>s.id===room.storyId)||STORIES[0];
@@ -1134,12 +1159,14 @@ function Lobby({room,code,myName,isHost}){
           </div>
         </div>
 
-        {/* Photos — hidden in duel mode (no silhouette round) */}
-        {Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'&&<GlassCard className="fu d1">
+        {/* Photos — selfie always required; silhouette only in free/duel mode */}
+        {<GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>📸 תמונות</p>
-          {[{t:"sil",lbl:"צללית (לחידה):",has:me?.silhouetteURL,cap:undefined,icons:["📷 בחר","🔄 החלף"]},
-            {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}
-          ].map(({t,lbl,has,cap,icons})=>(
+          {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
+            ? [{t:"sil",lbl:"צללית (לחידה):",has:me?.silhouetteURL,cap:undefined,icons:["📷 בחר","🔄 החלף"]},
+               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}]
+            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}]
+          ).map(({t,lbl,has,cap,icons})=>(
             <div key={t} style={{marginBottom:14}}>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>{lbl}</p>
               {has&&t==="sil"&&<img src={has} style={{width:"100%",maxHeight:90,objectFit:"cover",borderRadius:12,marginBottom:8,border:`1px solid ${D.violet}30`}}/>}
@@ -1772,14 +1799,45 @@ function Results({room,code,isHost,myName}){
 function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
   const medals=["🥇","🥈","🥉"];
+  const tid = room.tournamentId||null;
+
+  // Accumulate this game's scores into tournament node
+  const accumulateTournament=async(pl)=>{
+    if(!tid) return;
+    const snap=await get(ref(db,"tournaments/"+tid));
+    const prev=snap.exists()?snap.val():{players:{},gameCount:0};
+    const updated={};
+    pl.forEach(p=>{
+      const prevScore=(prev.players?.[p.name]?.score)||0;
+      updated[p.name]={
+        score: prevScore + (p.score||0),
+        photoURL: p.photoURL||prev.players?.[p.name]?.photoURL||"",
+        gamesPlayed: ((prev.players?.[p.name]?.gamesPlayed)||0)+1,
+        name: p.name
+      };
+    });
+    await update(ref(db,"tournaments/"+tid),{
+      players: {...(prev.players||{}), ...updated},
+      gameCount: (prev.gameCount||0)+1
+    });
+  };
+
   const restart=async()=>{
     const pl=Object.values(room.players||{});
+    await accumulateTournament(pl);
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
+    const sliderQs=room.gameMode==="slider"?await generateSliderQsAI(room.roundsPerPlayer||4):null;
     const r={};
-    pl.forEach(p=>{r[`rooms/${code}/players/${p.name}/score`]=0;r[`rooms/${code}/players/${p.name}/ready`]=false;r[`rooms/${code}/players/${p.name}/personalAnswers`]=null;});
+    pl.forEach(p=>{r["rooms/"+code+"/players/"+p.name+"/score"]=0;r["rooms/"+code+"/players/"+p.name+"/ready"]=false;r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;});
     await update(ref(db),r);
-    await update(ref(db,`rooms/${code}`),{phase:"lobby",round:0,lobbyQuestions:qs,guesses:null,roundSequence:null});
-    sessionStorage.clear();
+    await update(ref(db,"rooms/"+code),{phase:"lobby",round:0,lobbyQuestions:qs,
+      sliderQuestions:sliderQs,guesses:null,roundSequence:null,duelResult:null});
+  };
+
+  const endTournament=async()=>{
+    const pl=Object.values(room.players||{});
+    await accumulateTournament(pl);
+    await update(ref(db,"rooms/"+code),{phase:"tournament"});
   };
 
   return(
@@ -1789,25 +1847,26 @@ function Board({room,code,isHost}){
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
           <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🏆</div>
           <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
-            background:`linear-gradient(135deg,${D.gold},${D.amber})`,
+            background:"linear-gradient(135deg,"+D.gold+","+D.amber+")",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             תוצאות סופיות
           </h2>
+          {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
+            🏟 טורניר | משחק #{(room.tournamentGameCount||0)+1}
+          </p>}
         </div>
 
         <GlassCard>
           {list.map((p,i)=>(
-            <div key={i} className="fu" style={{animationDelay:`${i*.08}s`,
+            <div key={i} className="fu" style={{animationDelay:(i*.08)+"s",
               display:"flex",justifyContent:"space-between",alignItems:"center",
               padding:"14px 16px",borderRadius:16,marginBottom:8,
-              background:i===0?"rgba(251,191,36,.1)":"rgba(255,255,255,.04)",
-              border:`1.5px solid ${i===0?D.gold+"40":D.border}`,
-              boxShadow:i===0?`0 0 20px ${D.goldGlow}`:"none"}}>
+              background:i===0?"rgba(212,168,83,.1)":"rgba(255,255,255,.04)",
+              border:"1px solid "+(i===0?"rgba(212,168,83,.25)":D.border)}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:28}}>{medals[i]||`${i+1}`}</span>
-                <div>
-                  <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,
-                    color:i===0?D.gold:D.white}}>{p.score}</span>
+                <span style={{fontSize:24}}>{medals[i]||"  "}</span>
+                <div style={{textAlign:"right"}}>
+                  <span style={{fontFamily:ffd,fontWeight:900,fontSize:22,color:i===0?D.gold:D.white}}>{p.score}</span>
                   <span style={{color:D.muted,fontSize:12,marginRight:4}}>נק'</span>
                 </div>
               </div>
@@ -1819,7 +1878,89 @@ function Board({room,code,isHost}){
           ))}
         </GlassCard>
 
-        {isHost&&<Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>}
+        {isHost&&(
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {tid&&(
+              <Btn onClick={endTournament} variant="violet">🏟 טבלת הטורניר</Btn>
+            )}
+            <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
+          </div>
+        )}
+      </Wrap>
+    </Page>
+  );
+}
+
+// ── TOURNAMENT BOARD ──────────────────────────────────────────
+function TournamentBoard({room,code,isHost}){
+  const[tData,setTData]=useState(null);
+  const tid=room.tournamentId;
+
+  useEffect(()=>{
+    if(!tid)return;
+    return onValue(ref(db,"tournaments/"+tid),s=>{
+      if(s.exists())setTData(s.val());
+    });
+  },[tid]);
+
+  const medals=["🥇","🥈","🥉"];
+  const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];
+
+  const newGame=async()=>{
+    const pl=Object.values(room.players||{});
+    const qs=pickLobbyQs(room.roundsPerPlayer||4);
+    const sliderQs=room.gameMode==="slider"?await generateSliderQsAI(room.roundsPerPlayer||4):null;
+    const r={};
+    pl.forEach(p=>{r["rooms/"+code+"/players/"+p.name+"/score"]=0;r["rooms/"+code+"/players/"+p.name+"/ready"]=false;r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;});
+    await update(ref(db),r);
+    await update(ref(db,"rooms/"+code),{phase:"lobby",round:0,lobbyQuestions:qs,
+      sliderQuestions:sliderQs,guesses:null,roundSequence:null,duelResult:null});
+  };
+
+  const closeTournament=async()=>{
+    if(!window.confirm("לסגור את הטורניר לגמרי?"))return;
+    await update(ref(db,"rooms/"+code),{tournamentId:null,phase:"leaderboard"});
+  };
+
+  return(
+    <Page>
+      <ExitBtn/>
+      <Wrap>
+        <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
+          <div style={{fontSize:56,marginBottom:6}}>🏟</div>
+          <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
+          {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים • נקודות מצטברות</p>}
+        </div>
+
+        <GlassCard>
+          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען...</p>}
+          {list.map((p,i)=>(
+            <div key={i} className="fu" style={{animationDelay:(i*.07)+"s",
+              display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"14px 16px",borderRadius:16,marginBottom:8,
+              background:i===0?"rgba(212,168,83,.12)":"rgba(255,255,255,.04)",
+              border:"1px solid "+(i===0?"rgba(212,168,83,.3)":D.border)}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:24}}>{medals[i]||"  "}</span>
+                <div>
+                  <p style={{fontFamily:ffd,fontWeight:900,fontSize:22,color:i===0?D.gold:D.white}}>{p.score}</p>
+                  <p style={{color:D.muted,fontSize:11}}>{p.gamesPlayed||0} משחקים</p>
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{color:D.white,fontWeight:700,fontSize:15}}>{p.name}</span>
+                <Avatar url={p.photoURL} name={p.name} size={40}/>
+              </div>
+            </div>
+          ))}
+        </GlassCard>
+
+        {isHost&&(
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <Btn onClick={newGame} variant="lime">משחק נוסף ➕</Btn>
+            <Btn onClick={closeTournament} variant="ghost">סגור טורניר</Btn>
+          </div>
+        )}
       </Wrap>
     </Page>
   );
@@ -1849,6 +1990,7 @@ export default function App(){
     if(room.phase==="question")    return<Question room={room} code={rc} myName={mn} isHost={ih}/>;
     if(room.phase==="results")     return<Results  room={room} code={rc} isHost={ih} myName={mn}/>
     if(room.phase==="leaderboard") return<Board    room={room} code={rc} isHost={ih}/>;
+    if(room.phase==="tournament")  return<TournamentBoard room={room} code={rc} isHost={ih}/>;
   }
   if(rc&&!room)return(
     <div style={{height:"100dvh",background:D.bgFixed,display:"flex",flexDirection:"column",
