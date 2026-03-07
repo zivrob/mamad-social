@@ -204,7 +204,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v2.0";
+const APP_VERSION = "v2.1";
 const G2 = "repeat(2,1fr)";
 const G3 = "repeat(3,1fr)";
 
@@ -892,11 +892,10 @@ function Lobby({room,code,myName,isHost}){
 
   // On first load: if player has no personal questions yet, copy from lobbyQuestions
   useEffect(()=>{
-    if(!myQs && room.lobbyQuestions) {
+    if(!myQs && room.lobbyQuestions && room.gameMode==="free") {
       const shared = Array.isArray(room.lobbyQuestions)
         ? room.lobbyQuestions
         : Object.values(room.lobbyQuestions);
-      // Shuffle a personal copy for variety
       const personal = [...shared].sort(()=>Math.random()-.5);
       update(ref(db,`rooms/${code}/players/${myName}`),{myQuestions: personal});
     }
@@ -1027,7 +1026,16 @@ function Lobby({room,code,myName,isHost}){
   }
 
   // ── FILL FORM ─────────────────────────────────────────────────
-  const filled=qs.filter(q=>ans[q.id]?.trim()).length;
+  const filled = room.gameMode==="slider"
+    ? (room.sliderQuestions||[]).filter(q=>ans[q.id]!==undefined).length
+    : room.gameMode==="story"
+      ? (()=>{const st=STORIES.find(s=>s.id===room.storyId)||STORIES[0]; return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
+      : qs.filter(q=>ans[q.id]?.trim()).length;
+  const filledTotal = room.gameMode==="slider"
+    ? (room.sliderQuestions||[]).length
+    : room.gameMode==="story"
+      ? (()=>{const st=STORIES.find(s=>s.id===room.storyId)||STORIES[0]; return st.paragraphs.filter(p=>p.blank).length;})()
+      : qs.length;
   return(
     <Page style={{paddingBottom:100}}>
       <ExitBtn/>
@@ -1078,9 +1086,9 @@ function Lobby({room,code,myName,isHost}){
         <GlassCard className="fu d2">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <p style={{color:D.white,fontWeight:700,fontSize:15}}>❓ שאלות</p>
-            <span style={{background:filled===qs.length?D.greenBg:"rgba(255,255,255,.08)",
-              color:filled===qs.length?D.green:D.muted,borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700}}>
-              {filled} מתוך {qs.length}
+            <span style={{background:filled===filledTotal?D.greenBg:"rgba(255,255,255,.08)",
+              color:filled===filledTotal?D.green:D.muted,borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700}}>
+              {filled} מתוך {filledTotal}
             </span>
           </div>
           <p style={{color:D.muted,fontSize:12,marginBottom:14}}>נשמר אוטומטית — בטוח מרענון דפדפן</p>
@@ -1191,9 +1199,9 @@ function Question({room,code,myName,isHost}){
       // Score each player based on their own guess about the other
       const [p0,p1]=[cur.subjectName,cur.subject2Name];
       // p1 guessed about p0 (correct = p0's answer to qId)
-      const p0ans=(room.players?.[p0]?.personalAnswers?.[cur.qId]||"").trim().toLowerCase();
+      const p0ans=(()=>{const _r=room.players?.[p0]?.personalAnswers?.[cur.qId]; const _sq=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):String(_r||"");})().toLowerCase();
       // p0 guessed about p1 (correct = p1's answer to qId2)
-      const p1ans=(room.players?.[p1]?.personalAnswers?.[cur.qId2]||"").trim().toLowerCase();
+      const p1ans=(()=>{const _r=room.players?.[p1]?.personalAnswers?.[cur.qId2]; const _sq=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId2); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):String(_r||"");})().toLowerCase();
       const g1=guesses[p1]?.trim().toLowerCase(); // p1's guess about p0
       const g0=guesses[p0]?.trim().toLowerCase(); // p0's guess about p1
       if(g1===p0ans&&room.players[p1]) upd[`rooms/${code}/players/${p1}/score`]=(room.players[p1].score||0)+10;
