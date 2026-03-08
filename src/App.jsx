@@ -111,6 +111,168 @@ const QUESTIONS = [
 // ── Story Mode Data ───────────────────────────────────────────
 const STORIES = [
   {
+    id:"s01", title:"חופשה חלומית",
+    paragraphs:[
+      {text:"אם הייתי יכול לטוס עכשיו לאן שרוצה, הייתי בוחר ", blank:{id:"b01",label:"יעד",opts:["יפן","ניו יורק","איי מלדיב","פריז"]}},
+      {text:". הייתי גר שם ב", blank:{id:"b02",label:"לינה",opts:["בית על החוף","דירת אירבנבי במרכז העיר","מלון 5 כוכבים","קמפינג באוהל"]}},
+      {text:". בבוקר הייתי אוכל ", blank:{id:"b03",label:"ארוחת בוקר",opts:["סושי מקומי","קרואסון וקפה","ביצים ובייקון","פירות טרופיים"]}},
+      {text:". ובערב הייתי חוזר הביתה עם ", blank:{id:"b04",label:"מה קניתי",opts:["בגד שלא אלבש לעולם","אוכל מקומי שארזתי","מגנט לגינה","כלום — רק זיכרונות"]}},
+      {text:".", blank:null}
+    ]
+  },
+  {
+    id:"s02", title:"ארוחת הלילה המושלמת",
+    paragraphs:[
+      {text:"אם הייתי יכול לאכול עכשיו בדיוק מה שאני רוצה, הייתי מזמין ", blank:{id:"b05",label:"מנה ראשונה",opts:["פיצה ענקית עם המון גבינה","שוורמה עם הכל","המבורגר עם ביצה","פסטה ברוטב שמנת"]}},
+      {text:". לשתות הייתי לוקח ", blank:{id:"b06",label:"שתייה",opts:["קולה קרה מהבקבוק","בירה קרה","מיץ תפוזים סחוט","מים עם לימון"]}},
+      {text:". לקינוח הייתי חייב ", blank:{id:"b07",label:"קינוח",opts:["עוגת שוקולד חמה","גלידת וניל עם סירופ","פרפה פירות","קפה כפול בלי קינוח"]}},
+      {text:". ואחרי הכל הייתי ", blank:{id:"b08",label:"מה עושים אחרי",opts:["נרדם על הספה","יוצא לטיול קצר","מוסיף עוד מנה","מתחרט ועושה בטן"]}},
+      {text:".", blank:null}
+    ]
+  },
+  {
+    id:"s03", title:"הדירה המושלמת",
+    paragraphs:[
+      {text:"אם הייתי מעצב את הדירה שלי מחדש, הייתי צובע את הקירות ", blank:{id:"b09",label:"צבע קירות",opts:["לבן נקי","אפור כהה","ירוק זית","כחול כהה"]}},
+      {text:". בסלון הייתי שם ", blank:{id:"b10",label:"ריהוט מרכזי",opts:["ספה ענקית עם כריות","שטיח גדול על הרצפה","טלוויזיה ענקית על הקיר","כורסא אחת עם אור קריאה"]}},
+      {text:". בפינת האוכל הייתי תמיד מוצא ", blank:{id:"b11",label:"מה על השולחן",opts:["קערת פירות","ערימת דואר שלא פתחתי","נרות דקורטיביים","מפות בד מקופלות שלא נוגעים בהן"]}},
+      {text:". ועל המקרר הייתי מדביק ", blank:{id:"b12",label:"מה על המקרר",opts:["מגנטים מכל מקום שהייתי","לוח שנה עם תזכורות","ציורי ילדים","כלום — מקרר נקי"]}},
+      {text:".", blank:null}
+    ]
+  },
+  {
+    id:"s04", title:"יום שבת אידיאלי",
+    paragraphs:[
+      {text:"שבת מושלמת מתחילה בקימה ב", blank:{id:"b13",label:"שעת קימה",opts:["7 בבוקר — אחראי","10 בבוקר — מאוזן","12 בצהריים — חאפר","2 אחה"צ — אל תדברו אליי"]}},
+      {text:". ארוחת הבוקר חייבת לכלול ", blank:{id:"b14",label:"ארוחת בוקר",opts:["ביצה שמשית עם לחם","קורנפלקס מול הטלפון","חביתה עם גבינה לבנה","שאריות מאתמול"]}},
+      {text:". אחרי האוכל הייתי הולך ל", blank:{id:"b15",label:"פעילות שבת",opts:["ים או בריכה","הליכה בפארק","קניון עם אוזניות","להישאר בבית ולא לזוז"]}},
+      {text:". ובערב — בחירת הסרט תמיד נגמרת ב", blank:{id:"b16",label:"בחירת סרט",opts:["אקשן עם פיצוצים","קומדיה רומנטית","דוקומנטרי מעניין","ויכוח של שעה ואז נרדמים"]}},
+      {text:".", blank:null}
+    ]
+  },
+  {
+    id:"s05", title:"הטלפון שלי מספר עליי",
+    paragraphs:[
+      {text:"האפליקציה שאני הכי הרבה זמן בה היא ", blank:{id:"b17",label:"אפליקציה",opts:["יוטיוב","אינסטגרם","וואטסאפ","ספוטיפיי"]}},
+      {text:". הרינגטון שלי הוא ", blank:{id:"b18",label:"רינגטון",opts:["שיר שאהבתי לפני 5 שנים","ויברציה בלבד — תמיד","ברירת המחדל של האייפון","שקט כי אני תמיד שוכח לכבות"]}},
+      {text:". הטפט שלי הוא ", blank:{id:"b19",label:"טפט",opts:["תמונה של בן משפחה או חבר","נוף יפה מהטבע","צבע אחיד פשוט","מה שהיה מהקופסה"]}},
+      {text:". ואם מישהו היה רואה את ההיסטוריה שלי ביוטיוב היה מוצא ", blank:{id:"b20",label:"היסטוריית יוטיוב",opts:["מוזיקה ועוד מוזיקה","סרטוני DIY שאף פעם לא ניסיתי","וידאוים מצחיקים של בעלי חיים","חיפושים שאני מתבייש בהם"]}},
+      {text:".", blank:null}
+    ]
+  }
+]mport { useState, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, get, update, onValue } from "firebase/database";
+import { createClient } from "@supabase/supabase-js";
+
+// ── Services ──────────────────────────────────────────────────
+const supabase = createClient(
+  "https://hlvjyikeyjigaxucpkbu.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsdmp5aWtleWppZ2F4dWNwa2J1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDU4NzIsImV4cCI6MjA4ODI4MTg3Mn0.HsAhp0b9_hmAeEpXaP6krHMUL-9rU0dDCnu-KSzplSA"
+);
+const db = getDatabase(initializeApp({
+  apiKey: "AIzaSyBl86SocbdtuN4t1tQ1j2pECdW8U_BsPXA",
+  authDomain: "mamad-proj.firebaseapp.com",
+  databaseURL: "https://mamad-proj-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mamad-proj",
+  storageBucket: "mamad-proj.firebasestorage.app",
+  messagingSenderId: "951625552802",
+  appId: "1:951625552802:web:5b4151e77283e7105898fb"
+}));
+
+// ── Design System ─────────────────────────────────────────────
+// Direction: "Late-night game show" — deep indigo base, electric violet + neon lime accents,
+// glassmorphism cards, chunky rounded corners, bold Clash Display font.
+const D = {
+  // Backgrounds — warm dark slate, easier on the eyes
+  bg:        "linear-gradient(145deg,#1A1A2E 0%,#16213E 50%,#1A1A2E 100%)",
+  bgFixed:   "#1A1A2E",
+  card:      "rgba(255,255,255,.07)",
+  cardHover: "rgba(255,255,255,.11)",
+  border:    "rgba(255,255,255,.12)",
+
+  // Text
+  white:     "#F0EAD6",
+  offWhite:  "#C8BFA8",
+  muted:     "#8A8070",
+
+  // Accents — softer, warmer tones
+  violet:    "#9B72CF",
+  violetGlow:"rgba(155,114,207,.15)",
+  lime:      "#7EC8A0",
+  gold:      "#D4A853",
+  pink:      "#C47F9A",
+  red:       "#C46A6A",
+  green:     "#7EC8A0",
+  greenBg:   "rgba(126,200,160,.12)",
+  redBg:     "rgba(196,106,106,.12)",
+
+  // Helpers
+  border2:   "rgba(155,114,207,.35)",
+  glow: (col) => "0 0 24px "+col,
+}
+
+// ── Global CSS ────────────────────────────────────────────────
+const G = `
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
+  button,input{font-family:'Heebo',sans-serif;}
+  button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+
+  @keyframes fadeUp   {from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes scaleIn  {from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+  @keyframes glow     {0%,100%{opacity:.6}50%{opacity:1}}
+  @keyframes spin     {to{transform:rotate(360deg)}}
+  @keyframes countdown{0%{transform:scale(1.6);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+  @keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
+  .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
+  .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
+`;
+
+// ── Data ──────────────────────────────────────────────────────
+const QUESTIONS = [
+  {id:"q01",label:"מה המאכל האהוב עליך?",           giphy:"delicious food yum",       e:"🍕",  d:["פיצה","סושי","המבורגר","פסטה","שווארמה","גלידה","סטייק","חומוס","לזניה","ראמן"]},
+  {id:"q02",label:"מה האוכל שאתה הכי שונא?",         giphy:"disgusted food gross",     e:"🤢",  d:["כרוב ניצנים","סרדינים","כבד","חציל","סלק","כוסמת","כרובית","דג מלוח","לשון","טחינה"]},
+  {id:"q03",label:"לאן הכי רצית לטוס לחופשה?",       giphy:"vacation travel beach",    e:"✈️", d:["יפן","ניו יורק","פריז","תאילנד","ברצלונה","איטליה","יוון","מלדיביים","ברזיל","קנדה","אוסטרליה","מרוקו","פורטוגל","איסלנד"]},
+  {id:"q04",label:"באיזו ארץ היית רוצה לגור?",       giphy:"world travel adventure",   e:"🌍", d:["קנדה","ניו זילנד","שוודיה","אוסטרליה","הולנד","שוויץ","נורווגיה","פורטוגל","גרמניה","ספרד","דנמרק","יפן","אירלנד","סקוטלנד"]},
+  {id:"q05",label:"מה העיר הכי יפה שביקרת בה?",      giphy:"beautiful city travel",    e:"🏙️",d:["פריז","רומא","ניו יורק","ברצלונה","טוקיו","אמסטרדם","פראג","דובאי","סידני","לונדון","ויאנה","ליסבון","בנגקוק"]},
+  {id:"q06",label:"מה הסרט שצפית בו הכי הרבה?",     giphy:"movie popcorn cinema",     e:"🎬", d:["האריה המלך","פורסט גאמפ","הארי פוטר","טיטאניק","אינטרסטלר","שר הטבעות","הסנדק","מטריקס","פייט קלאב","טרמינייטור"]},
+  {id:"q07",label:"מה הסדרה האהובה עליך?",           giphy:"binge watch tv series",    e:"📺", d:["שובר שורות","חברים","משחקי הכס","ביג בנג","ווקינג דד","שרלוק","ביצים","מנדלוריאן","סופרנוס","אוזארק"]},
+  {id:"q08",label:"מה המשחק הכי ממכר שמשחקת?",      giphy:"video game addicted",      e:"🎮", d:["מיינקראפט","פורטנייט","FIFA","GTA","Valorant","Roblox","Zelda","Mario Kart","Among Us","Candy Crush","Elden Ring"]},
+  {id:"q09",label:"מה סגנון המוזיקה האהוב עליך?",    giphy:"music genre vibes",        e:"🎸", d:["פופ","רוק","היפ הופ","אלקטרוניקה","קלאסי","מזרחי","מטאל","ריגטון","אינדי","בלוז","פאנק","דאנס"]},
+  {id:"q10",label:"מה השיר שאתה הכי אוהב?",         giphy:"music dancing happy",      e:"🎵", d:["Bohemian Rhapsody","Billie Jean","Imagine","Hotel California","Hey Jude","Thriller","Smells Like Teen Spirit","Shape of You"]},
+  {id:"q11",label:"מה הרכב שחלמת עליו?",             giphy:"dream car luxury",         e:"🚗", d:["פורשה","פרארי","טסלה","מרצדס G","למבורגיני","BMW M3","מאזדה MX5","פורד מוסטנג","אאודי R8","ריינג רובר"]},
+  {id:"q12",label:"מה הספורט האהוב עליך?",           giphy:"sports action game",       e:"⚽", d:["כדורגל","כדורסל","טניס","שחייה","אופניים","ריצה","גלישה","סקי","בוקס","כדורעף","טריאתלון","פדל"]},
+  {id:"q13",label:"מה הספורטאי שאתה הכי מעריץ?",    giphy:"sports hero champion",     e:"🏅", d:["מסי","רונאלדו","לברון","פדרר","מייקל ג'ורדן","בולט","סרנה וויליאמס","נאדאל","טייגר וודס","שאקיל אונייל"]},
+  {id:"q14",label:"מה הספר האהוב עליך?",             giphy:"reading books library",    e:"📚", d:["הארי פוטר","שר הטבעות","הנסיך הקטן","קוד דה וינצ'י","סאפיינס","המבצר","מאה שנות בדידות","הסיפור של השפחה"]},
+  {id:"q15",label:"מה המקצוע שחלמת עליו בילדות?",   giphy:"dream job career",         e:"👔", d:["רופא","פיילוט","שחקן","כדורגלן","אסטרונאוט","מבשל","עורך דין","מורה","צלם","מדען","שוטר","כבאי"]},
+  {id:"q16",label:"מה החלום הכי גדול שלך?",         giphy:"dream big success",        e:"🌟", d:["לטייל בכל העולם","לפתוח עסק","לכתוב ספר","לבנות בית","להיות עצמאי כלכלית","לעשות שינוי בעולם","לגדל משפחה"]},
+  {id:"q17",label:"מה התחביב העיקרי שלך?",           giphy:"hobby creative fun",       e:"🎨", d:["ציור","ריצה","בישול","גיימינג","גינון","צילום","קריאה","נגינה","יוגה","אפייה","טיולים","עבודת יד"]},
+  {id:"q18",label:"איזה כישרון נסתר יש לך?",         giphy:"talent surprise wow",      e:"✨", d:["שירה","ריקוד","קסמים","חיקוי","ציור","גיטרה","אמנות","כתיבה","בישול","שרטוט"]},
+  {id:"q19",label:"איזה חיה היית רוצה להיות?",       giphy:"cute animals funny",       e:"🦁", d:["דולפין","נשר","אריה","כלב","חתול","ינשוף","פנתר","זאב","פיל","קוף","נמר","עורב"]},
+  {id:"q20",label:"איזה סופרפאואר היית רוצה?",       giphy:"superhero power flying",   e:"🦸", d:["טלפתיה","עצירת זמן","בלתי נראה","טיסה","ריפוי מיידי","כוח פיזי","שכפול עצמי","ניבוי עתיד","שינוי צורה"]},
+  {id:"q21",label:"מה היית קונה ראשון בלוטו?",       giphy:"lottery winner money",     e:"💰", d:["בית על הים","מכונית פרארי","טיול עולמי","השקעות","מתנות למשפחה","עסק משלי","קרן צדקה","אי פרטי","פנטהאוז"]},
+  {id:"q22",label:"מה הרגל הכי טוב שלך?",            giphy:"good habits healthy",      e:"💪", d:["ספורט יומי","שינה מוקדמת","קריאה","מדיטציה","שתיית מים","אכילה בריאה","תכנון יומי","הכרת תודה"]},
+  {id:"q23",label:"מה הדבר שאתה אף פעם לא שוכח?",   giphy:"daily habit routine",      e:"🎒", d:["טלפון","מפתחות","ארנק","אוזניות","בקבוק מים","מטעין","תרופות","ספר","מחברת","מטריה"]},
+  {id:"q24",label:"מה עונת השנה האהובה עליך?",       giphy:"seasons nature beautiful", e:"🍂", d:["קיץ","חורף","אביב","סתיו"]},
+  {id:"q25",label:"ים או הרים?",                     giphy:"sea mountains nature",     e:"🌊", d:["ים","הרים","מדבר","עיר","יער","כפר","ג'ונגל","ערבה"]},
+  {id:"q26",label:"מה הגאדג'ט שאתה הכי אוהב?",      giphy:"technology gadget cool",   e:"📱", d:["אייפון","אייפד","אוזניות אלחוטיות","שעון חכם","מחשב נייד","מצלמה","רמקול חכם","מסך גדול","מקלדת מכנית"]},
+  {id:"q27",label:"מה הדבר הכי מוזר שעשית?",         giphy:"weird funny strange",      e:"🤪", d:["קפצתי ממקום גבוה","אכלתי משהו מוזר","דיברתי עם עצמי בקול","ישנתי 18 שעות","הלכתי בפיג'מה לרחוב"]},
+  {id:"q28",label:"מה הדבר שהכי מעצבן אותך?",       giphy:"annoyed frustrated",       e:"😤", d:["אנשים שמאחרים","רעש בלילה","תור ארוך","ספויילרים","אנשים שלא מקשיבים","פקקים","חיבור אינטרנט איטי"]},
+  {id:"q29",label:"מה המאכל שאתה הכי טוב בהכנתו?",  giphy:"cooking chef kitchen",     e:"👨‍🍳",d:["פסטה","שקשוקה","סטייק","עוגה","סלט","ריזוטו","לחם","עוגיות","אורז מוקפץ","מרק עוף"]},
+  {id:"q30",label:"מה הדבר שאתה הכי גאה בו?",       giphy:"proud achievement",        e:"😤", d:["ההישג שלי בעבודה","המשפחה שלי","הכושר שלי","הידע שלי","החברים שלי","הסבלנות שלי","הכישרון שלי"]},
+]
+
+// ── Story Mode Data ───────────────────────────────────────────
+const STORIES = [
+  {
     id:"s01", title:"הלילה הזה",
     paragraphs:[
       {text:"היה לי לילה פנוי. שלחתי הודעה ל",   blank:{id:"b01",label:"למי שלחתי",    opts:["חבר הכי טוב","כל הקבוצה","אחד·אחת שאני בסוד איתו","לאף אחד — נשארתי לבד"]}},
@@ -279,7 +441,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.6";
+const APP_VERSION = "v3.7";
 // Firebase key sanitizer — removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
