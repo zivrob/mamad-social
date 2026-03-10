@@ -253,7 +253,9 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
   }
   return seq;
 }
-function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options// Image utils
+function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}
+
+// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options// Image utils
 function makeSil(file){
   return new Promise(res=>{
     const img=new Image();
@@ -304,7 +306,9 @@ const a=d?.data;if(!a?.length)return null;
     const p=a[Math.floor(Math.random()*Math.min(5,a.length))];
     return p?.images?.downsized_medium?.url||p?.images?.fixed_height?.url||null;
   }catch{return null;}
-}// ── Primitive Components ───────────────────────────
+}
+
+// ── Primitive Components ───────────────────────────
 const ff = "'Heebo',sans-serif";
 const ffd = "'Heebo',sans-serif";
   function GlassCard({children,style={},glow}){
@@ -400,7 +404,9 @@ const ffd = "'Heebo',sans-serif";
       ))}
     </div>
   );
-}// ── Page shell ─────────────────────────────────────
+}
+
+// ── Page shell ─────────────────────────────────────
 function Page({children,center=false,style={}}){
   return(
     <div style={{minHeight:"100dvh",background:D.bg,padding:"20px 18px 100px",
@@ -415,7 +421,9 @@ function Page({children,center=false,style={}}){
 }
 function Wrap({children,style={}}){
   return<div style={{width:"100%",maxWidth:440,display:"flex",flexDirection:"column",gap:14,...style}}>{children}</div>;
-}//  HOME function Home({onJoin}){
+}
+
+//  HOME function Home({onJoin}){
   const[name,setName]=useState("");
   const[code,setCode]=useState("");
   const[tab,setTab]=useState("create");
@@ -470,7 +478,7 @@ const create=async()=>{
         <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}> קוד חדר
         </button>
         <div className="fu" style={{textAlign:"center",marginBottom:4}}>
-          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>)"U% הצטרפות לחדר</h2>
+          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפות לחדר</h2>
         </div>        <GlassCard className="fu d1">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>בחר מצב משחק??</p>
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -501,7 +509,7 @@ const create=async()=>{
               </button>
             ))}
           </div>
-          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>מספר סיבובים::</p>
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>מספר סיבובים:</p>
           <div style={{display:"flex",gap:8}}>
             {rOpts.map(o=>(
               <button key={o.v} onClick={()=>setRnd(o.v)} style={{
@@ -517,7 +525,7 @@ const create=async()=>{
         </GlassCard>
 
         <GlassCard className="fu d3">
-          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לסיבוב::</p>
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לסיבוב:</p>
           <div style={{display:"flex",gap:8}}>
             {tOpts.map(o=>(
               <button key={o.v} onClick={()=>setTime(o.v)} style={{
@@ -536,7 +544,7 @@ const create=async()=>{
             background:isTournament?"rgba(212,168,83,.12)":"rgba(255,255,255,.05)",
             border:"1.5px solid "+(isTournament?"rgba(212,168,83,.4)":D.border)}}>
           <div>
-            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>a" מצב טורניר</p>
+            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>מצב טורניר</p>
             <p style={{color:D.muted,fontSize:12}}>שחקו כמה משחקים רצופים וצברו נקודות</p>
           </div>
           <div style={{width:44,height:24,borderRadius:12,
@@ -554,7 +562,7 @@ const create=async()=>{
     <Page center>
       {/* Hero */}
       <div className="fu" style={{textAlign:"center",marginBottom:36}}>
-        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>a"</div>
+        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎮</div>
         <h1 style={{fontFamily:ffd,fontSize:52,fontWeight:900,lineHeight:1,
           background:`linear-gradient(135deg,${D.white},${D.violet})`,
           WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>
@@ -589,7 +597,7 @@ const create=async()=>{
             }
           </div>
         </GlassCard>        <p className="fu d2" style={{color:D.muted,fontSize:12,textAlign:"center"}}>
-          ברוך הבא)"U% הכנס קוד חדר ולחץ הצטרף
+          הכנס קוד חדר ולחץ הצטרף
         </p>
         <p style={{color:"rgba(255,255,255,.2)",fontSize:11,marginTop:16,fontFamily:"monospace",letterSpacing:1}}>
           v2.4.0
@@ -597,7 +605,9 @@ const create=async()=>{
       </Wrap>
     </Page>
   );
-}//  LOBBY //  Story Form Component function getBlankStyle(isFilled, isActive){
+}
+
+//  LOBBY //  Story Form Component function getBlankStyle(isFilled, isActive){
   var bg = isFilled ? "rgba(163,230,53,.2)" : isActive ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)";
   var bd = "1.5px solid " + (isFilled ? D.lime : isActive ? D.violet : D.border);
   var cl = isFilled ? D.lime : isActive ? D.white : D.muted;
@@ -657,7 +667,7 @@ const create=async()=>{
         </div>        {curBlank &&
           <div style={{marginTop:20}}>
             <p style={{color:D.muted,fontSize:12,marginBottom:10,textAlign:"right"}}>
-              בחר·י:: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
+              בחר·י: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
             </p>
             <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
               {curBlank.opts.map(function(opt,oi){
@@ -697,7 +707,9 @@ const create=async()=>{
       </div>
     </GlassCard>
   );
-}//  Slider Form Component function SliderForm({questions, ans, setAns, code, myName}){
+}
+
+//  Slider Form Component function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const [anim, setAnim] = useState(null); // "left" | "right" | null
   const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
@@ -949,7 +961,7 @@ const url=await upload(body,type);
             <div style={{display:"inline-flex",alignItems:"center",gap:10,marginTop:12,
               background:D.violetGlow,border:`1px solid ${D.violet}50`,borderRadius:16,
               padding:"10px 24px"}}>
-              <span style={{color:D.muted,fontSize:13}}>קוד::</span>
+              <span style={{color:D.muted,fontSize:13}}>קוד:</span>
               <span style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.violet,letterSpacing:6}}>{code}</span>
             </div>
           </div>          <GlassCard className="fu d1">
@@ -972,7 +984,7 @@ const url=await upload(body,type);
               </div>
             ))}
           </GlassCard>          {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
-            {all?"כולם מוכנים! 🎉! %":`ממתין לשחקנים... (${rc}/${pl.length})`}
+            {all?"כולם מוכנים! 🎉":`ממתין לשחקנים... (${rc}/${pl.length})`}
           </Btn>}
         </Wrap>
       </Page>
@@ -995,14 +1007,14 @@ const url=await upload(body,type);
           <div style={{display:"inline-flex",alignItems:"center",gap:8,
             background:"rgba(168,85,247,.15)",border:`1px solid ${D.violet}40`,borderRadius:12,
             padding:"8px 20px",marginBottom:6}}>
-            <span style={{color:D.muted,fontSize:13}}>קוד::</span>
+            <span style={{color:D.muted,fontSize:13}}>קוד:</span>
             <span style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.violet,letterSpacing:5}}>{code}</span>
           </div>
         </div>        {/* Photos  selfie always required; silhouette only in free/duel mode */}
         {<GlassCard className="fu d1">
-          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>a"U% תמונות שלי</p>
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>תמונות שלי</p>
           {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
-            ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["a"V% 📷 צלם"," ✓ הועלה"]},
+            ? [{t:"sil",lbl:"צללית (מהצד):",has:me?.silhouetteURL,cap:undefined,icons:["📷 צלם"," ✓ הועלה"]},
                {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם"," ✓ הועלה"]}]
             : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם"," ✓ הועלה"]}]
           ).map(({t,lbl,has,cap,icons})=>(
@@ -1075,7 +1087,9 @@ const url=await upload(body,type);
       </Wrap>
     </Page>
   );
-}//  QUESTION SCREEN function Question({room,code,myName,isHost}){
+}
+
+//  QUESTION SCREEN function Question({room,code,myName,isHost}){
   const RT=room.roundTime||25;
   const isDuel=Object.keys(room.players||{}).length===2;
   const[cd,setCd]=useState(3);
@@ -1226,7 +1240,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
             borderRadius:99,padding:"6px 14px 6px 8px"}}>
             <Avatar url={mySubject?.photoURL} name={mySubject?.name} size={28}/>
-            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על:: {mySubject?.name}</span>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {mySubject?.name}</span>
           </div>
         </GlassCard>        {/* MC Options */}
         <GlassCard className="fu d1">
@@ -1262,7 +1276,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
     );
-  }//  MULTIPLAYER UI   return(
+  }
+
+//  MULTIPLAYER UI   return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1277,7 +1293,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.14),rgba(34,211,238,.07))`,textAlign:"center",padding:"20px 16px"}}>
           {/* Big question */}
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>
-            {isSil?"מי הדמות בצללית??":"התשובה שלו·ה::"}
+            {isSil?"מי הדמות בצללית?":"התשובה שלו·ה:"}
           </p>
           <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {cur.qEmoji} {cur.qLabel}
@@ -1298,7 +1314,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           )}
           {!isSil&&(
             <div>
-              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה האמיתית::</p>
+              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה האמיתית:</p>
               <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
                 {(()=>{var _r=subj&&subj.personalAnswers&&subj.personalAnswers[cur.qId]; var _sq=room.sliderQuestions&&room.sliderQuestions.find(function(q){return q.id===cur.qId;}); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})()}
               </p>
@@ -1363,14 +1379,14 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         )}        {/* Host panel */}
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
-            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>a" {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
+            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>✅ {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
               {nonSubj.map((p,i)=>{
                 const done=!!guesses[p.name];
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
                   background:done?D.greenBg:"rgba(255,255,255,.06)",
                   color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
-                  {done?"":"%"} {p.name}
+                  {done?"":"⏳"} {p.name}
                 </span>;
               })}
             </div>
@@ -1382,7 +1398,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
   );
-}//  RESULTS function Results({room,code,isHost,myName}){
+}
+
+//  RESULTS function Results({room,code,isHost,myName}){
   const[gif,setGif]=useState(null);
   const[gifLoading,setGL]=useState(true);
   const ca=room.correctAnswer||"";
@@ -1457,7 +1475,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
                         <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={28}/>
                         <div style={{textAlign:"right"}}>
-                          <p style={{color:D.muted,fontSize:11}}>נכון::</p>
+                          <p style={{color:D.muted,fontSize:11}}>נכון:</p>
                           <p style={{fontWeight:800,fontSize:15,
                             color:row.correct?D.lime:"rgba(196,106,106,.9)"}}>
                             {row.guessed}
@@ -1499,7 +1517,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>
         )}        {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>a"</div>}
+          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎮</div>}
         </GlassCard>        {/* Scores */}
                 {/* Personal result feedback */}
         {myGuess!==undefined&&!dr&&(
@@ -1522,7 +1540,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           </GlassCard>
         )}
         <GlassCard className="fu d1">
-          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים::</p>
+          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
           {players.map(function(p,i){
             var g=guesses[p.name];
             if(!g) return null;
@@ -1549,7 +1567,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                       {good?"ניחש·ה נכון: : ":"ניחש·ה: : "}<span style={{fontWeight:700}}>{g}</span>
                     </p>
                     {!good&&_dr&&(
-                      <p style={{color:D.muted,fontSize:11}}>נכון:: {correctAns}</p>
+                      <p style={{color:D.muted,fontSize:11}}>נכון: {correctAns}</p>
                     )}
                   </div>
                 </div>
@@ -1568,7 +1586,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
   );
-}//  LEADERBOARD function Board({room,code,isHost}){
+}
+
+//  LEADERBOARD function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
   const medals=["🥇","🥈","🥉"];
   const tid = room.tournamentId||null;  // Accumulate this game's scores into tournament node
@@ -1616,13 +1636,13 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>a"</div>
+          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🎮</div>
           <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
             background:"linear-gradient(135deg,"+D.gold+","+D.amber+")",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             טבלת ניקוד</h2>
           {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
-             סה"כ נקודות | משחק ##{(room.tournamentGameCount||0)+1}
+             סה״כ נקודות | משחק #{(room.tournamentGameCount||0)+1}
           </p>}
         </div>        <GlassCard>
           {list.map((p,i)=>(
@@ -1647,7 +1667,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {tid&&(
-              <Btn onClick={endTournament} variant="violet">a" טבלת הטורניר 🏟</Btn>
+              <Btn onClick={endTournament} variant="violet">טבלת הטורניר 🏟</Btn>
             )}
             <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
           </div>
@@ -1655,7 +1675,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
   );
-}//  TOURNAMENT BOARD function TournamentBoard({room,code,isHost}){
+}
+
+//  TOURNAMENT BOARD function TournamentBoard({room,code,isHost}){
   const[tData,setTData]=useState(null);
   const tid=room.tournamentId;  useEffect(()=>{
     if(!tid)return;
@@ -1688,7 +1710,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:56,marginBottom:6}}>a"</div>
+          <div style={{fontSize:56,marginBottom:6}}>🎮</div>
           <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
           {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
         </div>        <GlassCard>
@@ -1721,7 +1743,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
   );
-}//  ROOT export default function App(){
+}
+
+//  ROOT export default function App(){
   const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
   const[mn,setMn]=useState(()=>sessionStorage.getItem(SS_NAME)||"");
   const[room,setRoom]=useState(null);  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
