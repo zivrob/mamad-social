@@ -16,9 +16,7 @@ const db = getDatabase(initializeApp({
   storageBucket: "mamad-proj.firebasestorage.app",
   messagingSenderId: "951625552802",
   appId: "1:951625552802:web:5b4151e77283e7105898fb"
-}));
-
-// ── Design System ─────────────────────────────────
+}));// ── Design System ─────────────────────────────────
 // Direction: "Late-night game show"  deep indigo base, electric violet + neon lime accents,
 // glassmorphism cards, chunky rounded corners, bold Clash Display font.
 const D = {
@@ -42,9 +40,7 @@ const D = {
   border2:   "rgba(155,114,207,.35)",
   amber:     "#D4A853",
   glow: (col) => "0 0 24px "+col,
-};
-
-const G = `
+};const G = `
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
@@ -61,9 +57,7 @@ const G = `
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
   .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
   .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
-`;
-
-// ── Data ───────────────────────────────────────────
+`;// ── Data ───────────────────────────────────────────
 const QUESTIONS = [
   {id:"q01",label:"מה הספורט שהכי אוהבים לעשות?",giphy:"delicious food yum",e:"🏃"},
   {id:"q02",label:"מה המאכל האהוב?",giphy:"favorite food",e:"🍕"},
@@ -85,9 +79,7 @@ const QUESTIONS = [
   {id:"q18",label:"מה הדבר הראשון שעושים בבוקר?",giphy:"morning routine",e:"☀️"},
   {id:"q19",label:"מה הארץ שהכי רציתם לגור בה?",giphy:"dream country",e:"🌍"},
   {id:"q20",label:"מה הסופרפאוור שהייתם בוחרים?",giphy:"superpower",e:"⚡"},
-];
-
-const STORIES = [
+];const STORIES = [
   {
     id:"s01", title:"חופשה חלומית",
     paragraphs:[
@@ -138,9 +130,7 @@ const STORIES = [
       {text:".", blank:null}
     ]
   }
-];
-
-const SLIDER_QS = [
+];const SLIDER_QS = [
   {id:"sl01",left:"בוקר",right:"לילה",label:"מתי את·ה הכי חי·ה?"},
   {id:"sl02",left:"ים",right:"הרים",label:"חופשה מושלמת?"},
   {id:"sl03",left:"לבד",right:"עם אנשים",label:"תעדיף·י לבלות?"},
@@ -201,29 +191,25 @@ const SLIDER_QS = [
   {id:"sl58",left:"טיול מאורגן",right:"טיול עצמאי",label:"חופשה?"},
   {id:"sl59",left:"אירופה",right:"אסיה",label:"יבשת מועדפת?"},
   {id:"sl60",left:"חוויות",right:"רגיעה",label:"מטרת הטיול?"},
-];
-
-const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
+];const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
 const APP_VERSION = "v3.9";
 // Firebase key sanitizer  removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
-const G3 = "repeat(3,1fr)";
-
-// ── Helpers ────────────────────────────────────────
+const G3 = "repeat(3,1fr)";// ── Helpers ────────────────────────────────────────
 function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
     return story.paragraphs.filter(p=>p.blank).map(p=>({
       id: p.blank.id, label: p.blank.label,
-      giphy: "fun game party", e: "🎯",
+      giphy: "fun game party", e: "",
       d: p.blank.opts,
     }));
   }
   if(sliderQs && sliderQs.length) {
     return sliderQs.map(q=>({
       id: q.id, label: q.label,
-      giphy: "sliding scale", e: "🎮",
+      giphy: "sliding scale", e: ",
       left: q.left, right: q.right,
       d: [q.left, "גם "+q.left, "גם "+q.right, q.right],
     }));
@@ -318,9 +304,7 @@ const a=d?.data;if(!a?.length)return null;
     const p=a[Math.floor(Math.random()*Math.min(5,a.length))];
     return p?.images?.downsized_medium?.url||p?.images?.fixed_height?.url||null;
   }catch{return null;}
-}
-
-// ── Primitive Components ───────────────────────────
+}// ── Primitive Components ───────────────────────────
 const ff = "'Heebo',sans-serif";
 const ffd = "'Heebo',sans-serif";
   function GlassCard({children,style={},glow}){
@@ -416,9 +400,7 @@ const ffd = "'Heebo',sans-serif";
       ))}
     </div>
   );
-}
-
-// ── Page shell ─────────────────────────────────────
+}// ── Page shell ─────────────────────────────────────
 function Page({children,center=false,style={}}){
   return(
     <div style={{minHeight:"100dvh",background:D.bg,padding:"20px 18px 100px",
@@ -450,7 +432,7 @@ function Wrap({children,style={}}){
     {l:"בינוני", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} סיבובים`},
     {l:"ארוך",v:evenUp(Math.max(10,numP*3)),s:`${evenUp(Math.max(10,numP*3))} סיבובים`},
   ];
-  const tOpts=[{l:" 45 שניות",v:15},{l:"% דקה",v:25},{l:"a" 2 דקות",v:40}]
+  const tOpts=[{l:"30 שניות",v:10},{l:"45 שניות",v:15},{l:"דקה",v:25},{l:"2 דקות",v:40}]
 
 const create=async()=>{
     if(!name.trim()||!rnd||!time)return;
@@ -488,7 +470,7 @@ const create=async()=>{
         <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}> קוד חדר
         </button>
         <div className="fu" style={{textAlign:"center",marginBottom:4}}>
-          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפות לחדר</h2>
+          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>)"U% הצטרפות לחדר</h2>
         </div>        <GlassCard className="fu d1">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>בחר מצב משחק??</p>
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -506,7 +488,7 @@ const create=async()=>{
         </GlassCard>        <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב::</p>
           <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
-            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"🎮",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"🎮",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
+            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
@@ -550,7 +532,7 @@ const create=async()=>{
             background:isTournament?"rgba(212,168,83,.12)":"rgba(255,255,255,.05)",
             border:"1.5px solid "+(isTournament?"rgba(212,168,83,.4)":D.border)}}>
           <div>
-            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>מצב טורניר</p>
+            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>a" מצב טורניר</p>
             <p style={{color:D.muted,fontSize:12}}>שחקו כמה משחקים רצופים וצברו נקודות</p>
           </div>
           <div style={{width:44,height:24,borderRadius:12,
@@ -561,14 +543,14 @@ const create=async()=>{
               left:isTournament?2:22,
               transition:"left .2s"}}/>
           </div>
-        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉"}</Btn>
+        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉! "}</Btn>
       </Wrap>
     </Page>
   );  return(
     <Page center>
       {/* Hero */}
       <div className="fu" style={{textAlign:"center",marginBottom:36}}>
-        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎮</div>
+        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>a"</div>
         <h1 style={{fontFamily:ffd,fontSize:52,fontWeight:900,lineHeight:1,
           background:`linear-gradient(135deg,${D.white},${D.violet})`,
           WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>
@@ -603,7 +585,7 @@ const create=async()=>{
             }
           </div>
         </GlassCard>        <p className="fu d2" style={{color:D.muted,fontSize:12,textAlign:"center"}}>
-          הכנס קוד חדר ולחץ הצטרף
+          ברוך הבא)"U% הכנס קוד חדר ולחץ הצטרף
         </p>
         <p style={{color:"rgba(255,255,255,.2)",fontSize:11,marginTop:16,fontFamily:"monospace",letterSpacing:1}}>
           v2.4.0
@@ -790,7 +772,7 @@ const create=async()=>{
               color:chosen==="left"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="left"?"0 0 20px rgba(168,85,247,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{"⚡"}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{""}</div>
             {q.left}
             {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>          {/* RIGHT button */}
@@ -803,7 +785,7 @@ const create=async()=>{
               color:chosen==="right"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="right"?"0 0 20px rgba(163,230,53,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{"⚡"}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{""}</div>
             {q.right}
             {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>
@@ -977,7 +959,7 @@ const url=await upload(body,type);
                 background:p.ready?"rgba(163,230,53,.08)":"rgba(255,255,255,.04)",
                 border:`1px solid ${p.ready?D.lime+"30":D.border}`}}>
                 <span style={{color:p.ready?D.lime:D.muted,fontWeight:700,fontSize:13}}>
-                  {p.ready?" מוכן·ה":"% טוען..."}
+                  {p.ready?" מוכן·ה":"טוען..."}
                 </span>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
@@ -986,7 +968,7 @@ const url=await upload(body,type);
               </div>
             ))}
           </GlassCard>          {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
-            {all?"כולם מוכנים! 🎉"":`ממתין לשחקנים... (${rc}/${pl.length})`}
+            {all?"כולם מוכנים! 🎉! %":`ממתין לשחקנים... (${rc}/${pl.length})`}
           </Btn>}
         </Wrap>
       </Page>
@@ -1014,11 +996,11 @@ const url=await upload(body,type);
           </div>
         </div>        {/* Photos  selfie always required; silhouette only in free/duel mode */}
         {<GlassCard className="fu d1">
-          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>תמונות שלי</p>
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>a"U% תמונות שלי</p>
           {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
-            ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["a"V% 📷 צלם","a" ✓ הועלה"]},
-               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["a"% 📷 צלם","a" ✓ הועלה"]}]
-            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["a"% 📷 צלם","a" ✓ הועלה"]}]
+            ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["a"V% 📷 צלם"," ✓ הועלה"]},
+               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם"," ✓ הועלה"]}]
+            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם"," ✓ הועלה"]}]
           ).map(({t,lbl,has,cap,icons})=>(
             <div key={t} style={{marginBottom:14}}>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>{lbl}</p>
@@ -1030,7 +1012,7 @@ const url=await upload(body,type);
                 background:"rgba(168,85,247,.1)",border:`1.5px dashed ${D.violet}60`,
                 borderRadius:12,padding:"12px",cursor:"pointer",color:D.violet,fontWeight:600,fontSize:14}}>
                 <input type="file" accept="image/*" capture={cap} onChange={e=>onFile(e,t)} style={{display:"none"}}/>
-                {upping&&upT===t?"% מעלה...":has?icons[1]:icons[0]}
+                {upping&&upT===t?"מעלה...":has?icons[1]:icons[0]}
               </label>
             </div>
           ))}
@@ -1078,7 +1060,7 @@ const url=await upload(body,type);
                 border:`1px solid ${D.violet}50`,
                 color:D.violet,fontSize:13,fontWeight:700,
                 cursor:"pointer",fontFamily:ff}}>
-                🔄 החלף שאלה ולחץ החלף</button>
+                 🔄 החלף שאלה ולחץ החלף</button>
             </div>
             );
           })}
@@ -1245,8 +1227,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {/* MC Options */}
         <GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
-            מה ענה·תה {mySubject?.name} מה ענה·תה {mySubject?.name}? 🤔
-          <          </p>
+            מה ענה·תה {mySubject?.name} את ?           </p>
           {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
           {myOpts.map((opt,i)=>{
             const letters=["א","ב","ג","ד"];
@@ -1322,7 +1303,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {/* My turn or guess */}
         {amSubj&&(
           <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
-            <div style={{fontSize:34,marginBottom:6}}>{"⚡"}</div>
+            <div style={{fontSize:34,marginBottom:6}}>{""}</div>
             <p style={{color:D.violet,fontWeight:700}}>ניחשת נכון! 🎯!</p>
             <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
           </GlassCard>
@@ -1378,14 +1359,14 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         )}        {/* Host panel */}
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
-            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>✅ {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
+            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>a" {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
               {nonSubj.map((p,i)=>{
                 const done=!!guesses[p.name];
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
                   background:done?D.greenBg:"rgba(255,255,255,.06)",
                   color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
-                  {done?"":"⏳"} {p.name}
+                  {done?"":"%"} {p.name}
                 </span>;
               })}
             </div>
@@ -1514,7 +1495,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>
         )}        {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>{"✓"}</div>}
+          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>a"</div>}
         </GlassCard>        {/* Scores */}
                 {/* Personal result feedback */}
         {myGuess!==undefined&&!dr&&(
@@ -1523,7 +1504,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
             border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
           }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"🎯":"❌"}</div>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"":""}</div>
             <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
               {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
             </p>
@@ -1576,7 +1557,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             );
           })}
           {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
-            🎯 {scorers} ניחשו נכון!!
+             {scorers} ניחשו נכון!!
           </p>}
         </GlassCard>        {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️b%</Btn>
           :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>ממתין......</p></GlassCard>}
@@ -1631,13 +1612,13 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🎮</div>
+          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>a"</div>
           <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
             background:"linear-gradient(135deg,"+D.gold+","+D.amber+")",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             טבלת ניקוד</h2>
           {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
-            סה"כ נקודות | משחק ##{(room.tournamentGameCount||0)+1}
+             סה"כ נקודות | משחק ##{(room.tournamentGameCount||0)+1}
           </p>}
         </div>        <GlassCard>
           {list.map((p,i)=>(
@@ -1662,7 +1643,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {tid&&(
-              <Btn onClick={endTournament} variant="violet">טבלת הטורניר 🏟</Btn>
+              <Btn onClick={endTournament} variant="violet">a" טבלת הטורניר 🏟</Btn>
             )}
             <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
           </div>
@@ -1703,7 +1684,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:56,marginBottom:6}}>🎮</div>
+          <div style={{fontSize:56,marginBottom:6}}>a"</div>
           <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
           {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
         </div>        <GlassCard>
