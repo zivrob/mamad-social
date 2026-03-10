@@ -485,10 +485,12 @@ const create=async()=>{
             ))}
           </div>
           {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}> בחר מצב  ובחר הגדרות למשחק שלך!!</p>}
-        </GlassCard>        <GlassCard className="fu d2">
-          <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב::</p>
+        </GlassCard>
+
+        <GlassCard className="fu d2">
+          <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב:</p>
           <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
-            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
+            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"📖",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"🎮",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
@@ -512,7 +514,9 @@ const create=async()=>{
               </button>
             ))}
           </div>
-        </GlassCard>        <GlassCard className="fu d3">
+        </GlassCard>
+
+        <GlassCard className="fu d3">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לסיבוב::</p>
           <div style={{display:"flex",gap:8}}>
             {tOpts.map(o=>(
