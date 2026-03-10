@@ -143,7 +143,7 @@ const STORIES = [
   {
     id:"s04", title:"יום שבת אידיאלי",
     paragraphs:[
-      {text:"שבת מושלמת מתחילה בקימה ב", blank:{id:"b13",label:"שעת קימה",opts:["7 בבוקר — אחראי","10 בבוקר — מאוזן","12 בצהריים — חאפר","2 אחה"צ — אל תדברו אליי"]}},
+      {text:"שבת מושלמת מתחילה בקימה ב", blank:{id:"b13",label:"שעת קימה",opts:["7 בבוקר — אחראי","10 בבוקר — מאוזן","12 בצהריים — חאפר","2 בצהריים — אל תדברו אליי"]}},
       {text:". ארוחת הבוקר חייבת לכלול ", blank:{id:"b14",label:"ארוחת בוקר",opts:["ביצה שמשית עם לחם","קורנפלקס מול הטלפון","חביתה עם גבינה לבנה","שאריות מאתמול"]}},
       {text:". אחרי האוכל הייתי הולך ל", blank:{id:"b15",label:"פעילות שבת",opts:["ים או בריכה","הליכה בפארק","קניון עם אוזניות","להישאר בבית ולא לזוז"]}},
       {text:". ובערב — בחירת הסרט תמיד נגמרת ב", blank:{id:"b16",label:"בחירת סרט",opts:["אקשן עם פיצוצים","קומדיה רומנטית","דוקומנטרי מעניין","ויכוח של שעה ואז נרדמים"]}},
@@ -441,7 +441,7 @@ function pickSliderQs(n){
 
 const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.7";
+const APP_VERSION = "v3.8";
 // Firebase key sanitizer — removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
