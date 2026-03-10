@@ -639,7 +639,9 @@ function getBlankStyle(isFilled, isActive){
     for(var k=0; k<blanks.length; k++){
       if(!ans[blanks[k].id] && blanks[k].id !== bId){ setCur(k); return; }
     }
-  }  var curBlank = blanks[cur];  return(
+  }
+  var curBlank = blanks[cur];
+  return(
     <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
       <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
         <div style={{height:"100%",width:pct+"%",
@@ -992,7 +994,10 @@ const url=await upload(body,type);
         </Wrap>
       </Page>
     );
-  }  //  FILL FORM   const filled = room.gameMode==="slider"
+  }
+
+  // FILL FORM
+  const filled = room.gameMode==="slider"
     ? (room.sliderQuestions||[]).filter(q=>ans[q.id]!==undefined).length
     : room.gameMode==="story"
       ? (()=>{const st=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]); return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
