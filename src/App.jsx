@@ -202,14 +202,14 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
     return story.paragraphs.filter(p=>p.blank).map(p=>({
       id: p.blank.id, label: p.blank.label,
-      giphy: "fun game party", e: "",
+      giphy: "fun game party", e: "🎯",
       d: p.blank.opts,
     }));
   }
   if(sliderQs && sliderQs.length) {
     return sliderQs.map(q=>({
       id: q.id, label: q.label,
-      giphy: "sliding scale", e: ",
+      giphy: "sliding scale", e: "🎮",
       left: q.left, right: q.right,
       d: [q.left, "גם "+q.left, "גם "+q.right, q.right],
     }));
