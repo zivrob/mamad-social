@@ -423,7 +423,8 @@ function Wrap({children,style={}}){
   return<div style={{width:"100%",maxWidth:440,display:"flex",flexDirection:"column",gap:14,...style}}>{children}</div>;
 }
 
-//  HOME function Home({onJoin}){
+
+function Home({onJoin}){
   const[name,setName]=useState("");
   const[code,setCode]=useState("");
   const[tab,setTab]=useState("create");
@@ -607,7 +608,8 @@ const create=async()=>{
   );
 }
 
-//  LOBBY //  Story Form Component function getBlankStyle(isFilled, isActive){
+// ── StoryForm ───────────────────────────────────
+function getBlankStyle(isFilled, isActive){
   var bg = isFilled ? "rgba(163,230,53,.2)" : isActive ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)";
   var bd = "1.5px solid " + (isFilled ? D.lime : isActive ? D.violet : D.border);
   var cl = isFilled ? D.lime : isActive ? D.white : D.muted;
@@ -709,7 +711,8 @@ const create=async()=>{
   );
 }
 
-//  Slider Form Component function SliderForm({questions, ans, setAns, code, myName}){
+
+function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const [anim, setAnim] = useState(null); // "left" | "right" | null
   const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
@@ -1089,7 +1092,8 @@ const url=await upload(body,type);
   );
 }
 
-//  QUESTION SCREEN function Question({room,code,myName,isHost}){
+
+function Question({room,code,myName,isHost}){
   const RT=room.roundTime||25;
   const isDuel=Object.keys(room.players||{}).length===2;
   const[cd,setCd]=useState(3);
@@ -1278,7 +1282,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
     );
   }
 
-//  MULTIPLAYER UI   return(
+
+  // MULTIPLAYER UI   return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1400,7 +1405,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   );
 }
 
-//  RESULTS function Results({room,code,isHost,myName}){
+
+function Results({room,code,isHost,myName}){
   const[gif,setGif]=useState(null);
   const[gifLoading,setGL]=useState(true);
   const ca=room.correctAnswer||"";
@@ -1588,7 +1594,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   );
 }
 
-//  LEADERBOARD function Board({room,code,isHost}){
+
+function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
   const medals=["🥇","🥈","🥉"];
   const tid = room.tournamentId||null;  // Accumulate this game's scores into tournament node
@@ -1677,7 +1684,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   );
 }
 
-//  TOURNAMENT BOARD function TournamentBoard({room,code,isHost}){
+
+function TournamentBoard({room,code,isHost}){
   const[tData,setTData]=useState(null);
   const tid=room.tournamentId;  useEffect(()=>{
     if(!tid)return;
@@ -1745,7 +1753,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   );
 }
 
-//  ROOT export default function App(){
+
+export default function App(){
   const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
   const[mn,setMn]=useState(()=>sessionStorage.getItem(SS_NAME)||"");
   const[room,setRoom]=useState(null);  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
