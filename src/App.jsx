@@ -216,7 +216,7 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
     return story.paragraphs.filter(p=>p.blank).map(p=>({
       id: p.blank.id, label: p.blank.label,
-      giphy: "fun game party", e: "a"",
+      giphy: "fun game party", e: "🎯",
       d: p.blank.opts,
     }));
   }
@@ -506,7 +506,7 @@ const create=async()=>{
         </GlassCard>        <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב::</p>
           <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
-            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"a"",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"a")"U%",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
+            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"🎮",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"a")"U%",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
@@ -550,7 +550,7 @@ const create=async()=>{
             background:isTournament?"rgba(212,168,83,.12)":"rgba(255,255,255,.05)",
             border:"1.5px solid "+(isTournament?"rgba(212,168,83,.4)":D.border)}}>
           <div>
-            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>a" מצב טורניר</p>
+            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>מצב טורניר</p>
             <p style={{color:D.muted,fontSize:12}}>שחקו כמה משחקים רצופים וצברו נקודות</p>
           </div>
           <div style={{width:44,height:24,borderRadius:12,
@@ -561,14 +561,14 @@ const create=async()=>{
               left:isTournament?2:22,
               transition:"left .2s"}}/>
           </div>
-        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉! a""}</Btn>
+        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉"}</Btn>
       </Wrap>
     </Page>
   );  return(
     <Page center>
       {/* Hero */}
       <div className="fu" style={{textAlign:"center",marginBottom:36}}>
-        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>a"</div>
+        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎮</div>
         <h1 style={{fontFamily:ffd,fontSize:52,fontWeight:900,lineHeight:1,
           background:`linear-gradient(135deg,${D.white},${D.violet})`,
           WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>
@@ -580,7 +580,7 @@ const create=async()=>{
         {/* Tab */}
         <GlassCard className="fu d1" style={{padding:"6px"}}>
           <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.04)",borderRadius:14,padding:4}}>
-            {[{k:"create",l:"צור חדר 🎉a""},{k:"join",l:"הצטרף 🚀a""}].map(t=>(
+            {[{k:"create",l:"צור חדר 🎉"},{k:"join",l:"הצטרף 🚀"}].map(t=>(
               <button key={t.k} onClick={()=>setTab(t.k)} style={{
                 flex:1,padding:"11px",borderRadius:10,fontFamily:ff,fontWeight:700,fontSize:14,
                 background:tab===t.k?"rgba(168,85,247,.25)":"transparent",
@@ -790,7 +790,7 @@ const create=async()=>{
               color:chosen==="left"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="left"?"0 0 20px rgba(168,85,247,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{"a""}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{"⚡"}</div>
             {q.left}
             {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>          {/* RIGHT button */}
@@ -803,7 +803,7 @@ const create=async()=>{
               color:chosen==="right"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="right"?"0 0 20px rgba(163,230,53,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{"a""}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{"⚡"}</div>
             {q.right}
             {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>
@@ -986,7 +986,7 @@ const url=await upload(body,type);
               </div>
             ))}
           </GlassCard>          {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
-            {all?"כולם מוכנים! 🎉! a"%":`ממתין לשחקנים... (${rc}/${pl.length})`}
+            {all?"כולם מוכנים! 🎉"":`ממתין לשחקנים... (${rc}/${pl.length})`}
           </Btn>}
         </Wrap>
       </Page>
@@ -1078,7 +1078,7 @@ const url=await upload(body,type);
                 border:`1px solid ${D.violet}50`,
                 color:D.violet,fontSize:13,fontWeight:700,
                 cursor:"pointer",fontFamily:ff}}>
-                a" 🔄 החלף שאלה ולחץ החלף</button>
+                🔄 החלף שאלה ולחץ החלף</button>
             </div>
             );
           })}
@@ -1245,7 +1245,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {/* MC Options */}
         <GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
-            מה ענה·תה {mySubject?.name} את ? a"          </p>
+            מה ענה·תה {mySubject?.name} מה ענה·תה {mySubject?.name}? 🤔
+          <          </p>
           {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
           {myOpts.map((opt,i)=>{
             const letters=["א","ב","ג","ד"];
@@ -1321,7 +1322,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {/* My turn or guess */}
         {amSubj&&(
           <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
-            <div style={{fontSize:34,marginBottom:6}}>{"a""}</div>
+            <div style={{fontSize:34,marginBottom:6}}>{"⚡"}</div>
             <p style={{color:D.violet,fontWeight:700}}>ניחשת נכון! 🎯!</p>
             <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
           </GlassCard>
@@ -1377,7 +1378,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         )}        {/* Host panel */}
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
-            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>a" {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
+            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>✅ {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
               {nonSubj.map((p,i)=>{
                 const done=!!guesses[p.name];
@@ -1513,7 +1514,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>
         )}        {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>a"</div>}
+          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>{"✓"}</div>}
         </GlassCard>        {/* Scores */}
                 {/* Personal result feedback */}
         {myGuess!==undefined&&!dr&&(
@@ -1522,7 +1523,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
             border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
           }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"a"":"a""}</div>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"🎯":"❌"}</div>
             <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
               {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
             </p>
@@ -1575,7 +1576,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             );
           })}
           {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
-            a" {scorers} ניחשו נכון!!
+            🎯 {scorers} ניחשו נכון!!
           </p>}
         </GlassCard>        {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️b%</Btn>
           :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>ממתין......</p></GlassCard>}
@@ -1584,7 +1585,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   );
 }//  LEADERBOARD function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
-  const medals=["a"","a"","a""];
+  const medals=["🥇","🥈","🥉"];
   const tid = room.tournamentId||null;  // Accumulate this game's scores into tournament node
   const accumulateTournament=async(pl)=>{
     if(!tid) return;
@@ -1630,13 +1631,13 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>a"</div>
+          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🎮</div>
           <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
             background:"linear-gradient(135deg,"+D.gold+","+D.amber+")",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             טבלת ניקוד</h2>
           {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
-            a" סה"כ נקודות | משחק ##{(room.tournamentGameCount||0)+1}
+            סה"כ נקודות | משחק ##{(room.tournamentGameCount||0)+1}
           </p>}
         </div>        <GlassCard>
           {list.map((p,i)=>(
@@ -1661,7 +1662,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {tid&&(
-              <Btn onClick={endTournament} variant="violet">a" טבלת הטורניר 🏟</Btn>
+              <Btn onClick={endTournament} variant="violet">טבלת הטורניר 🏟</Btn>
             )}
             <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
           </div>
@@ -1676,7 +1677,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
     return onValue(ref(db,"tournaments/"+tid),s=>{
       if(s.exists())setTData(s.val());
     });
-  },[tid]);  const medals=["a"","a"","a""];
+  },[tid]);  const medals=["🥇","🥈","🥉"];
   const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];
   const newGame=async()=>{
     const pl=Object.values(room.players||{});
@@ -1702,7 +1703,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:56,marginBottom:6}}>a"</div>
+          <div style={{fontSize:56,marginBottom:6}}>🎮</div>
           <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
           {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
         </div>        <GlassCard>
