@@ -223,7 +223,7 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(sliderQs && sliderQs.length) {
     return sliderQs.map(q=>({
       id: q.id, label: q.label,
-      giphy: "sliding scale", e: "a")"U%",
+      giphy: "sliding scale", e: "🎮",
       left: q.left, right: q.right,
       d: [q.left, "גם "+q.left, "גם "+q.right, q.right],
     }));
@@ -488,7 +488,7 @@ const create=async()=>{
         <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}> קוד חדר
         </button>
         <div className="fu" style={{textAlign:"center",marginBottom:4}}>
-          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>)"U% הצטרפות לחדר</h2>
+          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפות לחדר</h2>
         </div>        <GlassCard className="fu d1">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>בחר מצב משחק??</p>
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -506,7 +506,7 @@ const create=async()=>{
         </GlassCard>        <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב::</p>
           <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
-            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"🎮",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"a")"U%",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
+            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"🎮",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"🎮",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
@@ -592,7 +592,7 @@ const create=async()=>{
             ))}
           </div>
           <div style={{padding:"12px 8px 8px",display:"flex",flexDirection:"column",gap:10}}>
-            <Input value={name} onChange={setName} placeholder="שם שלך 😊)"U%"/>
+            <Input value={name} onChange={setName} placeholder="שם שלך 😊"/>
             {tab==="join"&&(
               <Input value={code} onChange={v=>setCode(v.replace(/\D/g,"").slice(0,4))} placeholder="קוד החדר"
                 style={{textAlign:"center",fontSize:32,fontWeight:900,letterSpacing:10}}/>
@@ -603,7 +603,7 @@ const create=async()=>{
             }
           </div>
         </GlassCard>        <p className="fu d2" style={{color:D.muted,fontSize:12,textAlign:"center"}}>
-          ברוך הבא)"U% הכנס קוד חדר ולחץ הצטרף
+          הכנס קוד חדר ולחץ הצטרף
         </p>
         <p style={{color:"rgba(255,255,255,.2)",fontSize:11,marginTop:16,fontFamily:"monospace",letterSpacing:1}}>
           v2.4.0
@@ -1014,7 +1014,7 @@ const url=await upload(body,type);
           </div>
         </div>        {/* Photos  selfie always required; silhouette only in free/duel mode */}
         {<GlassCard className="fu d1">
-          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>a"U% תמונות שלי</p>
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>תמונות שלי</p>
           {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
             ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["a"V% 📷 צלם","a" ✓ הועלה"]},
                {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["a"% 📷 צלם","a" ✓ הועלה"]}]
@@ -1272,7 +1272,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           {myGuess&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}> ממתין לתשובות...</p>}
         </GlassCard>        {/* Host reveal */}
         {isHost&&<Btn onClick={reveal} variant={allDone?"lime":"primary"}>
-          {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳b%"}
+          {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳"}
         </Btn>}
       </Wrap>
     </Page>
@@ -1385,12 +1385,12 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
                   background:done?D.greenBg:"rgba(255,255,255,.06)",
                   color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
-                  {done?"":"%"} {p.name}
+                  {done?"":"⏳"} {p.name}
                 </span>;
               })}
             </div>
             <Btn onClick={reveal} variant={allDone?"lime":"primary"}>
-              {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳b%"}
+              {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳"}
             </Btn>
           </GlassCard>
         )}
