@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get, update, onValue } from "firebase/database";
-import { createClient } from "@supabase/supabase-js";
-
-// ── Services ──────────────────────────────────────────────────
-const supabase = createClient(
+import { createClient } from "@supabase/supabase-js";// ── Services ──────────────────────────────────────const supabase = createClient(
   "https://hlvjyikeyjigaxucpkbu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsdmp5aWtleWppZ2F4dWNwa2J1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDU4NzIsImV4cCI6MjA4ODI4MTg3Mn0.HsAhp0b9_hmAeEpXaP6krHMUL-9rU0dDCnu-KSzplSA"
 );
@@ -16,25 +13,17 @@ const db = getDatabase(initializeApp({
   storageBucket: "mamad-proj.firebasestorage.app",
   messagingSenderId: "951625552802",
   appId: "1:951625552802:web:5b4151e77283e7105898fb"
-}));
-
-// ── Design System ─────────────────────────────────────────────
-// Direction: "Late-night game show" — deep indigo base, electric violet + neon lime accents,
+}));// ── Design System ─────────────────────────────────// Direction: "Late-night game show"  deep indigo base, electric violet + neon lime accents,
 // glassmorphism cards, chunky rounded corners, bold Clash Display font.
 const D = {
-  // Backgrounds — warm dark slate, easier on the eyes
   bg:        "linear-gradient(145deg,#1A1A2E 0%,#16213E 50%,#1A1A2E 100%)",
   bgFixed:   "#1A1A2E",
   card:      "rgba(255,255,255,.07)",
   cardHover: "rgba(255,255,255,.11)",
   border:    "rgba(255,255,255,.12)",
-
-  // Text
   white:     "#F0EAD6",
   offWhite:  "#C8BFA8",
   muted:     "#8A8070",
-
-  // Accents — softer, warmer tones
   violet:    "#9B72CF",
   violetGlow:"rgba(155,114,207,.15)",
   lime:      "#7EC8A0",
@@ -44,72 +33,48 @@ const D = {
   green:     "#7EC8A0",
   greenBg:   "rgba(126,200,160,.12)",
   redBg:     "rgba(196,106,106,.12)",
-
-  // Helpers
   border2:   "rgba(155,114,207,.35)",
+  amber:     "#D4A853",
   glow: (col) => "0 0 24px "+col,
-}
-
-// ── Global CSS ────────────────────────────────────────────────
-const G = `
+};const G = `
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
   button,input{font-family:'Heebo',sans-serif;}
   button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
   ::-webkit-scrollbar{width:4px;}
-  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
-
-  @keyframes fadeUp   {from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}  @keyframes fadeUp   {from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
   @keyframes scaleIn  {from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
   @keyframes glow     {0%,100%{opacity:.6}50%{opacity:1}}
   @keyframes spin     {to{transform:rotate(360deg)}}
   @keyframes countdown{0%{transform:scale(1.6);opacity:0}100%{transform:scale(1);opacity:1}}
   @keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
   @keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-
-  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
   .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
   .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
-`;
-
-// ── Data ──────────────────────────────────────────────────────
-const QUESTIONS = [
-  {id:"q01",label:"מה המאכל האהוב עליך?",           giphy:"delicious food yum",       e:"🍕",  d:["פיצה","סושי","המבורגר","פסטה","שווארמה","גלידה","סטייק","חומוס","לזניה","ראמן"]},
-  {id:"q02",label:"מה האוכל שאתה הכי שונא?",         giphy:"disgusted food gross",     e:"🤢",  d:["כרוב ניצנים","סרדינים","כבד","חציל","סלק","כוסמת","כרובית","דג מלוח","לשון","טחינה"]},
-  {id:"q03",label:"לאן הכי רצית לטוס לחופשה?",       giphy:"vacation travel beach",    e:"✈️", d:["יפן","ניו יורק","פריז","תאילנד","ברצלונה","איטליה","יוון","מלדיביים","ברזיל","קנדה","אוסטרליה","מרוקו","פורטוגל","איסלנד"]},
-  {id:"q04",label:"באיזו ארץ היית רוצה לגור?",       giphy:"world travel adventure",   e:"🌍", d:["קנדה","ניו זילנד","שוודיה","אוסטרליה","הולנד","שוויץ","נורווגיה","פורטוגל","גרמניה","ספרד","דנמרק","יפן","אירלנד","סקוטלנד"]},
-  {id:"q05",label:"מה העיר הכי יפה שביקרת בה?",      giphy:"beautiful city travel",    e:"🏙️",d:["פריז","רומא","ניו יורק","ברצלונה","טוקיו","אמסטרדם","פראג","דובאי","סידני","לונדון","ויאנה","ליסבון","בנגקוק"]},
-  {id:"q06",label:"מה הסרט שצפית בו הכי הרבה?",     giphy:"movie popcorn cinema",     e:"🎬", d:["האריה המלך","פורסט גאמפ","הארי פוטר","טיטאניק","אינטרסטלר","שר הטבעות","הסנדק","מטריקס","פייט קלאב","טרמינייטור"]},
-  {id:"q07",label:"מה הסדרה האהובה עליך?",           giphy:"binge watch tv series",    e:"📺", d:["שובר שורות","חברים","משחקי הכס","ביג בנג","ווקינג דד","שרלוק","ביצים","מנדלוריאן","סופרנוס","אוזארק"]},
-  {id:"q08",label:"מה המשחק הכי ממכר שמשחקת?",      giphy:"video game addicted",      e:"🎮", d:["מיינקראפט","פורטנייט","FIFA","GTA","Valorant","Roblox","Zelda","Mario Kart","Among Us","Candy Crush","Elden Ring"]},
-  {id:"q09",label:"מה סגנון המוזיקה האהוב עליך?",    giphy:"music genre vibes",        e:"🎸", d:["פופ","רוק","היפ הופ","אלקטרוניקה","קלאסי","מזרחי","מטאל","ריגטון","אינדי","בלוז","פאנק","דאנס"]},
-  {id:"q10",label:"מה השיר שאתה הכי אוהב?",         giphy:"music dancing happy",      e:"🎵", d:["Bohemian Rhapsody","Billie Jean","Imagine","Hotel California","Hey Jude","Thriller","Smells Like Teen Spirit","Shape of You"]},
-  {id:"q11",label:"מה הרכב שחלמת עליו?",             giphy:"dream car luxury",         e:"🚗", d:["פורשה","פרארי","טסלה","מרצדס G","למבורגיני","BMW M3","מאזדה MX5","פורד מוסטנג","אאודי R8","ריינג רובר"]},
-  {id:"q12",label:"מה הספורט האהוב עליך?",           giphy:"sports action game",       e:"⚽", d:["כדורגל","כדורסל","טניס","שחייה","אופניים","ריצה","גלישה","סקי","בוקס","כדורעף","טריאתלון","פדל"]},
-  {id:"q13",label:"מה הספורטאי שאתה הכי מעריץ?",    giphy:"sports hero champion",     e:"🏅", d:["מסי","רונאלדו","לברון","פדרר","מייקל ג'ורדן","בולט","סרנה וויליאמס","נאדאל","טייגר וודס","שאקיל אונייל"]},
-  {id:"q14",label:"מה הספר האהוב עליך?",             giphy:"reading books library",    e:"📚", d:["הארי פוטר","שר הטבעות","הנסיך הקטן","קוד דה וינצ'י","סאפיינס","המבצר","מאה שנות בדידות","הסיפור של השפחה"]},
-  {id:"q15",label:"מה המקצוע שחלמת עליו בילדות?",   giphy:"dream job career",         e:"👔", d:["רופא","פיילוט","שחקן","כדורגלן","אסטרונאוט","מבשל","עורך דין","מורה","צלם","מדען","שוטר","כבאי"]},
-  {id:"q16",label:"מה החלום הכי גדול שלך?",         giphy:"dream big success",        e:"🌟", d:["לטייל בכל העולם","לפתוח עסק","לכתוב ספר","לבנות בית","להיות עצמאי כלכלית","לעשות שינוי בעולם","לגדל משפחה"]},
-  {id:"q17",label:"מה התחביב העיקרי שלך?",           giphy:"hobby creative fun",       e:"🎨", d:["ציור","ריצה","בישול","גיימינג","גינון","צילום","קריאה","נגינה","יוגה","אפייה","טיולים","עבודת יד"]},
-  {id:"q18",label:"איזה כישרון נסתר יש לך?",         giphy:"talent surprise wow",      e:"✨", d:["שירה","ריקוד","קסמים","חיקוי","ציור","גיטרה","אמנות","כתיבה","בישול","שרטוט"]},
-  {id:"q19",label:"איזה חיה היית רוצה להיות?",       giphy:"cute animals funny",       e:"🦁", d:["דולפין","נשר","אריה","כלב","חתול","ינשוף","פנתר","זאב","פיל","קוף","נמר","עורב"]},
-  {id:"q20",label:"איזה סופרפאואר היית רוצה?",       giphy:"superhero power flying",   e:"🦸", d:["טלפתיה","עצירת זמן","בלתי נראה","טיסה","ריפוי מיידי","כוח פיזי","שכפול עצמי","ניבוי עתיד","שינוי צורה"]},
-  {id:"q21",label:"מה היית קונה ראשון בלוטו?",       giphy:"lottery winner money",     e:"💰", d:["בית על הים","מכונית פרארי","טיול עולמי","השקעות","מתנות למשפחה","עסק משלי","קרן צדקה","אי פרטי","פנטהאוז"]},
-  {id:"q22",label:"מה הרגל הכי טוב שלך?",            giphy:"good habits healthy",      e:"💪", d:["ספורט יומי","שינה מוקדמת","קריאה","מדיטציה","שתיית מים","אכילה בריאה","תכנון יומי","הכרת תודה"]},
-  {id:"q23",label:"מה הדבר שאתה אף פעם לא שוכח?",   giphy:"daily habit routine",      e:"🎒", d:["טלפון","מפתחות","ארנק","אוזניות","בקבוק מים","מטעין","תרופות","ספר","מחברת","מטריה"]},
-  {id:"q24",label:"מה עונת השנה האהובה עליך?",       giphy:"seasons nature beautiful", e:"🍂", d:["קיץ","חורף","אביב","סתיו"]},
-  {id:"q25",label:"ים או הרים?",                     giphy:"sea mountains nature",     e:"🌊", d:["ים","הרים","מדבר","עיר","יער","כפר","ג'ונגל","ערבה"]},
-  {id:"q26",label:"מה הגאדג'ט שאתה הכי אוהב?",      giphy:"technology gadget cool",   e:"📱", d:["אייפון","אייפד","אוזניות אלחוטיות","שעון חכם","מחשב נייד","מצלמה","רמקול חכם","מסך גדול","מקלדת מכנית"]},
-  {id:"q27",label:"מה הדבר הכי מוזר שעשית?",         giphy:"weird funny strange",      e:"🤪", d:["קפצתי ממקום גבוה","אכלתי משהו מוזר","דיברתי עם עצמי בקול","ישנתי 18 שעות","הלכתי בפיג'מה לרחוב"]},
-  {id:"q28",label:"מה הדבר שהכי מעצבן אותך?",       giphy:"annoyed frustrated",       e:"😤", d:["אנשים שמאחרים","רעש בלילה","תור ארוך","ספויילרים","אנשים שלא מקשיבים","פקקים","חיבור אינטרנט איטי"]},
-  {id:"q29",label:"מה המאכל שאתה הכי טוב בהכנתו?",  giphy:"cooking chef kitchen",     e:"👨‍🍳",d:["פסטה","שקשוקה","סטייק","עוגה","סלט","ריזוטו","לחם","עוגיות","אורז מוקפץ","מרק עוף"]},
-  {id:"q30",label:"מה הדבר שאתה הכי גאה בו?",       giphy:"proud achievement",        e:"😤", d:["ההישג שלי בעבודה","המשפחה שלי","הכושר שלי","הידע שלי","החברים שלי","הסבלנות שלי","הכישרון שלי"]},
-]
-
-// ── Story Mode Data ───────────────────────────────────────────
-const STORIES = [
+`;// ── Data ───────────────────────────────────────────const QUESTIONS = [
+  {id:"q01",label:"מה הספורט שהכי אוהבים לעשות?",giphy:"delicious food yum",e:"🏃"},
+  {id:"q02",label:"מה המאכל האהוב?",giphy:"favorite food",e:"🍕"},
+  {id:"q03",label:"לאיזו ארץ הכי רצית לטוס?",giphy:"travel adventure",e:"✈️"},
+  {id:"q04",label:"מה הסדרה האהובה?",giphy:"binge watching",e:"📺"},
+  {id:"q05",label:"מה הג'אנר מוזיקה האהוב?",giphy:"music vibes",e:"🎵"},
+  {id:"q06",label:"מה התחביב שהכי אוהבים?",giphy:"hobby fun",e:"🎨"},
+  {id:"q07",label:"מה הספורט האהוב לצפות בו?",giphy:"sports watching",e:"⚽"},
+  {id:"q08",label:"מה המשקה האהוב?",giphy:"favorite drink",e:"☕"},
+  {id:"q09",label:"מה המקצוע שתמיד חלמתם עליו?",giphy:"dream job",e:"💼"},
+  {id:"q10",label:"מה הדבר שהכי מפחיד אתכם?",giphy:"scared fear",e:"😱"},
+  {id:"q11",label:"מה הפעילות הכי אהובה בחופשה?",giphy:"vacation fun",e:"🏖️"},
+  {id:"q12",label:"איזה סגנון מוזיקה הכי אוהבים?",giphy:"music style",e:"🎸"},
+  {id:"q13",label:"מה האוכל שהכי שונאים?",giphy:"disgusting food",e:"🤢"},
+  {id:"q14",label:"מה הצבע האהוב?",giphy:"favorite color",e:"🎨"},
+  {id:"q15",label:"מה החיה האהובה?",giphy:"favorite animal",e:"🐾"},
+  {id:"q16",label:"מה הז'אנר סרטים האהוב?",giphy:"movie genre",e:"🎬"},
+  {id:"q17",label:"איזו עונת השנה הכי אהובה?",giphy:"favorite season",e:"🌸"},
+  {id:"q18",label:"מה הדבר הראשון שעושים בבוקר?",giphy:"morning routine",e:"☀️"},
+  {id:"q19",label:"מה הארץ שהכי רציתם לגור בה?",giphy:"dream country",e:"🌍"},
+  {id:"q20",label:"מה הסופרפאוור שהייתם בוחרים?",giphy:"superpower",e:"⚡"},
+];const STORIES = [
   {
     id:"s01", title:"חופשה חלומית",
     paragraphs:[
@@ -121,7 +86,7 @@ const STORIES = [
     ]
   },
   {
-    id:"s02", title:"ארוחת הלילה המושלמת",
+    id:"s02", title:"ארוחת לילה מושלמת",
     paragraphs:[
       {text:"אם הייתי יכול לאכול עכשיו בדיוק מה שאני רוצה, הייתי מזמין ", blank:{id:"b05",label:"מנה ראשונה",opts:["פיצה ענקית עם המון גבינה","שוורמה עם הכל","המבורגר עם ביצה","פסטה ברוטב שמנת"]}},
       {text:". לשתות הייתי לוקח ", blank:{id:"b06",label:"שתייה",opts:["קולה קרה מהבקבוק","בירה קרה","מיץ תפוזים סחוט","מים עם לימון"]}},
@@ -160,175 +125,7 @@ const STORIES = [
       {text:".", blank:null}
     ]
   }
-]mport { useState, useEffect } from "react";
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, get, update, onValue } from "firebase/database";
-import { createClient } from "@supabase/supabase-js";
-
-// ── Services ──────────────────────────────────────────────────
-const supabase = createClient(
-  "https://hlvjyikeyjigaxucpkbu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsdmp5aWtleWppZ2F4dWNwa2J1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDU4NzIsImV4cCI6MjA4ODI4MTg3Mn0.HsAhp0b9_hmAeEpXaP6krHMUL-9rU0dDCnu-KSzplSA"
-);
-const db = getDatabase(initializeApp({
-  apiKey: "AIzaSyBl86SocbdtuN4t1tQ1j2pECdW8U_BsPXA",
-  authDomain: "mamad-proj.firebaseapp.com",
-  databaseURL: "https://mamad-proj-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "mamad-proj",
-  storageBucket: "mamad-proj.firebasestorage.app",
-  messagingSenderId: "951625552802",
-  appId: "1:951625552802:web:5b4151e77283e7105898fb"
-}));
-
-// ── Design System ─────────────────────────────────────────────
-// Direction: "Late-night game show" — deep indigo base, electric violet + neon lime accents,
-// glassmorphism cards, chunky rounded corners, bold Clash Display font.
-const D = {
-  // Backgrounds — warm dark slate, easier on the eyes
-  bg:        "linear-gradient(145deg,#1A1A2E 0%,#16213E 50%,#1A1A2E 100%)",
-  bgFixed:   "#1A1A2E",
-  card:      "rgba(255,255,255,.07)",
-  cardHover: "rgba(255,255,255,.11)",
-  border:    "rgba(255,255,255,.12)",
-
-  // Text
-  white:     "#F0EAD6",
-  offWhite:  "#C8BFA8",
-  muted:     "#8A8070",
-
-  // Accents — softer, warmer tones
-  violet:    "#9B72CF",
-  violetGlow:"rgba(155,114,207,.15)",
-  lime:      "#7EC8A0",
-  gold:      "#D4A853",
-  pink:      "#C47F9A",
-  red:       "#C46A6A",
-  green:     "#7EC8A0",
-  greenBg:   "rgba(126,200,160,.12)",
-  redBg:     "rgba(196,106,106,.12)",
-
-  // Helpers
-  border2:   "rgba(155,114,207,.35)",
-  glow: (col) => "0 0 24px "+col,
-}
-
-// ── Global CSS ────────────────────────────────────────────────
-const G = `
-  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
-  button,input{font-family:'Heebo',sans-serif;}
-  button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  ::-webkit-scrollbar{width:4px;}
-  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
-
-  @keyframes fadeUp   {from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes scaleIn  {from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
-  @keyframes glow     {0%,100%{opacity:.6}50%{opacity:1}}
-  @keyframes spin     {to{transform:rotate(360deg)}}
-  @keyframes countdown{0%{transform:scale(1.6);opacity:0}100%{transform:scale(1);opacity:1}}
-  @keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
-  @keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-
-  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
-  .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
-  .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
-`;
-
-// ── Data ──────────────────────────────────────────────────────
-const QUESTIONS = [
-  {id:"q01",label:"מה המאכל האהוב עליך?",           giphy:"delicious food yum",       e:"🍕",  d:["פיצה","סושי","המבורגר","פסטה","שווארמה","גלידה","סטייק","חומוס","לזניה","ראמן"]},
-  {id:"q02",label:"מה האוכל שאתה הכי שונא?",         giphy:"disgusted food gross",     e:"🤢",  d:["כרוב ניצנים","סרדינים","כבד","חציל","סלק","כוסמת","כרובית","דג מלוח","לשון","טחינה"]},
-  {id:"q03",label:"לאן הכי רצית לטוס לחופשה?",       giphy:"vacation travel beach",    e:"✈️", d:["יפן","ניו יורק","פריז","תאילנד","ברצלונה","איטליה","יוון","מלדיביים","ברזיל","קנדה","אוסטרליה","מרוקו","פורטוגל","איסלנד"]},
-  {id:"q04",label:"באיזו ארץ היית רוצה לגור?",       giphy:"world travel adventure",   e:"🌍", d:["קנדה","ניו זילנד","שוודיה","אוסטרליה","הולנד","שוויץ","נורווגיה","פורטוגל","גרמניה","ספרד","דנמרק","יפן","אירלנד","סקוטלנד"]},
-  {id:"q05",label:"מה העיר הכי יפה שביקרת בה?",      giphy:"beautiful city travel",    e:"🏙️",d:["פריז","רומא","ניו יורק","ברצלונה","טוקיו","אמסטרדם","פראג","דובאי","סידני","לונדון","ויאנה","ליסבון","בנגקוק"]},
-  {id:"q06",label:"מה הסרט שצפית בו הכי הרבה?",     giphy:"movie popcorn cinema",     e:"🎬", d:["האריה המלך","פורסט גאמפ","הארי פוטר","טיטאניק","אינטרסטלר","שר הטבעות","הסנדק","מטריקס","פייט קלאב","טרמינייטור"]},
-  {id:"q07",label:"מה הסדרה האהובה עליך?",           giphy:"binge watch tv series",    e:"📺", d:["שובר שורות","חברים","משחקי הכס","ביג בנג","ווקינג דד","שרלוק","ביצים","מנדלוריאן","סופרנוס","אוזארק"]},
-  {id:"q08",label:"מה המשחק הכי ממכר שמשחקת?",      giphy:"video game addicted",      e:"🎮", d:["מיינקראפט","פורטנייט","FIFA","GTA","Valorant","Roblox","Zelda","Mario Kart","Among Us","Candy Crush","Elden Ring"]},
-  {id:"q09",label:"מה סגנון המוזיקה האהוב עליך?",    giphy:"music genre vibes",        e:"🎸", d:["פופ","רוק","היפ הופ","אלקטרוניקה","קלאסי","מזרחי","מטאל","ריגטון","אינדי","בלוז","פאנק","דאנס"]},
-  {id:"q10",label:"מה השיר שאתה הכי אוהב?",         giphy:"music dancing happy",      e:"🎵", d:["Bohemian Rhapsody","Billie Jean","Imagine","Hotel California","Hey Jude","Thriller","Smells Like Teen Spirit","Shape of You"]},
-  {id:"q11",label:"מה הרכב שחלמת עליו?",             giphy:"dream car luxury",         e:"🚗", d:["פורשה","פרארי","טסלה","מרצדס G","למבורגיני","BMW M3","מאזדה MX5","פורד מוסטנג","אאודי R8","ריינג רובר"]},
-  {id:"q12",label:"מה הספורט האהוב עליך?",           giphy:"sports action game",       e:"⚽", d:["כדורגל","כדורסל","טניס","שחייה","אופניים","ריצה","גלישה","סקי","בוקס","כדורעף","טריאתלון","פדל"]},
-  {id:"q13",label:"מה הספורטאי שאתה הכי מעריץ?",    giphy:"sports hero champion",     e:"🏅", d:["מסי","רונאלדו","לברון","פדרר","מייקל ג'ורדן","בולט","סרנה וויליאמס","נאדאל","טייגר וודס","שאקיל אונייל"]},
-  {id:"q14",label:"מה הספר האהוב עליך?",             giphy:"reading books library",    e:"📚", d:["הארי פוטר","שר הטבעות","הנסיך הקטן","קוד דה וינצ'י","סאפיינס","המבצר","מאה שנות בדידות","הסיפור של השפחה"]},
-  {id:"q15",label:"מה המקצוע שחלמת עליו בילדות?",   giphy:"dream job career",         e:"👔", d:["רופא","פיילוט","שחקן","כדורגלן","אסטרונאוט","מבשל","עורך דין","מורה","צלם","מדען","שוטר","כבאי"]},
-  {id:"q16",label:"מה החלום הכי גדול שלך?",         giphy:"dream big success",        e:"🌟", d:["לטייל בכל העולם","לפתוח עסק","לכתוב ספר","לבנות בית","להיות עצמאי כלכלית","לעשות שינוי בעולם","לגדל משפחה"]},
-  {id:"q17",label:"מה התחביב העיקרי שלך?",           giphy:"hobby creative fun",       e:"🎨", d:["ציור","ריצה","בישול","גיימינג","גינון","צילום","קריאה","נגינה","יוגה","אפייה","טיולים","עבודת יד"]},
-  {id:"q18",label:"איזה כישרון נסתר יש לך?",         giphy:"talent surprise wow",      e:"✨", d:["שירה","ריקוד","קסמים","חיקוי","ציור","גיטרה","אמנות","כתיבה","בישול","שרטוט"]},
-  {id:"q19",label:"איזה חיה היית רוצה להיות?",       giphy:"cute animals funny",       e:"🦁", d:["דולפין","נשר","אריה","כלב","חתול","ינשוף","פנתר","זאב","פיל","קוף","נמר","עורב"]},
-  {id:"q20",label:"איזה סופרפאואר היית רוצה?",       giphy:"superhero power flying",   e:"🦸", d:["טלפתיה","עצירת זמן","בלתי נראה","טיסה","ריפוי מיידי","כוח פיזי","שכפול עצמי","ניבוי עתיד","שינוי צורה"]},
-  {id:"q21",label:"מה היית קונה ראשון בלוטו?",       giphy:"lottery winner money",     e:"💰", d:["בית על הים","מכונית פרארי","טיול עולמי","השקעות","מתנות למשפחה","עסק משלי","קרן צדקה","אי פרטי","פנטהאוז"]},
-  {id:"q22",label:"מה הרגל הכי טוב שלך?",            giphy:"good habits healthy",      e:"💪", d:["ספורט יומי","שינה מוקדמת","קריאה","מדיטציה","שתיית מים","אכילה בריאה","תכנון יומי","הכרת תודה"]},
-  {id:"q23",label:"מה הדבר שאתה אף פעם לא שוכח?",   giphy:"daily habit routine",      e:"🎒", d:["טלפון","מפתחות","ארנק","אוזניות","בקבוק מים","מטעין","תרופות","ספר","מחברת","מטריה"]},
-  {id:"q24",label:"מה עונת השנה האהובה עליך?",       giphy:"seasons nature beautiful", e:"🍂", d:["קיץ","חורף","אביב","סתיו"]},
-  {id:"q25",label:"ים או הרים?",                     giphy:"sea mountains nature",     e:"🌊", d:["ים","הרים","מדבר","עיר","יער","כפר","ג'ונגל","ערבה"]},
-  {id:"q26",label:"מה הגאדג'ט שאתה הכי אוהב?",      giphy:"technology gadget cool",   e:"📱", d:["אייפון","אייפד","אוזניות אלחוטיות","שעון חכם","מחשב נייד","מצלמה","רמקול חכם","מסך גדול","מקלדת מכנית"]},
-  {id:"q27",label:"מה הדבר הכי מוזר שעשית?",         giphy:"weird funny strange",      e:"🤪", d:["קפצתי ממקום גבוה","אכלתי משהו מוזר","דיברתי עם עצמי בקול","ישנתי 18 שעות","הלכתי בפיג'מה לרחוב"]},
-  {id:"q28",label:"מה הדבר שהכי מעצבן אותך?",       giphy:"annoyed frustrated",       e:"😤", d:["אנשים שמאחרים","רעש בלילה","תור ארוך","ספויילרים","אנשים שלא מקשיבים","פקקים","חיבור אינטרנט איטי"]},
-  {id:"q29",label:"מה המאכל שאתה הכי טוב בהכנתו?",  giphy:"cooking chef kitchen",     e:"👨‍🍳",d:["פסטה","שקשוקה","סטייק","עוגה","סלט","ריזוטו","לחם","עוגיות","אורז מוקפץ","מרק עוף"]},
-  {id:"q30",label:"מה הדבר שאתה הכי גאה בו?",       giphy:"proud achievement",        e:"😤", d:["ההישג שלי בעבודה","המשפחה שלי","הכושר שלי","הידע שלי","החברים שלי","הסבלנות שלי","הכישרון שלי"]},
-]
-
-// ── Story Mode Data ───────────────────────────────────────────
-const STORIES = [
-  {
-    id:"s01", title:"הלילה הזה",
-    paragraphs:[
-      {text:"היה לי לילה פנוי. שלחתי הודעה ל",   blank:{id:"b01",label:"למי שלחתי",    opts:["חבר הכי טוב","כל הקבוצה","אחד·אחת שאני בסוד איתו","לאף אחד — נשארתי לבד"]}},
-      {text:", הלכנו ל",                            blank:{id:"b02",label:"איפה בילינו",  opts:["לשבת על הגג","לסדרה עם נשנושים","לצאת ולא לתכנן","לבר שכולם מכירים"]}},
-      {text:". בשלב מסוים דיברנו על ",            blank:{id:"b03",label:"שיחת הלילה",   opts:["זוגיות ומה אנחנו רוצים","חלומות שאנחנו דוחים","בן אדם שאנחנו מתגעגעים","שטויות וצחקנו"]}},
-      {text:". הרגשתי ",                           blank:{id:"b04",label:"הרגשה",        opts:["חי·ה לרגע","קצת עצוב·ה בלי סיבה","בדיוק במקום הנכון","שאני רוצה שזה לא ייגמר"]}},
-      {text:". חזרתי הביתה עם ",                  blank:{id:"b05",label:"מה לקחתי",     opts:["חיוך שלא הסברתי","סיפור חדש","תחושה שמשהו ישתנה","שאריות אוכל"]}},
-      {text:".", blank:null}
-    ]
-  },
-  {
-    id:"s02", title:"אם הייתי נעלם יום אחד",
-    paragraphs:[
-      {text:"קמתי בבוקר והחלטתי — היום אני ",     blank:{id:"b06",label:"מה החלטת",     opts:["עוזב·ת את הטלפון בבית","נוסע·ת בלי יעד","שוכח·ת מכולם","עושה רק מה שבא לי"]}},
-      {text:". ירדתי ל",                           blank:{id:"b07",label:"לאן ירדת",     opts:["ים בשמונה בבוקר","כפר ששכחו ממנו","מסעדה שאף פעם לא ניסיתי","ספריה שקטה"]}},
-      {text:", הזמנתי ",                           blank:{id:"b08",label:"הזמנת",        opts:["קפה ומשהו מתוק","ארוחה שלמה לבד","כלום — רק ישבתי","מה שהמלצר המליץ"]}},
-      {text:" ונשארתי שם עד ש",                   blank:{id:"b09",label:"עד מתי",       opts:["השמש שקעה","הפסקתי לחשוב","התגעגעתי למישהו","נזכרתי שיש לי חיים"]}},
-      {text:". חזרתי אחר·ת לגמרי.", blank:null}
-    ]
-  },
-  {
-    id:"s03", title:"רגע אמת",
-    paragraphs:[
-      {text:"יש רגע שבו את·ה מבין·ה מי את·ה באמת. אצלי זה קרה ב",  blank:{id:"b10",label:"איפה זה קרה",    opts:["אמצע ריב שהצדקתי","שיחה בשלוש בלילה","שעה שהכל השתבש","רגע של שקט מוחלט"]}},
-      {text:". הבנתי שאני ",                       blank:{id:"b11",label:"מה הבנת",      opts:["מפחד·ת יותר ממה שנראה","בוחר·ת אנשים על תחושה","מחפש·ת עומק בכל דבר","מסתיר·ה חלק ממני"]}},
-      {text:". הדבר שהכי קשה לי להודות בו הוא ש", blank:{id:"b12",label:"הודאה",        opts:["אני צריך·ה אישור","אני מפחד·ת לאכזב","לפעמים אני לא יודע·ת מה אני רוצה","אני רגיש·ה יותר מכפי שאני מראה"]}},
-      {text:". אבל מה שאני גאה בו הכי הוא ה",    blank:{id:"b13",label:"גאווה",         opts:["נאמנות שלי לאנשים שאני אוהב","אומץ שלי כשמשנה","יכולת שלי להקשיב","דרך שלי להחזיק את כולם"]}},
-      {text:".", blank:null}
-    ]
-  },
-  {
-    id:"s04", title:"72 שעות בלי תירוצים",
-    paragraphs:[
-      {text:"שלושה ימים. אין עבודה, אין חובות. הדבר הראשון שעולה לי הוא ", blank:{id:"b14",label:"דבר ראשון",   opts:["לישון כמה שאני רוצה","לנסוע לאיפשהו","לסיים משהו שדחיתי","לא לדבר עם אף אחד"]}},
-      {text:". ביום השני הייתי ",                  blank:{id:"b15",label:"מצב ביום שני", opts:["שלם·ה לגמרי","שועמם·ת וצריך·ה אנשים","מגלה משהו על עצמי","מתגעגע·ת לשגרה"]}},
-      {text:". האוכל שהייתי מכין·ה לעצמי: ",      blank:{id:"b16",label:"מה בישלת",     opts:["פסטה גדולה עם כל מה שיש","אין בישול — הזמנות","ביצים בכל צורה אפשרית","משהו שאף פעם לא ניסיתי"]}},
-      {text:". בסוף השלושה ימים הייתי ",           blank:{id:"b17",label:"בסוף הרגשת",   opts:["טעון·ה מחדש","משתוקק·ת לאנשים","גאה שהצלחתי להיות לבד","מוכן·ה לחזור לכאוס"]}},
-      {text:".", blank:null}
-    ]
-  },
-  {
-    id:"s05", title:"משהו עליי שלא ידעתם",
-    paragraphs:[
-      {text:"יש דבר שאנשים לא יודעים עליי: אני ",  blank:{id:"b18",label:"סוד קטן",      opts:["זוכר·ת כל שיחה חשובה מילה במילה","מדבר·ת עם עצמי בקול","בוכה בסרטים מהר מהר","שר·ה לבד בלי בושה"]}},
-      {text:". הדבר שמרגיז אותי יותר מכל הוא ",   blank:{id:"b19",label:"מה מרגיז",     opts:["חוסר ישירות","אנשים שמאחרים","כשמבטיחים ולא עומדים","רעש כשאני צריך·ה שקט"]}},
-      {text:". אם הייתי יכול·ה לדעת דבר אחד על העתיד הייתי בוחר·ת לדעת ", blank:{id:"b20",label:"מה לדעת",   opts:["אם כל מה שאני בונה שווה את זה","עם מי אסיים את הדרך","אם אני בכיוון הנכון","לא — עדיף שלא לדעת"]}},
-      {text:". ומה שכולם מפספסים בי זה ה",         blank:{id:"b21",label:"מה מפספסים",   opts:["עומק שמתחת לחיצוניות","הומור שיוצא רק עם אנשים קרובים","רגישות שאני מסתיר·ה","נחישות שיש לי כשחשוב לי"]}},
-      {text:".", blank:null}
-    ]
-  }
-];
-
-
-// ── Slider Mode Data ─────────────────────────────────────────
-const SLIDER_QS = [
-  // אורח חיים
+];const SLIDER_QS = [
   {id:"sl01",left:"בוקר",right:"לילה",label:"מתי את·ה הכי חי·ה?"},
   {id:"sl02",left:"ים",right:"הרים",label:"חופשה מושלמת?"},
   {id:"sl03",left:"לבד",right:"עם אנשים",label:"תעדיף·י לבלות?"},
@@ -349,7 +146,6 @@ const SLIDER_QS = [
   {id:"sl18",left:"לטוס",right:"לנסוע",label:"דרך הגעה לטיול?"},
   {id:"sl19",left:"ריצה",right:"יוגה",label:"ספורט מועדף?"},
   {id:"sl20",left:"נטפליקס",right:"לצאת",label:"שישי בערב?"},
-  // אוכל
   {id:"sl21",left:"פיצה",right:"המבורגר",label:"ארוחת ערב?"},
   {id:"sl22",left:"חריף",right:"עדין",label:"טעם מועדף?"},
   {id:"sl23",left:"בישול בבית",right:"מסעדה",label:"ארוחה טובה?"},
@@ -358,7 +154,6 @@ const SLIDER_QS = [
   {id:"sl26",left:"ארוחת בוקר",right:"ארוחת לילה",label:"ארוחה מועדפת?"},
   {id:"sl27",left:"ירקות",right:"פירות",label:"נשנוש בריא?"},
   {id:"sl28",left:"אוכל אסייתי",right:"אוכל ים תיכוני",label:"מטבח מועדף?"},
-  // אישיות
   {id:"sl29",left:"מוביל",right:"עוקב",label:"בקבוצה את·ה?"},
   {id:"sl30",left:"שומר סוד",right:"מספר לכולם",label:"כשיש לך חדשות?"},
   {id:"sl31",left:"מתכנן",right:"מאלתר",label:"לפני אירוע?"},
@@ -369,7 +164,6 @@ const SLIDER_QS = [
   {id:"sl36",left:"ספקן",right:"מאמין",label:"גישה לחיים?"},
   {id:"sl37",left:"מינימליסט",right:"קולקציונר",label:"בבית?"},
   {id:"sl38",left:"רציני",right:"הומוריסטי",label:"סגנון דיבור?"},
-  // טכנולוגיה ובידור
   {id:"sl39",left:"אנדרואיד",right:"אייפון",label:"סמארטפון?"},
   {id:"sl40",left:"סרט",right:"סדרה",label:"ערב בית?"},
   {id:"sl41",left:"ספר נייר",right:"אודיובוק",label:"קריאה?"},
@@ -377,104 +171,50 @@ const SLIDER_QS = [
   {id:"sl43",left:"חדשות",right:"פודקאסט",label:"בזמן ריצה?"},
   {id:"sl44",left:"וואטסאפ",right:"שיחת טלפון",label:"תקשורת?"},
   {id:"sl45",left:"שחייה",right:"אופניים",label:"פעילות קיץ?"},
-  // כסף ועבודה
   {id:"sl46",left:"לחסוך",right:"ליהנות",label:"כשיש כסף?"},
   {id:"sl47",left:"שכיר",right:"עצמאי",label:"סגנון עבודה?"},
   {id:"sl48",left:"מקצוע אהוב",right:"משכורת גבוהה",label:"בבחירת עבודה?"},
   {id:"sl49",left:"לעבוד מהבית",right:"ללכת למשרד",label:"יום עבודה?"},
   {id:"sl50",left:"פרויקט אחד",right:"כמה פרויקטים",label:"אופן עבודה?"},
-  // חברות ויחסים
   {id:"sl51",left:"חבר אחד טוב",right:"הרבה חברים",label:"חברות?"},
   {id:"sl52",left:"ביקור פתע",right:"תיאום מראש",label:"חברים אצלך?"},
   {id:"sl53",left:"לתת מתנה",right:"לקבל מתנה",label:"מה מרגש יותר?"},
   {id:"sl54",left:"לסלוח מהר",right:"לזכור זמן",label:"כשנפגעת?"},
   {id:"sl55",left:"לדבר על רגשות",right:"להמשיך הלאה",label:"בעיות רגשיות?"},
-  // נסיעות
   {id:"sl56",left:"חוף ים",right:"גלישה בעיר",label:"יעד חלומי?"},
   {id:"sl57",left:"מלון",right:"אירבנבי",label:"לינה בחו·ל?"},
   {id:"sl58",left:"טיול מאורגן",right:"טיול עצמאי",label:"חופשה?"},
   {id:"sl59",left:"אירופה",right:"אסיה",label:"יבשת מועדפת?"},
   {id:"sl60",left:"חוויות",right:"רגיעה",label:"מטרת הטיול?"},
-]
-
-async function generateSliderQsAI(n){
-  try{
-    const resp = await fetch("/api/gen",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({n, existing: SLIDER_QS.map(q=>q.left+"_"+q.right)})
-    });
-    if(!resp.ok) throw new Error("api "+resp.status);
-    const data = await resp.json();
-    if(!Array.isArray(data)||data.length<1) throw new Error("empty");
-    return data.slice(0,n);
-  }catch(e){
-    console.warn("AI gen failed, fallback:", e.message);
-    return pickSliderQs(n);
-  }
-}
-
-async function generateStoryAI(){
-  try{
-    const resp = await fetch("/api/gen",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({type:"story"})
-    });
-    if(!resp.ok) throw new Error("api "+resp.status);
-    const story = await resp.json();
-    if(!story.paragraphs||!story.title) throw new Error("bad story");
-    // Give it a unique id
-    story.id = "ai_"+Date.now().toString(36);
-    return story;
-  }catch(e){
-    console.warn("Story AI gen failed, using local:", e.message);
-    return null; // caller falls back to local STORIES
-  }
-}
-
-function pickSliderQs(n){
-  const shuffled = [...SLIDER_QS].sort(()=>Math.random()-0.5);
-  return shuffled.slice(0, Math.min(n, SLIDER_QS.length));
-}
-
-
-const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
+];const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
-const APP_VERSION = "v3.8";
-// Firebase key sanitizer — removes chars not allowed in Firebase paths
+const APP_VERSION = "v3.9";
+// Firebase key sanitizer  removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
-const G3 = "repeat(3,1fr)";
-
-// ── Helpers ───────────────────────────────────────────────────
-function getPlayerQs(player, lobbyQs, story, sliderQs) {
+const G3 = "repeat(3,1fr)";// ── Helpers ────────────────────────────────────────function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
     return story.paragraphs.filter(p=>p.blank).map(p=>({
       id: p.blank.id, label: p.blank.label,
-      giphy: "fun game party", e: "📖",
+      giphy: "fun game party", e: "a"",
       d: p.blank.opts,
     }));
   }
   if(sliderQs && sliderQs.length) {
     return sliderQs.map(q=>({
       id: q.id, label: q.label,
-      giphy: "sliding scale", e: "🎚️",
+      giphy: "sliding scale", e: "a")"U%",
       left: q.left, right: q.right,
-      d: [q.left, "יותר "+q.left, "יותר "+q.right, q.right],
+      d: [q.left, "גם "+q.left, "גם "+q.right, q.right],
     }));
   }
   return player.myQuestions
     ? (Array.isArray(player.myQuestions) ? player.myQuestions : Object.values(player.myQuestions))
     : lobbyQs;
-}
-
-function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
+}function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
   const n = players.length;
-  const seq = [];
-
-  if(n === 2) {
-    // DUEL MODE: each round both players answer simultaneously — A about B, B about A
+  const seq = [];  if(n === 2) {
+    // DUEL MODE: each round both players answer simultaneously  A about B, B about A
     // No silhouette round (the answer is obvious with only 2 players)
     const [p0, p1] = players;
     const qs0 = getPlayerQs(p0, lobbyQs, story, sliderQs); // questions answered by p0 (p1 will guess about p0)
@@ -506,12 +246,7 @@ function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
   }
   return seq;
 }
-function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}
-
-// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options
-
-
-// Image utils
+function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options// Image utils
 function makeSil(file){
   return new Promise(res=>{
     const img=new Image();
@@ -558,13 +293,8 @@ async function fetchGif(q){
     const p=a[Math.floor(Math.random()*Math.min(5,a.length))];
     return p?.images?.downsized_medium?.url||p?.images?.fixed_height?.url||null;
   }catch{return null;}
-}
-
-// ── Primitive Components ──────────────────────────────────────
-const ff = "'Heebo',sans-serif";
-const ffd = "'Heebo',sans-serif";
-
-function GlassCard({children,style={},glow}){
+}// ── Primitive Components ───────────────────────────const ff = "'Heebo',sans-serif";
+const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
   return(
     <div style={{
       background:D.card,
@@ -577,9 +307,7 @@ function GlassCard({children,style={},glow}){
       ...style
     }}>{children}</div>
   );
-}
-
-function Btn({children,onClick,disabled,variant="primary",style={}}){
+}function Btn({children,onClick,disabled,variant="primary",style={}}){
   const styles = {
     primary:{background:disabled?"rgba(255,255,255,.08)":D.violet,color:disabled?D.muted:"#fff",boxShadow:disabled?"none":`0 4px 20px ${D.violetGlow}`},
     lime:   {background:D.lime,color:"#0E0A1F",boxShadow:`0 4px 20px ${D.limeGlow}`},
@@ -594,9 +322,7 @@ function Btn({children,onClick,disabled,variant="primary",style={}}){
       ...styles[variant],...style
     }}>{children}</button>
   );
-}
-
-function Input({value,onChange,placeholder,type="text",style={}}){
+}function Input({value,onChange,placeholder,type="text",style={}}){
   return(
     <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} type={type}
       style={{
@@ -609,9 +335,7 @@ function Input({value,onChange,placeholder,type="text",style={}}){
       onBlur={e=>{e.target.style.borderColor=D.border;e.target.style.background="rgba(255,255,255,.07)";}}
     />
   );
-}
-
-function Avatar({url,name,size=40}){
+}function Avatar({url,name,size=40}){
   return url
     ?<img src={url} alt={name} style={{width:size,height:size,borderRadius:"50%",objectFit:"cover",border:`2px solid ${D.violet}50`,flexShrink:0}}/>
     :<div style={{width:size,height:size,borderRadius:"50%",flexShrink:0,
@@ -620,14 +344,10 @@ function Avatar({url,name,size=40}){
         color:"#fff",fontWeight:800,fontSize:size*.38,fontFamily:ffd,boxShadow:`0 0 16px ${D.violetGlow}`}}>
        {name?.[0]?.toUpperCase()||"?"}
      </div>;
-}
-
-function Spinner({size=32}){
+}function Spinner({size=32}){
   return<div style={{width:size,height:size,borderRadius:"50%",border:`3px solid rgba(255,255,255,.1)`,
     borderTop:`3px solid ${D.violet}`,animation:"spin .7s linear infinite",margin:"0 auto"}}/>;
-}
-
-function TimerRing({t,total}){
+}function TimerRing({t,total}){
   const p=t/total,r=28,c=2*Math.PI*r;
   const col=t>total*.5?D.lime:t>total*.25?D.gold:D.red;
   return(
@@ -642,20 +362,16 @@ function TimerRing({t,total}){
         fontFamily:ffd,fontSize:20,fontWeight:900,color:col}}>{t}</span>
     </div>
   );
-}
-
-function ExitBtn(){
+}function ExitBtn(){
   return(
-    <button onClick={()=>{if(window.confirm("לצאת למסך הראשי?")){{sessionStorage.clear();window.location.reload();}}}}
+    <button onClick={()=>{if(window.confirm("לצאת מהמשחק??")){{sessionStorage.clear();window.location.reload();}}}}
       style={{position:"fixed",bottom:20,left:16,zIndex:999,
         background:"rgba(255,255,255,.08)",backdropFilter:"blur(12px)",border:`1px solid ${D.border}`,
         color:D.muted,borderRadius:99,padding:"8px 16px",fontSize:13,fontFamily:ff}}>
-      ← יציאה
+       יציאה
     </button>
   );
-}
-
-function Dots({current,total}){
+}function Dots({current,total}){
   return(
     <div style={{display:"flex",gap:5,alignItems:"center"}}>
       {Array.from({length:total}).map((_,i)=>(
@@ -664,10 +380,7 @@ function Dots({current,total}){
       ))}
     </div>
   );
-}
-
-// ── Page shell ────────────────────────────────────────────────
-function Page({children,center=false,style={}}){
+}// ── Page shell ─────────────────────────────────────function Page({children,center=false,style={}}){
   return(
     <div style={{minHeight:"100dvh",background:D.bg,padding:"20px 18px 100px",
       direction:"rtl",fontFamily:ff,color:D.white,
@@ -681,10 +394,7 @@ function Page({children,center=false,style={}}){
 }
 function Wrap({children,style={}}){
   return<div style={{width:"100%",maxWidth:440,display:"flex",flexDirection:"column",gap:14,...style}}>{children}</div>;
-}
-
-// ── HOME ──────────────────────────────────────────────────────
-function Home({onJoin}){
+}//  HOME function Home({onJoin}){
   const[name,setName]=useState("");
   const[code,setCode]=useState("");
   const[tab,setTab]=useState("create");
@@ -692,20 +402,16 @@ function Home({onJoin}){
   const[numP,setNumP]=useState(4);
   const[rnd,setRnd]=useState(null);
   const[time,setTime]=useState(null);
-  const[busy,setBusy]=useState(false);
-
-  // For 2 players: rounds must be even so each gets equal turns
+  const[busy,setBusy]=useState(false);  // For 2 players: rounds must be even so each gets equal turns
   const evenUp = n => numP===2 ? (n%2===0?n:n+1) : n;
   const [gameMode, setGameMode] = useState("free"); // "free" | "story"
   const [isTournament, setIsTournament] = useState(false);
   const rOpts=[
-    {l:"קצר",  v:evenUp(Math.max(4,numP)),   s:`${evenUp(Math.max(4,numP))} שאלות`},
-    {l:"רגיל", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} שאלות`},
-    {l:"מרתוני",v:evenUp(Math.max(10,numP*3)),s:`${evenUp(Math.max(10,numP*3))} שאלות`},
+    {l:"קצר",  v:evenUp(Math.max(4,numP)),   s:`${evenUp(Math.max(4,numP))} סיבובים`},
+    {l:"בינוני", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} סיבובים`},
+    {l:"ארוך",v:evenUp(Math.max(10,numP*3)),s:`${evenUp(Math.max(10,numP*3))} סיבובים`},
   ];
-  const tOpts=[{l:"⚡ מהיר",v:15},{l:"⏱ רגיל",v:25},{l:"🧘 נינוח",v:40}];
-
-  const create=async()=>{
+  const tOpts=[{l:" 45 שניות",v:15},{l:"% דקה",v:25},{l:"a" 2 דקות",v:40}];  const create=async()=>{
     if(!name.trim()||!rnd||!time)return;
     setBusy(true);
     const c=Math.floor(1000+Math.random()*9000).toString();
@@ -731,22 +437,19 @@ function Home({onJoin}){
     if(!name.trim()||code.length!==4)return;
     setBusy(true);
     const snap=await get(ref(db,`rooms/${code}`));
-    if(!snap.exists()){alert("חדר לא נמצא!");setBusy(false);return;}
+    if(!snap.exists()){alert("החדר לא נמצא!");setBusy(false);return;}
     await update(ref(db,`rooms/${code}/players/${name.trim()}`),{name:name.trim(),score:0,ready:false});
     sessionStorage.setItem(SS_CODE,code);sessionStorage.setItem(SS_NAME,name.trim());
     onJoin(code,name.trim());setBusy(false);
-  };
-
-  if(setup) return(
+  };  if(setup) return(
     <Page>
       <Wrap>
-        <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}>← חזור</button>
+        <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}> קוד חדר
+        </button>
         <div className="fu" style={{textAlign:"center",marginBottom:4}}>
-          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>⚙️ הגדרות</h2>
-        </div>
-
-        <GlassCard className="fu d1">
-          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>כמה שחקנים?</p>
+          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>)"U% הצטרפות לחדר</h2>
+        </div>        <GlassCard className="fu d1">
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>בחר מצב משחק??</p>
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
             {[2,3,4,5,6,7,8].map(n=>(
               <button key={n} onClick={()=>{setNumP(n);setRnd(null);}} style={{
@@ -758,13 +461,11 @@ function Home({onJoin}){
               </button>
             ))}
           </div>
-          {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}>⚡ מצב דואל — מבחן אמריקאי פעיל!</p>}
-        </GlassCard>
-
-        <GlassCard className="fu d2">
-          <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>מצב משחק:</p>
+          {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}> בחר מצב  ובחר הגדרות למשחק שלך!!</p>}
+        </GlassCard>        <GlassCard className="fu d2">
+          <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב::</p>
           <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
-            {[{v:"free",icon:"❓",label:"שאלות חופשיות",desc:"ממלאים טקסט"},{v:"story",icon:"📖",label:"מצב סיפור",desc:"בחירה מתוך סיפור"},{v:"slider",icon:"🎚️",label:"מצב סליידר",desc:"ימין או שמאל"}].map(m=>(
+            {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"a"",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"a")"U%",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
@@ -775,7 +476,7 @@ function Home({onJoin}){
               </button>
             ))}
           </div>
-          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>כמות שאלות:</p>
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>מספר סיבובים::</p>
           <div style={{display:"flex",gap:8}}>
             {rOpts.map(o=>(
               <button key={o.v} onClick={()=>setRnd(o.v)} style={{
@@ -788,10 +489,8 @@ function Home({onJoin}){
               </button>
             ))}
           </div>
-        </GlassCard>
-
-        <GlassCard className="fu d3">
-          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לשאלה:</p>
+        </GlassCard>        <GlassCard className="fu d3">
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לסיבוב::</p>
           <div style={{display:"flex",gap:8}}>
             {tOpts.map(o=>(
               <button key={o.v} onClick={()=>setTime(o.v)} style={{
@@ -799,21 +498,19 @@ function Home({onJoin}){
                 background:time===o.v?D.lime:"rgba(255,255,255,.06)",
                 color:time===o.v?"#0E0A1F":D.muted,border:`1px solid ${time===o.v?D.lime:D.border}`,
                 boxShadow:time===o.v?`0 0 16px ${D.limeGlow}`:"none",transition:"all .18s"}}>
-                {o.l}<div style={{fontSize:11,marginTop:2,opacity:.7}}>{o.v} שנ'</div>
+                {o.l}<div style={{fontSize:11,marginTop:2,opacity:.7}}>{o.v} נק''</div>
               </button>
             ))}
           </div>
-        </GlassCard>
-
-        {/* Tournament toggle */}
+        </GlassCard>        {/* Tournament toggle */}
         <div onClick={function(){setIsTournament(!isTournament);}}
           style={{display:"flex",alignItems:"center",justifyContent:"space-between",
             padding:"14px 18px",borderRadius:16,cursor:"pointer",
             background:isTournament?"rgba(212,168,83,.12)":"rgba(255,255,255,.05)",
             border:"1.5px solid "+(isTournament?"rgba(212,168,83,.4)":D.border)}}>
           <div>
-            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>🏟 מצב טורניר</p>
-            <p style={{color:D.muted,fontSize:12}}>נקודות מצטברות על פני כמה משחקים</p>
+            <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>a" מצב טורניר</p>
+            <p style={{color:D.muted,fontSize:12}}>שחקו כמה משחקים רצופים וצברו נקודות</p>
           </div>
           <div style={{width:44,height:24,borderRadius:12,
             background:isTournament?"rgba(212,168,83,.6)":"rgba(255,255,255,.15)",
@@ -823,32 +520,26 @@ function Home({onJoin}){
               left:isTournament?2:22,
               transition:"left .2s"}}/>
           </div>
-        </div>
-
-        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🚀"}</Btn>
+        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉! a""}</Btn>
       </Wrap>
     </Page>
-  );
-
-  return(
+  );  return(
     <Page center>
       {/* Hero */}
       <div className="fu" style={{textAlign:"center",marginBottom:36}}>
-        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎭</div>
+        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>a"</div>
         <h1 style={{fontFamily:ffd,fontSize:52,fontWeight:900,lineHeight:1,
           background:`linear-gradient(135deg,${D.white},${D.violet})`,
           WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>
           SocialID
         </h1>
-        <p style={{color:D.muted,fontSize:16}}>המשחק שמגלה מי באמת מכיר את מי</p>
+        <p style={{color:D.muted,fontSize:16}}>משחק היכרות לחברים ומשפחה 🎮</p>
         <p style={{color:D.border,fontSize:11,marginTop:6,letterSpacing:1}}>{APP_VERSION}</p>
-      </div>
-
-      <Wrap style={{maxWidth:390}}>
+      </div>      <Wrap style={{maxWidth:390}}>
         {/* Tab */}
         <GlassCard className="fu d1" style={{padding:"6px"}}>
           <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.04)",borderRadius:14,padding:4}}>
-            {[{k:"create",l:"צור חדר 🎮"},{k:"join",l:"הצטרף 🔑"}].map(t=>(
+            {[{k:"create",l:"צור חדר 🎉a""},{k:"join",l:"הצטרף 🚀a""}].map(t=>(
               <button key={t.k} onClick={()=>setTab(t.k)} style={{
                 flex:1,padding:"11px",borderRadius:10,fontFamily:ff,fontWeight:700,fontSize:14,
                 background:tab===t.k?"rgba(168,85,247,.25)":"transparent",
@@ -860,20 +551,18 @@ function Home({onJoin}){
             ))}
           </div>
           <div style={{padding:"12px 8px 8px",display:"flex",flexDirection:"column",gap:10}}>
-            <Input value={name} onChange={setName} placeholder="השם שלך ✍️"/>
+            <Input value={name} onChange={setName} placeholder="שם שלך 😊)"U%"/>
             {tab==="join"&&(
-              <Input value={code} onChange={v=>setCode(v.replace(/\D/g,"").slice(0,4))} placeholder="קוד חדר"
+              <Input value={code} onChange={v=>setCode(v.replace(/\D/g,"").slice(0,4))} placeholder="קוד החדר"
                 style={{textAlign:"center",fontSize:32,fontWeight:900,letterSpacing:10}}/>
             )}
             {tab==="create"
-              ?<Btn onClick={()=>{if(!name.trim())return alert("הכנס שם!");setSetup(true);}}>המשך ←</Btn>
-              :<Btn onClick={join} disabled={!name.trim()||code.length!==4||busy} variant="primary">{busy?"...":"הצטרף!"}</Btn>
+              ?<Btn onClick={()=>{if(!name.trim())return alert("נא להכניס שם!!");setSetup(true);}}>קדימה </Btn>
+              :<Btn onClick={join} disabled={!name.trim()||code.length!==4||busy} variant="primary">{busy?"...":"הצטרף!!"}</Btn>
             }
           </div>
-        </GlassCard>
-
-        <p className="fu d2" style={{color:D.muted,fontSize:12,textAlign:"center"}}>
-          נבנה עם ❤️ לרגעים שיחד
+        </GlassCard>        <p className="fu d2" style={{color:D.muted,fontSize:12,textAlign:"center"}}>
+          ברוך הבא)"U% הכנס קוד חדר ולחץ הצטרף
         </p>
         <p style={{color:"rgba(255,255,255,.2)",fontSize:11,marginTop:16,fontFamily:"monospace",letterSpacing:1}}>
           v2.4.0
@@ -881,35 +570,24 @@ function Home({onJoin}){
       </Wrap>
     </Page>
   );
-}
-
-// ── LOBBY ─────────────────────────────────────────────────────
-
-// ── Story Form Component ──────────────────────────────────────
-function getBlankStyle(isFilled, isActive){
+}//  LOBBY //  Story Form Component function getBlankStyle(isFilled, isActive){
   var bg = isFilled ? "rgba(163,230,53,.2)" : isActive ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)";
   var bd = "1.5px solid " + (isFilled ? D.lime : isActive ? D.violet : D.border);
   var cl = isFilled ? D.lime : isActive ? D.white : D.muted;
   return {display:"inline-block",minWidth:80,padding:"2px 10px",borderRadius:8,
     margin:"0 4px",cursor:"pointer",fontWeight:800,fontSize:14,transition:"all .2s",
     background:bg, border:bd, color:cl};
-}
-
-function StoryForm({story, ans, setAns, code, myName}){
+}function StoryForm({story, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const blanks = story.paragraphs.filter(function(p){return p.blank;}).map(function(p){return p.blank;});
   const filled = blanks.filter(function(b){return ans[b.id];}).length;
   const total_b = blanks.length || 1;
   const pct = Math.round(filled * 100 / total_b);
-  const activeBId = blanks[cur] ? blanks[cur].id : "";
-
-  function saveAns(id, val){
+  const activeBId = blanks[cur] ? blanks[cur].id : "";  function saveAns(id, val){
     var newAns = Object.assign({}, ans, {[id]: val});
     setAns(newAns);
     update(ref(db,"rooms/"+code+"/players/"+myName+"/personalAnswers"), {[id]: val});
-  }
-
-  function handleOptClick(bId, opt){
+  }  function handleOptClick(bId, opt){
     saveAns(bId, opt);
     var nextIdx = -1;
     for(var k=cur+1; k<blanks.length; k++){
@@ -919,11 +597,7 @@ function StoryForm({story, ans, setAns, code, myName}){
     for(var k=0; k<blanks.length; k++){
       if(!ans[blanks[k].id] && blanks[k].id !== bId){ setCur(k); return; }
     }
-  }
-
-  var curBlank = blanks[cur];
-
-  return(
+  }  var curBlank = blanks[cur];  return(
     <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
       <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
         <div style={{height:"100%",width:pct+"%",
@@ -931,11 +605,9 @@ function StoryForm({story, ans, setAns, code, myName}){
       </div>
       <div style={{padding:"16px 16px 20px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <p style={{color:D.muted,fontSize:12}}>{filled} מתוך {blanks.length} הושלמו</p>
+          <p style={{color:D.muted,fontSize:12}}>{filled} מתוך {blanks.length} חסרות</p>
           <p style={{fontFamily:ffd,fontSize:15,fontWeight:800,color:D.violet}}>{story.title}</p>
-        </div>
-
-        <div style={{fontSize:15,lineHeight:1.9,color:D.offWhite,textAlign:"right",direction:"rtl"}}>
+        </div>        <div style={{fontSize:15,lineHeight:1.9,color:D.offWhite,textAlign:"right",direction:"rtl"}}>
           {story.paragraphs.map(function(para,pi){
             var bFilled = para.blank ? ans[para.blank.id] : null;
             var bActive = para.blank ? activeBId===para.blank.id : false;
@@ -952,12 +624,10 @@ function StoryForm({story, ans, setAns, code, myName}){
               </span>
             );
           })}
-        </div>
-
-        {curBlank &&
+        </div>        {curBlank &&
           <div style={{marginTop:20}}>
             <p style={{color:D.muted,fontSize:12,marginBottom:10,textAlign:"right"}}>
-              בחר עבור: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
+              בחר·י:: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
             </p>
             <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
               {curBlank.opts.map(function(opt,oi){
@@ -982,14 +652,14 @@ function StoryForm({story, ans, setAns, code, myName}){
                 disabled={cur===0}
                 style={{background:"none",border:"1px solid "+D.border,borderRadius:8,
                   padding:"6px 12px",color:cur===0?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
-                "הקודם"
+                "לא נבחר"
               </button>
               <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{cur+1} מתוך {blanks.length}</span>
               <button onClick={function(){setCur(Math.min(blanks.length-1,cur+1));}}
                 disabled={cur===blanks.length-1}
                 style={{background:"none",border:"1px solid "+D.border,borderRadius:8,
                   padding:"6px 12px",color:cur===blanks.length-1?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
-                "הבא"
+                "אין"
               </button>
             </div>
           </div>
@@ -997,17 +667,11 @@ function StoryForm({story, ans, setAns, code, myName}){
       </div>
     </GlassCard>
   );
-}
-
-
-// ── Slider Form Component ────────────────────────────────────
-function SliderForm({questions, ans, setAns, code, myName}){
+}//  Slider Form Component function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const [anim, setAnim] = useState(null); // "left" | "right" | null
   const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
-  const q = questions[cur];
-
-  useEffect(function(){
+  const q = questions[cur];  useEffect(function(){
     var el = document.getElementById("slider-thumb-style");
     if(!el){
       el = document.createElement("style");
@@ -1015,9 +679,7 @@ function SliderForm({questions, ans, setAns, code, myName}){
       el.textContent = "input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:white;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.3);}input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:white;cursor:pointer;border:none;}";
       document.head.appendChild(el);
     }
-  }, []);
-
-  function choose(side){
+  }, []);  function choose(side){
     // side: "left" | "right"
     var val = side==="left" ? 0 : 100;
     var newAns = Object.assign({}, ans, {[q.id]: val});
@@ -1028,9 +690,7 @@ function SliderForm({questions, ans, setAns, code, myName}){
       setAnim(null);
       if(cur < questions.length-1) setCur(cur+1);
     }, 320);
-  }
-
-  function handleSwipe(e){
+  }  function handleSwipe(e){
     // Touch swipe support
     var start = e.touches[0].clientX;
     function onEnd(ev){
@@ -1039,31 +699,21 @@ function SliderForm({questions, ans, setAns, code, myName}){
       document.removeEventListener("touchend", onEnd);
     }
     document.addEventListener("touchend", onEnd);
-  }
-
-  if(!q) return(
+  }  if(!q) return(
     <GlassCard className="fu d2" style={{textAlign:"center",padding:32}}>
-      <p style={{fontSize:32,marginBottom:8}}>{"✅"}</p>
-      <p style={{color:D.lime,fontWeight:700,fontSize:16}}>כל השאלות הושלמו!</p>
+      <p style={{fontSize:32,marginBottom:8}}>{""}</p>
+      <p style={{color:D.lime,fontWeight:700,fontSize:16}}>כל המשבצות מלאות!!</p>
     </GlassCard>
-  );
-
-  var chosen = ans[q.id]!==undefined ? (ans[q.id]===0 ? "left" : "right") : null;
-  var _tot = questions.length || 1; var pct = Math.round(filled * 100 / _tot);
-
-  return(
+  );  var chosen = ans[q.id]!==undefined ? (ans[q.id]===0 ? "left" : "right") : null;
+  var _tot = questions.length || 1; var pct = Math.round(filled * 100 / _tot);  return(
     <div>
       <div style={{height:4,background:"rgba(255,255,255,.08)",borderRadius:2,marginBottom:16}}>
         <div style={{height:"100%",width:pct+"%",
           background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",
           borderRadius:2,transition:"width .4s"}}/>
-      </div>
-
-      <div style={{textAlign:"center",marginBottom:12}}>
-        <span style={{color:D.muted,fontSize:12}}>{filled} מתוך {questions.length} הושלמו</span>
-      </div>
-
-      {/* Card */}
+      </div>      <div style={{textAlign:"center",marginBottom:12}}>
+        <span style={{color:D.muted,fontSize:12}}>{filled} מתוך {questions.length} שאלות</span>
+      </div>      {/* Card */}
       <div onTouchStart={handleSwipe}
         style={{
           position:"relative",
@@ -1076,20 +726,14 @@ function SliderForm({questions, ans, setAns, code, myName}){
                      anim==="right"?"translateX(60px) rotate(8deg) scale(.95)":"translateX(0)",
           opacity: anim ? 0 : 1,
           transition:"transform .28s ease,opacity .28s ease",
-          overflow:"hidden"}}>
-
-        {/* Tint overlay when chosen */}
+          overflow:"hidden"}}>        {/* Tint overlay when chosen */}
         {chosen==="left" &&
           <div style={{position:"absolute",inset:0,borderRadius:24,
             background:"rgba(168,85,247,.12)",pointerEvents:"none"}}/>}
         {chosen==="right" &&
           <div style={{position:"absolute",inset:0,borderRadius:24,
-            background:"rgba(163,230,53,.12)",pointerEvents:"none"}}/>}
-
-        <p style={{color:D.white,fontWeight:800,fontSize:17,textAlign:"center",
-          marginBottom:28,fontFamily:ffd,lineHeight:1.3}}>{q.label}</p>
-
-        <div style={{display:"flex",gap:12,alignItems:"stretch"}}>
+            background:"rgba(163,230,53,.12)",pointerEvents:"none"}}/>}        <p style={{color:D.white,fontWeight:800,fontSize:17,textAlign:"center",
+          marginBottom:28,fontFamily:ffd,lineHeight:1.3}}>{q.label}</p>        <div style={{display:"flex",gap:12,alignItems:"stretch"}}>
           {/* LEFT button */}
           <button onClick={function(){choose("left");}}
             style={{
@@ -1100,12 +744,10 @@ function SliderForm({questions, ans, setAns, code, myName}){
               color:chosen==="left"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="left"?"0 0 20px rgba(168,85,247,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{"👈"}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{"a""}</div>
             {q.left}
-            {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>הבחירה שלי</div>}
-          </button>
-
-          {/* RIGHT button */}
+            {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
+          </button>          {/* RIGHT button */}
           <button onClick={function(){choose("right");}}
             style={{
               flex:1,padding:"20px 12px",borderRadius:18,cursor:"pointer",
@@ -1115,13 +757,11 @@ function SliderForm({questions, ans, setAns, code, myName}){
               color:chosen==="right"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="right"?"0 0 20px rgba(163,230,53,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{"👉"}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{"a""}</div>
             {q.right}
-            {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>הבחירה שלי</div>}
+            {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>
-        </div>
-
-        {/* Dots nav */}
+        </div>        {/* Dots nav */}
         <div style={{display:"flex",justifyContent:"center",gap:5,marginTop:20}}>
           {questions.map(function(qq,i){
             return(
@@ -1132,37 +772,30 @@ function SliderForm({questions, ans, setAns, code, myName}){
             );
           })}
         </div>
-      </div>
-
-      <div style={{display:"flex",justifyContent:"space-between",marginTop:12,gap:8}}>
+      </div>      <div style={{display:"flex",justifyContent:"space-between",marginTop:12,gap:8}}>
         <button onClick={function(){setCur(Math.max(0,cur-1));}} disabled={cur===0}
           style={{flex:1,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
             background:"rgba(255,255,255,.04)",border:"1px solid "+D.border,
             color:cur===0?D.muted:D.offWhite,fontSize:13}}>
-          הקודם
-        </button>
+          הקודמת</button>
         <button onClick={function(){setCur(Math.min(questions.length-1,cur+1));}}
           disabled={cur===questions.length-1}
           style={{flex:2,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
             background:chosen?"rgba(168,85,247,.2)":"rgba(255,255,255,.04)",
             border:"1px solid "+(chosen?D.violet:D.border),
             color:chosen?D.white:D.muted,fontSize:13,fontWeight:chosen?700:400}}>
-          הבא
+          הבאה
         </button>
       </div>
     </div>
   );
-}
-
-function Lobby({room,code,myName,isHost}){
+}function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
   // Each player has their own question set (falls back to room's shared questions)
   const myQs = room.players?.[myName]?.myQuestions;
   const qs = myQs
     ? (Array.isArray(myQs) ? myQs : Object.values(myQs))
-    : (Array.isArray(room.lobbyQuestions) ? room.lobbyQuestions : Object.values(room.lobbyQuestions||{}));
-
-  // On first load: if player has no personal questions yet, copy from lobbyQuestions
+    : (Array.isArray(room.lobbyQuestions) ? room.lobbyQuestions : Object.values(room.lobbyQuestions||{}));  // On first load: if player has no personal questions yet, copy from lobbyQuestions
   useEffect(()=>{
     if(!myQs && room.lobbyQuestions && room.gameMode==="free") {
       const shared = Array.isArray(room.lobbyQuestions)
@@ -1177,33 +810,27 @@ function Lobby({room,code,myName,isHost}){
   const[ans,setAns]=useState(()=>{try{return JSON.parse(sessionStorage.getItem(KA)||"{}")}catch{return{}}});
   
   const[upping,setUp]=useState(false);
-  const[upT,setUpT]=useState("");
-
-  useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
-  
-
-  const up=async(file,type)=>{
+  const[upT,setUpT]=useState("");  useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
+    const up=async(file,type)=>{
     setUp(true);setUpT(type);
     try{const body=type==="sil"?await makeSil(file):await compress(file);const url=await upload(body,type);
       await update(ref(db,`rooms/${code}/players/${myName}`),type==="sil"?{silhouetteURL:url}:{photoURL:url});}
     catch(e){alert(e.message);}
     setUp(false);setUpT("");
   };
-  const onFile=(e,t)=>{const f=e.target.files?.[0];if(f)up(f,t);e.target.value="";};
-
-  const ready=()=>{
+  const onFile=(e,t)=>{const f=e.target.files?.[0];if(f)up(f,t);e.target.value="";};  const ready=()=>{
     const isDuelMode = Object.keys(room.players||{}).length===2;
     const noPhotoMode = false; // selfie required in all modes
-    if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות סלפי!");
+    if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות תמונה!!");
     if(room.gameMode==="story"){
       const story=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]);
       const blanks=story.paragraphs.filter(p=>p.blank).map(p=>p.blank);
-      if(blanks.some(b=>!ans[b.id]))return alert("בחר תשובה לכל המשפטים בסיפור");
+      if(blanks.some(b=>!ans[b.id]))return alert("יש למלא את כל המשבצות בסיפור");
     } else if(room.gameMode==="slider"){
       const sqs=room.sliderQuestions||[];
-      if(sqs.some(q=>ans[q.id]===undefined))return alert("הזז את הסליידר לכל השאלות");
+      if(sqs.some(q=>ans[q.id]===undefined))return alert("יש לענות על כל השאלות");
     } else {
-      if(qs.some(q=>!ans[q.id]?.trim()))return alert("ענה על כל השאלות");
+      if(qs.some(q=>!ans[q.id]?.trim()))return alert("יש למלא את כל התשובות");
     }
     update(ref(db,`rooms/${code}/players/${myName}`),{personalAnswers:ans,ready:true});
   };
@@ -1219,7 +846,7 @@ function Lobby({room,code,myName,isHost}){
         const subj=pl.find(p=>p.name===subjectName);
         const rawAns=subj?.personalAnswers?.[qId];
         if(rawAns===undefined||rawAns===null) return null;
-        // Slider mode: answer is 0 or 100 — convert to label
+        // Slider mode: answer is 0 or 100  convert to label
         const sliderQ=sliderQs&&sliderQs.find(q=>q.id===qId);
         if(sliderQ){
           const correct=rawAns===0?sliderQ.left:sliderQ.right;
@@ -1234,7 +861,7 @@ function Lobby({room,code,myName,isHost}){
         const pool=storyQ?storyQ.blank.opts.filter(d=>d!==correct):(qDef?.d||[]).filter(d=>d.trim().toLowerCase()!==correct.toLowerCase());
         const shuffled=[...pool].sort(()=>Math.random()-.5);
         const decoys=shuffled.slice(0,3);
-        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אחר");
+        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אין");
         return [...decoys,correct].sort(()=>Math.random()-.5);
       };
       seq.forEach(item=>{
@@ -1269,15 +896,12 @@ function Lobby({room,code,myName,isHost}){
           :(qDef?.d||[]).filter(d=>d.toLowerCase()!==correct.toLowerCase());
         const shuffled=[...pool].sort(()=>Math.random()-.5);
         const decoys=shuffled.slice(0,3);
-        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אחר");
+        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אין");
         decoyMap[fbKey(item.qId)+"_"+fbKey(item.subjectName)]=[...decoys,correct].sort(()=>Math.random()-.5);
       });
     }
     update(ref(db,`rooms/${code}`),{phase:"question",round:1,roundSequence:seq,guesses:null,decoyMap});
-  };
-
-  // ── WAITING ROOM ──────────────────────────────────────────────
-  if(me?.ready){
+  };  //  WAITING ROOM   if(me?.ready){
     const pl=Object.values(room.players||{});
     const rc=pl.filter(p=>p.ready).length,all=pl.length>1&&pl.every(p=>p.ready);
     return(
@@ -1285,17 +909,15 @@ function Lobby({room,code,myName,isHost}){
         <ExitBtn/>
         <Wrap>
           <div className="fu" style={{textAlign:"center",padding:"12px 0 4px"}}>
-            <div style={{fontSize:48,marginBottom:6}}>✅</div>
-            <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>נרשמת!</h2>
+            <div style={{fontSize:48,marginBottom:6}}></div>
+            <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפת! 🎉!</h2>
             <div style={{display:"inline-flex",alignItems:"center",gap:10,marginTop:12,
               background:D.violetGlow,border:`1px solid ${D.violet}50`,borderRadius:16,
               padding:"10px 24px"}}>
-              <span style={{color:D.muted,fontSize:13}}>קוד:</span>
+              <span style={{color:D.muted,fontSize:13}}>קוד::</span>
               <span style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.violet,letterSpacing:6}}>{code}</span>
             </div>
-          </div>
-
-          <GlassCard className="fu d1">
+          </div>          <GlassCard className="fu d1">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <span style={{color:D.muted,fontSize:13}}>שחקנים</span>
               <span style={{color:D.violet,fontWeight:700,fontSize:13}}>{rc} מתוך {pl.length} מוכנים</span>
@@ -1306,7 +928,7 @@ function Lobby({room,code,myName,isHost}){
                 background:p.ready?"rgba(163,230,53,.08)":"rgba(255,255,255,.04)",
                 border:`1px solid ${p.ready?D.lime+"30":D.border}`}}>
                 <span style={{color:p.ready?D.lime:D.muted,fontWeight:700,fontSize:13}}>
-                  {p.ready?"✓ מוכן":"⏳ ממלא..."}
+                  {p.ready?" מוכן·ה":"% טוען..."}
                 </span>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
@@ -1314,18 +936,13 @@ function Lobby({room,code,myName,isHost}){
                 </div>
               </div>
             ))}
-          </GlassCard>
-
-          {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
-            {all?"התחל! 🎲":`מחכים... (${rc}/${pl.length})`}
+          </GlassCard>          {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
+            {all?"כולם מוכנים! 🎉! a"%":`ממתין לשחקנים... (${rc}/${pl.length})`}
           </Btn>}
         </Wrap>
       </Page>
     );
-  }
-
-  // ── FILL FORM ─────────────────────────────────────────────────
-  const filled = room.gameMode==="slider"
+  }  //  FILL FORM   const filled = room.gameMode==="slider"
     ? (room.sliderQuestions||[]).filter(q=>ans[q.id]!==undefined).length
     : room.gameMode==="story"
       ? (()=>{const st=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]); return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
@@ -1343,18 +960,16 @@ function Lobby({room,code,myName,isHost}){
           <div style={{display:"inline-flex",alignItems:"center",gap:8,
             background:"rgba(168,85,247,.15)",border:`1px solid ${D.violet}40`,borderRadius:12,
             padding:"8px 20px",marginBottom:6}}>
-            <span style={{color:D.muted,fontSize:13}}>קוד:</span>
+            <span style={{color:D.muted,fontSize:13}}>קוד::</span>
             <span style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.violet,letterSpacing:5}}>{code}</span>
           </div>
-        </div>
-
-        {/* Photos — selfie always required; silhouette only in free/duel mode */}
+        </div>        {/* Photos  selfie always required; silhouette only in free/duel mode */}
         {<GlassCard className="fu d1">
-          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>📸 תמונות</p>
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>a"U% תמונות שלי</p>
           {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
-            ? [{t:"sil",lbl:"צללית (לחידה):",has:me?.silhouetteURL,cap:undefined,icons:["📷 בחר","🔄 החלף"]},
-               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}]
-            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["🤳 צלם","🔄 שוב"]}]
+            ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["a"V% 📷 צלם","a" ✓ הועלה"]},
+               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["a"% 📷 צלם","a" ✓ הועלה"]}]
+            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["a"% 📷 צלם","a" ✓ הועלה"]}]
           ).map(({t,lbl,has,cap,icons})=>(
             <div key={t} style={{marginBottom:14}}>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>{lbl}</p>
@@ -1366,13 +981,11 @@ function Lobby({room,code,myName,isHost}){
                 background:"rgba(168,85,247,.1)",border:`1.5px dashed ${D.violet}60`,
                 borderRadius:12,padding:"12px",cursor:"pointer",color:D.violet,fontWeight:600,fontSize:14}}>
                 <input type="file" accept="image/*" capture={cap} onChange={e=>onFile(e,t)} style={{display:"none"}}/>
-                {upping&&upT===t?"⏳ מעבד...":has?icons[1]:icons[0]}
+                {upping&&upT===t?"% מעלה...":has?icons[1]:icons[0]}
               </label>
             </div>
           ))}
-        </GlassCard>}
-
-        {/* Questions — Free mode or Story mode */}
+        </GlassCard>}        {/* Questions  Free mode or Story mode */}
         {room.gameMode === "story" ? (
           <StoryForm story={(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0])}
             ans={ans} setAns={setAns} code={code} myName={myName}/>
@@ -1381,13 +994,13 @@ function Lobby({room,code,myName,isHost}){
         ) : (
         <GlassCard className="fu d2">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <p style={{color:D.white,fontWeight:700,fontSize:15}}>❓ שאלות</p>
+            <p style={{color:D.white,fontWeight:700,fontSize:15}}> שאלות</p>
             <span style={{background:filled===filledTotal?D.greenBg:"rgba(255,255,255,.08)",
               color:filled===filledTotal?D.green:D.muted,borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700}}>
               {filled} מתוך {filledTotal}
             </span>
           </div>
-          <p style={{color:D.muted,fontSize:12,marginBottom:14}}>נשמר אוטומטית — בטוח מרענון דפדפן</p>
+          <p style={{color:D.muted,fontSize:12,marginBottom:14}}>לחץ על הכפתור כדי להעלות תמונה 📸 ושמור את תשובותיך </p>
           {qs.map((q,i)=>{
             if(!q||!q.id) return null;
             const replaceQ=()=>{
@@ -1404,11 +1017,11 @@ function Lobby({room,code,myName,isHost}){
             <div key={q.id} style={{marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:6}}>
                 <label style={{fontSize:13,color:D.offWhite,fontWeight:600,lineHeight:1.4,flex:1,textAlign:"right"}}>
-                  {q.e||"•"} {q.label}
+                  {q.e||""} {q.label}
                 </label>
               </div>
               <Input value={ans[q.id]||""} onChange={v=>setAns(p=>({...p,[q.id]:v}))}
-                placeholder="התשובה שלך..."
+                placeholder="תשובה שלך......"
                 style={{borderColor:ans[q.id]?.trim()?D.lime+"80":D.border,marginBottom:6}}/>
               <button onClick={replaceQ} style={{
                 width:"100%",padding:"8px",borderRadius:10,
@@ -1416,44 +1029,32 @@ function Lobby({room,code,myName,isHost}){
                 border:`1px solid ${D.violet}50`,
                 color:D.violet,fontSize:13,fontWeight:700,
                 cursor:"pointer",fontFamily:ff}}>
-                🔄 לא מתאים לי — החלף שאלה
-              </button>
+                a" 🔄 החלף שאלה ולחץ החלף</button>
             </div>
             );
           })}
         </GlassCard>
-        )}
-
-        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
-          {upping?"מעלה...":"אני מוכן! ✓"}
+        )}        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
+          {upping?"שומר...":"אני מוכן·ה! 🎮! "}
         </Btn>
       </Wrap>
     </Page>
   );
-}
-
-// ── QUESTION SCREEN ───────────────────────────────────────────
-function Question({room,code,myName,isHost}){
+}//  QUESTION SCREEN function Question({room,code,myName,isHost}){
   const RT=room.roundTime||25;
   const isDuel=Object.keys(room.players||{}).length===2;
   const[cd,setCd]=useState(3);
   const[tl,setTl]=useState(RT);
-  const[localPick,setLocalPick]=useState(null); // UI feedback before Firebase
-
-  const players=Object.values(room.players||{});
+  const[localPick,setLocalPick]=useState(null); // UI feedback before Firebase  const players=Object.values(room.players||{});
   const seq=room.roundSequence||[];
   const si=(room.round-1)%seq.length;
   const cur=seq[si]||{};
   const subj=room.players?.[cur.subjectName]||players[0];
   const isSil=cur.qType==="sil";
   const amSubj=myName===cur.subjectName;
-  const guesses=room.guesses||{};
-
-  // Duel specifics: guesser = the OTHER player
+  const guesses=room.guesses||{};  // Duel specifics: guesser = the OTHER player
   const duelGuesser=isDuel?players.find(p=>p.name!==cur.subjectName):null;
-  const amDuelGuesser=isDuel&&myName===duelGuesser?.name;
-
-  // Build MC options for duel
+  const amDuelGuesser=isDuel&&myName===duelGuesser?.name;  // Build MC options for duel
   const lobbyQs=room.lobbyQuestions||[];
   const matchQ=lobbyQs.find(q=>q.id===cur.qId);
   const correctText=cur.qType==="duel_round"?"":( ()=>{
@@ -1463,7 +1064,7 @@ function Question({room,code,myName,isHost}){
     if(_sq) return _raw===0?_sq.left:_sq.right;
     return String(_raw);
   })();
-  // allAns removed — AI generates contextual decoys now
+  // allAns removed  AI generates contextual decoys now
   // Read pre-generated decoys from Firebase (generated by host at game start)
   // In duel_round, each player guesses about different subject
   const amP0duel = isDuel && myName === cur.subjectName;
@@ -1473,22 +1074,16 @@ function Question({room,code,myName,isHost}){
     ? (fbKey(duelTargetQId)+"_"+fbKey(duelTargetName))
     : (fbKey(cur.qId)+"_"+fbKey(cur.subjectName));
   const rawOpts = (room.decoyMap||{})[decoyKey];
-  // Firebase arrays come back as objects with numeric keys — convert back
+  // Firebase arrays come back as objects with numeric keys  convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
     : rawOpts ? Object.values(rawOpts) : [];
-  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;
-
-  useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
+  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;  useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
   useEffect(()=>{if(cd<=0)return;const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   useEffect(()=>{
     if(cd>0)return;
     if(tl<=0){if(isHost)reveal();return;}
     const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
-  },[cd,tl]);
-
-  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};
-
-  const reveal=()=>{
+  },[cd,tl]);  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};  const reveal=()=>{
     if(!isHost)return;
     const upd={};
     if(cur.qType==="duel_round"){
@@ -1541,14 +1136,10 @@ function Question({room,code,myName,isHost}){
         correctSubject:cur.subjectName,currentQLabel:cur.qLabel,currentGiphyQuery:cur.qGiphy||"celebration",
       });
     }
-  };
-
-  // In duel_round: ALL players are guessers (both guess simultaneously)
+  };  // In duel_round: ALL players are guessers (both guess simultaneously)
   const nonSubj = cur.qType==="duel_round" ? players : players.filter(p=>p.name!==cur.subjectName);
   const answered = nonSubj.filter(p=>guesses[p.name]).length;
-  const allDone = nonSubj.length>0&&answered===nonSubj.length;
-
-  // Countdown screen
+  const allDone = nonSubj.length>0&&answered===nonSubj.length;  // Countdown screen
   if(cd>0) return(
     <div style={{height:"100dvh",background:D.bg,display:"flex",flexDirection:"column",
       alignItems:"center",justifyContent:"center",direction:"rtl",fontFamily:ff,color:D.white}}>
@@ -1560,10 +1151,7 @@ function Question({room,code,myName,isHost}){
         WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",
         animation:"countdown .4s cubic-bezier(.22,.68,0,1.2) both"}}>{cd}</div>
     </div>
-  );
-
-  // ── DUEL MODE UI ──────────────────────────────────────────────
-  if(isDuel) {
+  );  //  DUEL MODE UI   if(isDuel) {
     // Both players guess simultaneously each round
     // mySubject = the player I'm guessing about
     // myQuestion = the question THEY answered that I need to guess
@@ -1574,18 +1162,12 @@ function Question({room,code,myName,isHost}){
     const myQId       = isP0 ? cur.qId2   : cur.qId;
     const myQLabel    = isP0 ? cur.qLabel2 : cur.qLabel;
     const myQEmoji    = isP0 ? cur.qEmoji2 : cur.qEmoji;
-    const myCorrectTxt= mySubject?.personalAnswers?.[myQId]||"";
-
-    // Decoy options keyed per player
+    const myCorrectTxt= mySubject?.personalAnswers?.[myQId]||"";    // Decoy options keyed per player
     const myDecoyKey  = isP0 ? (fbKey(cur.qId2)+"_"+fbKey(cur.subject2Name)) : (fbKey(cur.qId)+"_"+fbKey(cur.subjectName));
     const rawMyOpts   = (room.decoyMap||{})[myDecoyKey];
     const myOpts      = Array.isArray(rawMyOpts) ? rawMyOpts
                         : rawMyOpts ? Object.values(rawMyOpts) : [];
-    const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;
-
-    const myGuess = guesses[myName];
-
-    return(
+    const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;    const myGuess = guesses[myName];    return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1596,12 +1178,10 @@ function Question({room,code,myName,isHost}){
             <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
           </div>
           <TimerRing t={tl} total={RT}/>
-        </div>
-
-        {/* My question card */}
+        </div>        {/* My question card */}
         <GlassCard className="fu" glow={D.violet}
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.15),rgba(244,114,182,.08))`,textAlign:"center",padding:"20px 16px"}}>
-          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>השאלה:</p>
+          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>סיבוב :</p>
           <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {myQEmoji} {myQLabel}
           </p>
@@ -1609,15 +1189,12 @@ function Question({room,code,myName,isHost}){
             background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
             borderRadius:99,padding:"6px 14px 6px 8px"}}>
             <Avatar url={mySubject?.photoURL} name={mySubject?.name} size={28}/>
-            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {mySubject?.name}</span>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על:: {mySubject?.name}</span>
           </div>
-        </GlassCard>
-
-        {/* MC Options */}
+        </GlassCard>        {/* MC Options */}
         <GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
-            מה {mySubject?.name} ענה? 🤔
-          </p>
+            מה ענה·תה {mySubject?.name} את ? a"          </p>
           {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
           {myOpts.map((opt,i)=>{
             const letters=["א","ב","ג","ד"];
@@ -1640,20 +1217,15 @@ function Question({room,code,myName,isHost}){
               </button>
             );
           })}
-          {myGuess&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>✓ ניחוש נשלח</p>}
-        </GlassCard>
-
-        {/* Host reveal */}
+          {myGuess&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}> ממתין לתשובות...</p>}
+        </GlassCard>        {/* Host reveal */}
         {isHost&&<Btn onClick={reveal} variant={allDone?"lime":"primary"}>
-          {allDone?"כולם ענו! חשוף ⚡":"חשוף עכשיו ▶"}
+          {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳b%"}
         </Btn>}
       </Wrap>
     </Page>
     );
-  }
-
-// ── MULTIPLAYER UI ─────────────────────────────────────────────
-  return(
+  }//  MULTIPLAYER UI   return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1663,14 +1235,12 @@ function Question({room,code,myName,isHost}){
             <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
           </div>
           <TimerRing t={tl} total={RT}/>
-        </div>
-
-        {/* Subject banner — question big + center, avatar small + framed */}
+        </div>        {/* Subject banner  question big + center, avatar small + framed */}
         <GlassCard className="fu" glow={D.violet}
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.14),rgba(34,211,238,.07))`,textAlign:"center",padding:"20px 16px"}}>
           {/* Big question */}
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>
-            {isSil?"מי הדמות בצללית?":"השאלה:"}
+            {isSil?"מי הדמות בצללית??":"התשובה שלו·ה::"}
           </p>
           <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {cur.qEmoji} {cur.qLabel}
@@ -1682,31 +1252,27 @@ function Question({room,code,myName,isHost}){
             <Avatar url={subj?.photoURL} name={subj?.name} size={28}/>
             <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>{cur.subjectName}</span>
           </div>
-        </GlassCard>
-
-        {/* Answer or silhouette */}
+        </GlassCard>        {/* Answer or silhouette */}
         <GlassCard className="fu d1" style={{textAlign:"center"}}>
           {isSil&&(
             subj?.silhouetteURL
               ?<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:200,objectFit:"contain",borderRadius:12}}/>
-              :<p style={{color:D.muted,textAlign:"center",padding:20}}>ממתין...</p>
+              :<p style={{color:D.muted,textAlign:"center",padding:20}}>טוען......</p>
           )}
           {!isSil&&(
             <div>
-              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה שלו היתה:</p>
+              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה האמיתית::</p>
               <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
                 {(()=>{var _r=subj&&subj.personalAnswers&&subj.personalAnswers[cur.qId]; var _sq=room.sliderQuestions&&room.sliderQuestions.find(function(q){return q.id===cur.qId;}); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})()}
               </p>
             </div>
           )}
-        </GlassCard>
-
-        {/* My turn or guess */}
+        </GlassCard>        {/* My turn or guess */}
         {amSubj&&(
           <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
-            <div style={{fontSize:34,marginBottom:6}}>{"👤"}</div>
-            <p style={{color:D.violet,fontWeight:700}}>השאלה הזו עליך!</p>
-            <p style={{color:D.muted,fontSize:13,marginTop:4}}>האחרים מנחשים...</p>
+            <div style={{fontSize:34,marginBottom:6}}>{"a""}</div>
+            <p style={{color:D.violet,fontWeight:700}}>ניחשת נכון! 🎯!</p>
+            <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
           </GlassCard>
         )}
         {!amSubj&&isSil&&(
@@ -1727,7 +1293,7 @@ function Question({room,code,myName,isHost}){
                 );
               })}
             </div>
-            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>{"✓"} ניחוש נשלח</p>}
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>{""} עוד מנחשים...</p>}
           </div>
         )}
         {!amSubj&&!isSil&&(
@@ -1755,36 +1321,31 @@ function Question({room,code,myName,isHost}){
                 </button>
               );
             })}
-            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>{"✓"} ניחוש נשלח</p>}
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>{""} עוד מנחשים...</p>}
           </div>
-        )}
-
-        {/* Host panel */}
+        )}        {/* Host panel */}
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
-            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>📊 {answered} מתוך {nonSubj.length} ענו</p>
+            <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>a" {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
               {nonSubj.map((p,i)=>{
                 const done=!!guesses[p.name];
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
                   background:done?D.greenBg:"rgba(255,255,255,.06)",
                   color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
-                  {done?"✓":"⏳"} {p.name}
+                  {done?"":"%"} {p.name}
                 </span>;
               })}
             </div>
             <Btn onClick={reveal} variant={allDone?"lime":"primary"}>
-              {allDone?"כולם ענו! חשוף ⚡":"חשוף עכשיו ▶"}
+              {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳b%"}
             </Btn>
           </GlassCard>
         )}
       </Wrap>
     </Page>
   );
-}
-
-// ── RESULTS ───────────────────────────────────────────────────
-function Results({room,code,isHost,myName}){
+}//  RESULTS function Results({room,code,isHost,myName}){
   const[gif,setGif]=useState(null);
   const[gifLoading,setGL]=useState(true);
   const ca=room.correctAnswer||"";
@@ -1809,23 +1370,17 @@ function Results({room,code,isHost,myName}){
   const seq=room.roundSequence||[];
   const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
-  const dr=room.duelResult||null; // duel round result object
-
-  useEffect(()=>{
+  const dr=room.duelResult||null; // duel round result object  useEffect(()=>{
     setGif(null);setGL(true);
     fetchGif(room.currentGiphyQuery||"celebration").then(u=>{setGif(u);setGL(false);});
-  },[room.currentGiphyQuery]);
-
-  const next=()=>{
+  },[room.currentGiphyQuery]);  const next=()=>{
     const nr=room.round+1;
     update(ref(db,`rooms/${code}`),{
       phase:nr>seq.length?"leaderboard":"question",
       round:nr,guesses:null,correctAnswer:null,subjectTextAnswer:null,
       correctSubject:null,currentQLabel:null,currentGiphyQuery:null,
     });
-  };
-
-  return(
+  };  return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1865,7 +1420,7 @@ function Results({room,code,isHost,myName}){
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
                         <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={28}/>
                         <div style={{textAlign:"right"}}>
-                          <p style={{color:D.muted,fontSize:11}}>ניחש:</p>
+                          <p style={{color:D.muted,fontSize:11}}>נכון::</p>
                           <p style={{fontWeight:800,fontSize:15,
                             color:row.correct?D.lime:"rgba(196,106,106,.9)"}}>
                             {row.guessed}
@@ -1876,12 +1431,12 @@ function Results({room,code,isHost,myName}){
                         width:44,height:44,borderRadius:22,display:"flex",
                         alignItems:"center",justifyContent:"center",fontSize:22,
                         background:row.correct?"rgba(74,222,128,.15)":"rgba(248,113,113,.12)"}}>
-                        {row.correct?"✅":"❌"}
+                        {row.correct?"":""}
                       </div>
                     </div>
                     {row.correct&&(
                       <p style={{textAlign:"center",color:D.lime,fontSize:12,
-                        fontWeight:700,marginTop:8}}>+10 נקודות!</p>
+                        fontWeight:700,marginTop:8}}>+10 נקודות!!</p>
                     )}
                   </div>
                 </GlassCard>
@@ -1900,19 +1455,15 @@ function Results({room,code,isHost,myName}){
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
             <Avatar url={sd?.photoURL} name={cs} size={56}/>
             <div style={{textAlign:"right"}}>
-              <p style={{color:D.muted,fontSize:11,marginBottom:2}}>זה היה...</p>
+              <p style={{color:D.muted,fontSize:11,marginBottom:2}}>התשובה שלו:...</p>
               <p style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>{cs}</p>
             </div>
           </div>
         </GlassCard>
-        )}
-
-        {/* GIF */}
+        )}        {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎉</div>}
-        </GlassCard>
-
-        {/* Scores */}
+          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>a"</div>}
+        </GlassCard>        {/* Scores */}
                 {/* Personal result feedback */}
         {myGuess!==undefined&&!dr&&(
           <GlassCard className="si" style={{
@@ -1920,21 +1471,21 @@ function Results({room,code,isHost,myName}){
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
             border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
           }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"🎯":"😅"}</div>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"a"":"a""}</div>
             <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
-              {myCorrect?"ניחשת נכון!":"לא הצלחת הפעם"}
+              {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
             </p>
             {myCorrect?<div style={{display:"inline-flex",alignItems:"center",gap:6,
               background:"rgba(163,230,53,.15)",borderRadius:99,padding:"6px 18px",marginTop:4}}>
               <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>+10</span>
-              <span style={{color:D.muted,fontSize:13}}>נקודות!</span>
+              <span style={{color:D.muted,fontSize:13}}>התשובה הנכונה נקודות!</span>
             </div>:<p style={{color:D.muted,fontSize:13,marginTop:4}}>
-              ניחשת: <span style={{color:D.red}}>"{myGuess}"</span>
+              התשובה הנכונה: : <span style={{color:D.red}}>"{myGuess}"</span>
             </p>}
           </GlassCard>
         )}
         <GlassCard className="fu d1">
-          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
+          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים::</p>
           {players.map(function(p,i){
             var g=guesses[p.name];
             if(!g) return null;
@@ -1953,15 +1504,15 @@ function Results({room,code,isHost,myName}){
                   <div style={{width:36,height:36,borderRadius:18,display:"flex",
                     alignItems:"center",justifyContent:"center",fontSize:18,
                     background:good?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
-                    {good?"✅":"❌"}
+                    {good?"":""}
                   </div>
                   <div style={{textAlign:"right"}}>
                     <p style={{color:D.white,fontWeight:700,fontSize:14}}>{p.name}</p>
                     <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
-                      {good?"ניחש נכון: ":"ניחש: "}<span style={{fontWeight:700}}>{g}</span>
+                      {good?"ניחש·ה נכון: : ":"ניחש·ה: : "}<span style={{fontWeight:700}}>{g}</span>
                     </p>
                     {!good&&_dr&&(
-                      <p style={{color:D.muted,fontSize:11}}>התשובה הנכונה: {correctAns}</p>
+                      <p style={{color:D.muted,fontSize:11}}>נכון:: {correctAns}</p>
                     )}
                   </div>
                 </div>
@@ -1973,24 +1524,17 @@ function Results({room,code,isHost,myName}){
             );
           })}
           {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
-            🎯 {scorers} שחקנים ניחשו נכון!
+            a" {scorers} ניחשו נכון!!
           </p>}
-        </GlassCard>
-
-        {isHost?<Btn onClick={next} variant="lime">המשך ▶</Btn>
-          :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>מחכים למארח...</p></GlassCard>}
+        </GlassCard>        {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️b%</Btn>
+          :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>ממתין......</p></GlassCard>}
       </Wrap>
     </Page>
   );
-}
-
-// ── LEADERBOARD ───────────────────────────────────────────────
-function Board({room,code,isHost}){
+}//  LEADERBOARD function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
-  const medals=["🥇","🥈","🥉"];
-  const tid = room.tournamentId||null;
-
-  // Accumulate this game's scores into tournament node
+  const medals=["a"","a"","a""];
+  const tid = room.tournamentId||null;  // Accumulate this game's scores into tournament node
   const accumulateTournament=async(pl)=>{
     if(!tid) return;
     const snap=await get(ref(db,"tournaments/"+tid));
@@ -2009,9 +1553,7 @@ function Board({room,code,isHost}){
       players: {...(prev.players||{}), ...updated},
       gameCount: (prev.gameCount||0)+1
     });
-  };
-
-  const restart=async()=>{
+  };  const restart=async()=>{
     const pl=Object.values(room.players||{});
     await accumulateTournament(pl);
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
@@ -2028,31 +1570,24 @@ function Board({room,code,isHost}){
       aiStory:newAiStory||null,
       storyId:newAiStory?newAiStory.id:(room.storyId||null),
       guesses:null,roundSequence:null,duelResult:null});
-  };
-
-  const endTournament=async()=>{
+  };  const endTournament=async()=>{
     const pl=Object.values(room.players||{});
     await accumulateTournament(pl);
     await update(ref(db,"rooms/"+code),{phase:"tournament"});
-  };
-
-  return(
+  };  return(
     <Page>
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🏆</div>
+          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>a"</div>
           <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
             background:"linear-gradient(135deg,"+D.gold+","+D.amber+")",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
-            תוצאות סופיות
-          </h2>
+            טבלת ניקוד</h2>
           {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
-            🏟 טורניר | משחק #{(room.tournamentGameCount||0)+1}
+            a" סה"כ נקודות | משחק ##{(room.tournamentGameCount||0)+1}
           </p>}
-        </div>
-
-        <GlassCard>
+        </div>        <GlassCard>
           {list.map((p,i)=>(
             <div key={i} className="fu" style={{animationDelay:(i*.08)+"s",
               display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -2072,12 +1607,10 @@ function Board({room,code,isHost}){
               </div>
             </div>
           ))}
-        </GlassCard>
-
-        {isHost&&(
+        </GlassCard>        {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {tid&&(
-              <Btn onClick={endTournament} variant="violet">🏟 טבלת הטורניר</Btn>
+              <Btn onClick={endTournament} variant="violet">a" טבלת הטורניר 🏟</Btn>
             )}
             <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
           </div>
@@ -2085,24 +1618,15 @@ function Board({room,code,isHost}){
       </Wrap>
     </Page>
   );
-}
-
-// ── TOURNAMENT BOARD ──────────────────────────────────────────
-function TournamentBoard({room,code,isHost}){
+}//  TOURNAMENT BOARD function TournamentBoard({room,code,isHost}){
   const[tData,setTData]=useState(null);
-  const tid=room.tournamentId;
-
-  useEffect(()=>{
+  const tid=room.tournamentId;  useEffect(()=>{
     if(!tid)return;
     return onValue(ref(db,"tournaments/"+tid),s=>{
       if(s.exists())setTData(s.val());
     });
-  },[tid]);
-
-  const medals=["🥇","🥈","🥉"];
-  const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];
-
-  const newGame=async()=>{
+  },[tid]);  const medals=["a"","a"","a""];
+  const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];  const newGame=async()=>{
     const pl=Object.values(room.players||{});
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
     const sliderQs=room.gameMode==="slider"?await generateSliderQsAI(room.roundsPerPlayer||4):null;
@@ -2118,25 +1642,19 @@ function TournamentBoard({room,code,isHost}){
       aiStory:newAiStory||null,
       storyId:newAiStory?newAiStory.id:(room.storyId||null),
       guesses:null,roundSequence:null,duelResult:null});
-  };
-
-  const closeTournament=async()=>{
-    if(!window.confirm("לסגור את הטורניר לגמרי?"))return;
+  };  const closeTournament=async()=>{
+    if(!window.confirm("לסגור את הטורניר??"))return;
     await update(ref(db,"rooms/"+code),{tournamentId:null,phase:"leaderboard"});
-  };
-
-  return(
+  };  return(
     <Page>
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:56,marginBottom:6}}>🏟</div>
+          <div style={{fontSize:56,marginBottom:6}}>a"</div>
           <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
-          {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים • נקודות מצטברות</p>}
-        </div>
-
-        <GlassCard>
-          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען...</p>}
+          {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
+        </div>        <GlassCard>
+          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען......</p>}
           {list.map((p,i)=>(
             <div key={i} className="fu" style={{animationDelay:(i*.07)+"s",
               display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -2156,26 +1674,19 @@ function TournamentBoard({room,code,isHost}){
               </div>
             </div>
           ))}
-        </GlassCard>
-
-        {isHost&&(
+        </GlassCard>        {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <Btn onClick={newGame} variant="lime">משחק נוסף ➕</Btn>
+            <Btn onClick={newGame} variant="lime">משחק נוסף ➕ </Btn>
             <Btn onClick={closeTournament} variant="ghost">סגור טורניר</Btn>
           </div>
         )}
       </Wrap>
     </Page>
   );
-}
-
-// ── ROOT ──────────────────────────────────────────────────────
-export default function App(){
+}//  ROOT export default function App(){
   const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
   const[mn,setMn]=useState(()=>sessionStorage.getItem(SS_NAME)||"");
-  const[room,setRoom]=useState(null);
-
-  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
+  const[room,setRoom]=useState(null);  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
   useEffect(()=>{if(mn)sessionStorage.setItem(SS_NAME,mn);},[mn]);
   useEffect(()=>{
     if(!rc)return;
@@ -2183,11 +1694,7 @@ export default function App(){
       if(s.exists())setRoom(s.val());
       else{sessionStorage.clear();setRc("");setMn("");}
     });
-  },[rc]);
-
-  const join=(c,n)=>{setRc(c);setMn(n);};
-
-  if(rc&&room){
+  },[rc]);  const join=(c,n)=>{setRc(c);setMn(n);};  if(rc&&room){
     const ih=room.host===mn;
     if(room.phase==="lobby")       return<Lobby    room={room} code={rc} myName={mn} isHost={ih}/>;
     if(room.phase==="question")    return<Question room={room} code={rc} myName={mn} isHost={ih}/>;
@@ -2198,7 +1705,7 @@ export default function App(){
   if(rc&&!room)return(
     <div style={{height:"100dvh",background:D.bgFixed,display:"flex",flexDirection:"column",
       alignItems:"center",justifyContent:"center",gap:12,fontFamily:ff,color:D.white}}>
-      <style>{G}</style><Spinner/><p style={{color:D.muted}}>מתחבר...</p>
+      <style>{G}</style><Spinner/><p style={{color:D.muted}}>טוען......</p>
     </div>
   );
   return<Home onJoin={join}/>;
