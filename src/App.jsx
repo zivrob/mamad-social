@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get, update, onValue } from "firebase/database";
-import { createClient } from "@supabase/supabase-js";// ── Services ──────────────────────────────────────const supabase = createClient(
+import { createClient } from "@supabase/supabase-js";
+
+// ── Services ──────────────────────────────────────
+const supabase = createClient(
   "https://hlvjyikeyjigaxucpkbu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsdmp5aWtleWppZ2F4dWNwa2J1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDU4NzIsImV4cCI6MjA4ODI4MTg3Mn0.HsAhp0b9_hmAeEpXaP6krHMUL-9rU0dDCnu-KSzplSA"
 );
@@ -13,7 +16,10 @@ const db = getDatabase(initializeApp({
   storageBucket: "mamad-proj.firebasestorage.app",
   messagingSenderId: "951625552802",
   appId: "1:951625552802:web:5b4151e77283e7105898fb"
-}));// ── Design System ─────────────────────────────────// Direction: "Late-night game show"  deep indigo base, electric violet + neon lime accents,
+}));
+
+// ── Design System ─────────────────────────────────
+// Direction: "Late-night game show"  deep indigo base, electric violet + neon lime accents,
 // glassmorphism cards, chunky rounded corners, bold Clash Display font.
 const D = {
   bg:        "linear-gradient(145deg,#1A1A2E 0%,#16213E 50%,#1A1A2E 100%)",
@@ -36,7 +42,9 @@ const D = {
   border2:   "rgba(155,114,207,.35)",
   amber:     "#D4A853",
   glow: (col) => "0 0 24px "+col,
-};const G = `
+};
+
+const G = `
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
@@ -53,7 +61,10 @@ const D = {
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
   .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
   .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
-`;// ── Data ───────────────────────────────────────────const QUESTIONS = [
+`;
+
+// ── Data ───────────────────────────────────────────
+const QUESTIONS = [
   {id:"q01",label:"מה הספורט שהכי אוהבים לעשות?",giphy:"delicious food yum",e:"🏃"},
   {id:"q02",label:"מה המאכל האהוב?",giphy:"favorite food",e:"🍕"},
   {id:"q03",label:"לאיזו ארץ הכי רצית לטוס?",giphy:"travel adventure",e:"✈️"},
@@ -74,7 +85,9 @@ const D = {
   {id:"q18",label:"מה הדבר הראשון שעושים בבוקר?",giphy:"morning routine",e:"☀️"},
   {id:"q19",label:"מה הארץ שהכי רציתם לגור בה?",giphy:"dream country",e:"🌍"},
   {id:"q20",label:"מה הסופרפאוור שהייתם בוחרים?",giphy:"superpower",e:"⚡"},
-];const STORIES = [
+];
+
+const STORIES = [
   {
     id:"s01", title:"חופשה חלומית",
     paragraphs:[
@@ -125,7 +138,9 @@ const D = {
       {text:".", blank:null}
     ]
   }
-];const SLIDER_QS = [
+];
+
+const SLIDER_QS = [
   {id:"sl01",left:"בוקר",right:"לילה",label:"מתי את·ה הכי חי·ה?"},
   {id:"sl02",left:"ים",right:"הרים",label:"חופשה מושלמת?"},
   {id:"sl03",left:"לבד",right:"עם אנשים",label:"תעדיף·י לבלות?"},
@@ -186,13 +201,18 @@ const D = {
   {id:"sl58",left:"טיול מאורגן",right:"טיול עצמאי",label:"חופשה?"},
   {id:"sl59",left:"אירופה",right:"אסיה",label:"יבשת מועדפת?"},
   {id:"sl60",left:"חוויות",right:"רגיעה",label:"מטרת הטיול?"},
-];const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
+];
+
+const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
 const APP_VERSION = "v3.9";
 // Firebase key sanitizer  removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
-const G3 = "repeat(3,1fr)";// ── Helpers ────────────────────────────────────────function getPlayerQs(player, lobbyQs, story, sliderQs) {
+const G3 = "repeat(3,1fr)";
+
+// ── Helpers ────────────────────────────────────────
+function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
     return story.paragraphs.filter(p=>p.blank).map(p=>({
       id: p.blank.id, label: p.blank.label,
@@ -211,7 +231,8 @@ const G3 = "repeat(3,1fr)";// ── Helpers ───────────�
   return player.myQuestions
     ? (Array.isArray(player.myQuestions) ? player.myQuestions : Object.values(player.myQuestions))
     : lobbyQs;
-}function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
+}
+  function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
   const n = players.length;
   const seq = [];  if(n === 2) {
     // DUEL MODE: each round both players answer simultaneously  A about B, B about A
@@ -222,7 +243,7 @@ const G3 = "repeat(3,1fr)";// ── Helpers ───────────�
     const rounds = Math.max(qs0.length, qs1.length);
     for(let i=0; i<rounds; i++){
       const q0 = qs0[i % qs0.length];
-      const q1 = qs1[i % qs1.length];
+  const q1 = qs1[i % qs1.length];
       if(!q0||!q1) continue;
       seq.push({
         qType:"duel_round",
@@ -237,7 +258,7 @@ const G3 = "repeat(3,1fr)";// ── Helpers ───────────�
     const rpp = lobbyQs.length;
     for(let i=0; i<rpp; i++){
       const player = players[i%n];
-      const playerQs = getPlayerQs(player, lobbyQs, story, sliderQs);
+  const playerQs = getPlayerQs(player, lobbyQs, story, sliderQs);
       const q = playerQs[i] || lobbyQs[i] || lobbyQs[0];
       if(!q) continue;
       seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
@@ -254,7 +275,9 @@ function makeSil(file){
       const W=400,H=Math.round(img.height/img.width*W);
       const c=document.createElement("canvas");c.width=W;c.height=H;
       const ctx=c.getContext("2d");ctx.drawImage(img,0,0,W,H);
-      const d=ctx.getImageData(0,0,W,H);const px=d.data;
+      const d=ctx.getImageData(0,0,W,H);
+
+const px=d.data;
       for(let i=0;i<px.length;i+=4){
         const b=px[i]*.299+px[i+1]*.587+px[i+2]*.114;
         if(b<180){px[i]=0;px[i+1]=0;px[i+2]=0;px[i+3]=255;}else px[i+3]=0;
@@ -289,12 +312,18 @@ async function upload(blob,type){
 async function fetchGif(q){
   try{
     const r=await fetch(`https://api.giphy.com/v1/gifs/search?api_key=sXpGFDGZs0Dv1mmNFvYaGUvYwKX0PWIh&q=${encodeURIComponent(q)}&limit=8&rating=g`);
-    const d=await r.json();const a=d?.data;if(!a?.length)return null;
+    const d=await r.json();
+
+const a=d?.data;if(!a?.length)return null;
     const p=a[Math.floor(Math.random()*Math.min(5,a.length))];
     return p?.images?.downsized_medium?.url||p?.images?.fixed_height?.url||null;
   }catch{return null;}
-}// ── Primitive Components ───────────────────────────const ff = "'Heebo',sans-serif";
-const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
+}
+
+// ── Primitive Components ───────────────────────────
+const ff = "'Heebo',sans-serif";
+const ffd = "'Heebo',sans-serif";
+  function GlassCard({children,style={},glow}){
   return(
     <div style={{
       background:D.card,
@@ -307,7 +336,8 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
       ...style
     }}>{children}</div>
   );
-}function Btn({children,onClick,disabled,variant="primary",style={}}){
+}
+  function Btn({children,onClick,disabled,variant="primary",style={}}){
   const styles = {
     primary:{background:disabled?"rgba(255,255,255,.08)":D.violet,color:disabled?D.muted:"#fff",boxShadow:disabled?"none":`0 4px 20px ${D.violetGlow}`},
     lime:   {background:D.lime,color:"#0E0A1F",boxShadow:`0 4px 20px ${D.limeGlow}`},
@@ -322,7 +352,8 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
       ...styles[variant],...style
     }}>{children}</button>
   );
-}function Input({value,onChange,placeholder,type="text",style={}}){
+}
+  function Input({value,onChange,placeholder,type="text",style={}}){
   return(
     <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} type={type}
       style={{
@@ -335,7 +366,8 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
       onBlur={e=>{e.target.style.borderColor=D.border;e.target.style.background="rgba(255,255,255,.07)";}}
     />
   );
-}function Avatar({url,name,size=40}){
+}
+  function Avatar({url,name,size=40}){
   return url
     ?<img src={url} alt={name} style={{width:size,height:size,borderRadius:"50%",objectFit:"cover",border:`2px solid ${D.violet}50`,flexShrink:0}}/>
     :<div style={{width:size,height:size,borderRadius:"50%",flexShrink:0,
@@ -344,10 +376,12 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
         color:"#fff",fontWeight:800,fontSize:size*.38,fontFamily:ffd,boxShadow:`0 0 16px ${D.violetGlow}`}}>
        {name?.[0]?.toUpperCase()||"?"}
      </div>;
-}function Spinner({size=32}){
+}
+  function Spinner({size=32}){
   return<div style={{width:size,height:size,borderRadius:"50%",border:`3px solid rgba(255,255,255,.1)`,
     borderTop:`3px solid ${D.violet}`,animation:"spin .7s linear infinite",margin:"0 auto"}}/>;
-}function TimerRing({t,total}){
+}
+  function TimerRing({t,total}){
   const p=t/total,r=28,c=2*Math.PI*r;
   const col=t>total*.5?D.lime:t>total*.25?D.gold:D.red;
   return(
@@ -362,7 +396,8 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
         fontFamily:ffd,fontSize:20,fontWeight:900,color:col}}>{t}</span>
     </div>
   );
-}function ExitBtn(){
+}
+  function ExitBtn(){
   return(
     <button onClick={()=>{if(window.confirm("לצאת מהמשחק??")){{sessionStorage.clear();window.location.reload();}}}}
       style={{position:"fixed",bottom:20,left:16,zIndex:999,
@@ -371,7 +406,8 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
        יציאה
     </button>
   );
-}function Dots({current,total}){
+}
+  function Dots({current,total}){
   return(
     <div style={{display:"flex",gap:5,alignItems:"center"}}>
       {Array.from({length:total}).map((_,i)=>(
@@ -380,7 +416,10 @@ const ffd = "'Heebo',sans-serif";function GlassCard({children,style={},glow}){
       ))}
     </div>
   );
-}// ── Page shell ─────────────────────────────────────function Page({children,center=false,style={}}){
+}
+
+// ── Page shell ─────────────────────────────────────
+function Page({children,center=false,style={}}){
   return(
     <div style={{minHeight:"100dvh",background:D.bg,padding:"20px 18px 100px",
       direction:"rtl",fontFamily:ff,color:D.white,
@@ -411,7 +450,9 @@ function Wrap({children,style={}}){
     {l:"בינוני", v:evenUp(Math.max(6,numP*2)),  s:`${evenUp(Math.max(6,numP*2))} סיבובים`},
     {l:"ארוך",v:evenUp(Math.max(10,numP*3)),s:`${evenUp(Math.max(10,numP*3))} סיבובים`},
   ];
-  const tOpts=[{l:" 45 שניות",v:15},{l:"% דקה",v:25},{l:"a" 2 דקות",v:40}];  const create=async()=>{
+  const tOpts=[{l:" 45 שניות",v:15},{l:"% דקה",v:25},{l:"a" 2 דקות",v:40}]
+
+const create=async()=>{
     if(!name.trim()||!rnd||!time)return;
     setBusy(true);
     const c=Math.floor(1000+Math.random()*9000).toString();
@@ -577,17 +618,20 @@ function Wrap({children,style={}}){
   return {display:"inline-block",minWidth:80,padding:"2px 10px",borderRadius:8,
     margin:"0 4px",cursor:"pointer",fontWeight:800,fontSize:14,transition:"all .2s",
     background:bg, border:bd, color:cl};
-}function StoryForm({story, ans, setAns, code, myName}){
+}
+  function StoryForm({story, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const blanks = story.paragraphs.filter(function(p){return p.blank;}).map(function(p){return p.blank;});
   const filled = blanks.filter(function(b){return ans[b.id];}).length;
   const total_b = blanks.length || 1;
   const pct = Math.round(filled * 100 / total_b);
-  const activeBId = blanks[cur] ? blanks[cur].id : "";  function saveAns(id, val){
+  const activeBId = blanks[cur] ? blanks[cur].id : "";
+  function saveAns(id, val){
     var newAns = Object.assign({}, ans, {[id]: val});
     setAns(newAns);
     update(ref(db,"rooms/"+code+"/players/"+myName+"/personalAnswers"), {[id]: val});
-  }  function handleOptClick(bId, opt){
+  }
+  function handleOptClick(bId, opt){
     saveAns(bId, opt);
     var nextIdx = -1;
     for(var k=cur+1; k<blanks.length; k++){
@@ -679,7 +723,8 @@ function Wrap({children,style={}}){
       el.textContent = "input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:white;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.3);}input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:white;cursor:pointer;border:none;}";
       document.head.appendChild(el);
     }
-  }, []);  function choose(side){
+  }, []);
+  function choose(side){
     // side: "left" | "right"
     var val = side==="left" ? 0 : 100;
     var newAns = Object.assign({}, ans, {[q.id]: val});
@@ -690,10 +735,11 @@ function Wrap({children,style={}}){
       setAnim(null);
       if(cur < questions.length-1) setCur(cur+1);
     }, 320);
-  }  function handleSwipe(e){
+  }
+  function handleSwipe(e){
     // Touch swipe support
     var start = e.touches[0].clientX;
-    function onEnd(ev){
+  function onEnd(ev){
       var dx = ev.changedTouches[0].clientX - start;
       if(Math.abs(dx) > 60) choose(dx < 0 ? "right" : "left");
       document.removeEventListener("touchend", onEnd);
@@ -789,7 +835,8 @@ function Wrap({children,style={}}){
       </div>
     </div>
   );
-}function Lobby({room,code,myName,isHost}){
+}
+  function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
   // Each player has their own question set (falls back to room's shared questions)
   const myQs = room.players?.[myName]?.myQuestions;
@@ -813,7 +860,9 @@ function Wrap({children,style={}}){
   const[upT,setUpT]=useState("");  useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
     const up=async(file,type)=>{
     setUp(true);setUpT(type);
-    try{const body=type==="sil"?await makeSil(file):await compress(file);const url=await upload(body,type);
+    try{const body=type==="sil"?await makeSil(file):await compress(file);
+
+const url=await upload(body,type);
       await update(ref(db,`rooms/${code}/players/${myName}`),type==="sil"?{silhouetteURL:url}:{photoURL:url});}
     catch(e){alert(e.message);}
     setUp(false);setUpT("");
@@ -1078,7 +1127,9 @@ function Wrap({children,style={}}){
   const opts = Array.isArray(rawOpts) ? rawOpts
     : rawOpts ? Object.values(rawOpts) : [];
   const optsLoading = isDuel && !isSil && correctText && opts.length === 0;  useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
-  useEffect(()=>{if(cd<=0)return;const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
+  useEffect(()=>{if(cd<=0)return;
+
+const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   useEffect(()=>{
     if(cd>0)return;
     if(tl<=0){if(isHost)reveal();return;}
@@ -1117,7 +1168,7 @@ function Wrap({children,style={}}){
       // For sil round: correct=subjectName. For regular: correct=subject's actual answer
       const subj=players.find(p=>p.name===cur.subjectName);
       const rawCorrect=subj?.personalAnswers?.[cur.qId];
-      const sliderQDef=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId);
+  const sliderQDef=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId);
       const correctLabel=isSilRound
         ? cur.subjectName
         : sliderQDef&&rawCorrect!==undefined
@@ -1165,9 +1216,9 @@ function Wrap({children,style={}}){
     const myCorrectTxt= mySubject?.personalAnswers?.[myQId]||"";    // Decoy options keyed per player
     const myDecoyKey  = isP0 ? (fbKey(cur.qId2)+"_"+fbKey(cur.subject2Name)) : (fbKey(cur.qId)+"_"+fbKey(cur.subjectName));
     const rawMyOpts   = (room.decoyMap||{})[myDecoyKey];
-    const myOpts      = Array.isArray(rawMyOpts) ? rawMyOpts
+  const myOpts      = Array.isArray(rawMyOpts) ? rawMyOpts
                         : rawMyOpts ? Object.values(rawMyOpts) : [];
-    const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;    const myGuess = guesses[myName];    return(
+  const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;    const myGuess = guesses[myName];    return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1198,7 +1249,7 @@ function Wrap({children,style={}}){
           {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
           {myOpts.map((opt,i)=>{
             const letters=["א","ב","ג","ד"];
-            const picked=localPick===opt;
+  const picked=localPick===opt;
             const done=!!myGuess;
             return(
               <button key={i} onClick={()=>{if(!done){setLocalPick(opt);guess(opt);} }}
@@ -1626,7 +1677,8 @@ function Wrap({children,style={}}){
       if(s.exists())setTData(s.val());
     });
   },[tid]);  const medals=["a"","a"","a""];
-  const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];  const newGame=async()=>{
+  const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];
+  const newGame=async()=>{
     const pl=Object.values(room.players||{});
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
     const sliderQs=room.gameMode==="slider"?await generateSliderQsAI(room.roundsPerPlayer||4):null;
