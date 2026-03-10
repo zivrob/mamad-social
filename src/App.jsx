@@ -16,7 +16,9 @@ const db = getDatabase(initializeApp({
   storageBucket: "mamad-proj.firebasestorage.app",
   messagingSenderId: "951625552802",
   appId: "1:951625552802:web:5b4151e77283e7105898fb"
-}));// ── Design System ─────────────────────────────────
+}));
+
+// ── Design System ─────────────────────────────────
 // Direction: "Late-night game show"  deep indigo base, electric violet + neon lime accents,
 // glassmorphism cards, chunky rounded corners, bold Clash Display font.
 const D = {
@@ -40,7 +42,9 @@ const D = {
   border2:   "rgba(155,114,207,.35)",
   amber:     "#D4A853",
   glow: (col) => "0 0 24px "+col,
-};const G = `
+};
+
+const G = `
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{min-height:100%;background:#1A1A2E;direction:rtl;overscroll-behavior:none;}
@@ -57,7 +61,9 @@ const D = {
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}  .fu{animation:fadeUp .4s cubic-bezier(.22,.68,0,1.15) both}
   .si{animation:scaleIn .35s cubic-bezier(.22,.68,0,1.2) both}
   .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}
-`;// ── Data ───────────────────────────────────────────
+`;
+
+// ── Data ───────────────────────────────────────────
 const QUESTIONS = [
   {id:"q01",label:"מה הספורט שהכי אוהבים לעשות?",giphy:"delicious food yum",e:"🏃"},
   {id:"q02",label:"מה המאכל האהוב?",giphy:"favorite food",e:"🍕"},
@@ -79,7 +85,9 @@ const QUESTIONS = [
   {id:"q18",label:"מה הדבר הראשון שעושים בבוקר?",giphy:"morning routine",e:"☀️"},
   {id:"q19",label:"מה הארץ שהכי רציתם לגור בה?",giphy:"dream country",e:"🌍"},
   {id:"q20",label:"מה הסופרפאוור שהייתם בוחרים?",giphy:"superpower",e:"⚡"},
-];const STORIES = [
+];
+
+const STORIES = [
   {
     id:"s01", title:"חופשה חלומית",
     paragraphs:[
@@ -130,7 +138,9 @@ const QUESTIONS = [
       {text:".", blank:null}
     ]
   }
-];const SLIDER_QS = [
+];
+
+const SLIDER_QS = [
   {id:"sl01",left:"בוקר",right:"לילה",label:"מתי את·ה הכי חי·ה?"},
   {id:"sl02",left:"ים",right:"הרים",label:"חופשה מושלמת?"},
   {id:"sl03",left:"לבד",right:"עם אנשים",label:"תעדיף·י לבלות?"},
@@ -191,13 +201,17 @@ const QUESTIONS = [
   {id:"sl58",left:"טיול מאורגן",right:"טיול עצמאי",label:"חופשה?"},
   {id:"sl59",left:"אירופה",right:"אסיה",label:"יבשת מועדפת?"},
   {id:"sl60",left:"חוויות",right:"רגיעה",label:"מטרת הטיול?"},
-];const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
+];
+
+const SIL = {id:"sil1",label:"נחש מי הדמות בצללית!",giphy:"mystery shadow",e:"🕵️"};
 const SS_CODE="sid_code", SS_NAME="sid_name";
 const APP_VERSION = "v3.9";
 // Firebase key sanitizer  removes chars not allowed in Firebase paths
 function fbKey(s){ return String(s).replace(/[.#$\/\[\]']/g,"_"); }
 const G2 = "repeat(2,1fr)";
-const G3 = "repeat(3,1fr)";// ── Helpers ────────────────────────────────────────
+const G3 = "repeat(3,1fr)";
+
+// ── Helpers ────────────────────────────────────────
 function getPlayerQs(player, lobbyQs, story, sliderQs) {
   if(story) {
     return story.paragraphs.filter(p=>p.blank).map(p=>({
@@ -254,9 +268,7 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
   return seq;
 }
 function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}
-
-// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options// Image utils
-function makeSil(file){
+  function makeSil(file){
   return new Promise(res=>{
     const img=new Image();
     img.onload=()=>{
@@ -422,8 +434,6 @@ function Page({children,center=false,style={}}){
 function Wrap({children,style={}}){
   return<div style={{width:"100%",maxWidth:440,display:"flex",flexDirection:"column",gap:14,...style}}>{children}</div>;
 }
-
-
 function Home({onJoin}){
   const[name,setName]=useState("");
   const[code,setCode]=useState("");
@@ -494,9 +504,7 @@ const create=async()=>{
             ))}
           </div>
           {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}> בחר מצב  ובחר הגדרות למשחק שלך!!</p>}
-        </GlassCard>
-
-        <GlassCard className="fu d2">
+        </GlassCard>        <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב:</p>
           <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
             {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"📖",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"🎮",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
@@ -523,9 +531,7 @@ const create=async()=>{
               </button>
             ))}
           </div>
-        </GlassCard>
-
-        <GlassCard className="fu d3">
+        </GlassCard>        <GlassCard className="fu d3">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לסיבוב:</p>
           <div style={{display:"flex",gap:8}}>
             {tOpts.map(o=>(
@@ -556,7 +562,7 @@ const create=async()=>{
               left:isTournament?2:22,
               transition:"left .2s"}}/>
           </div>
-        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉! "}</Btn>
+        </div>        <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉"}</Btn>
       </Wrap>
     </Page>
   );  return(
@@ -607,9 +613,7 @@ const create=async()=>{
     </Page>
   );
 }
-
-// ── StoryForm ───────────────────────────────────
-function getBlankStyle(isFilled, isActive){
+  function getBlankStyle(isFilled, isActive){
   var bg = isFilled ? "rgba(163,230,53,.2)" : isActive ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)";
   var bd = "1.5px solid " + (isFilled ? D.lime : isActive ? D.violet : D.border);
   var cl = isFilled ? D.lime : isActive ? D.white : D.muted;
@@ -640,8 +644,7 @@ function getBlankStyle(isFilled, isActive){
       if(!ans[blanks[k].id] && blanks[k].id !== bId){ setCur(k); return; }
     }
   }
-  var curBlank = blanks[cur];
-  return(
+  var curBlank = blanks[cur];  return(
     <GlassCard className="fu d2" style={{padding:0,overflow:"hidden"}}>
       <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
         <div style={{height:"100%",width:pct+"%",
@@ -712,9 +715,7 @@ function getBlankStyle(isFilled, isActive){
     </GlassCard>
   );
 }
-
-
-function SliderForm({questions, ans, setAns, code, myName}){
+  function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const [anim, setAnim] = useState(null); // "left" | "right" | null
   const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
@@ -793,7 +794,7 @@ function SliderForm({questions, ans, setAns, code, myName}){
               color:chosen==="left"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="left"?"0 0 20px rgba(168,85,247,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{""}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{"🎮"}</div>
             {q.left}
             {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>          {/* RIGHT button */}
@@ -806,7 +807,7 @@ function SliderForm({questions, ans, setAns, code, myName}){
               color:chosen==="right"?D.white:D.offWhite,
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="right"?"0 0 20px rgba(163,230,53,.4)":"none"}}>
-            <div style={{fontSize:28,marginBottom:6}}>{""}</div>
+            <div style={{fontSize:28,marginBottom:6}}>{"🎮"}</div>
             {q.right}
             {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>
@@ -839,7 +840,7 @@ function SliderForm({questions, ans, setAns, code, myName}){
     </div>
   );
 }
-  function Lobby({room,code,myName,isHost}){
+function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
   // Each player has their own question set (falls back to room's shared questions)
   const myQs = room.players?.[myName]?.myQuestions;
@@ -994,10 +995,7 @@ const url=await upload(body,type);
         </Wrap>
       </Page>
     );
-  }
-
-  // FILL FORM
-  const filled = room.gameMode==="slider"
+  }  //  FILL FORM   const filled = room.gameMode==="slider"
     ? (room.sliderQuestions||[]).filter(q=>ans[q.id]!==undefined).length
     : room.gameMode==="story"
       ? (()=>{const st=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]); return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
@@ -1020,11 +1018,11 @@ const url=await upload(body,type);
           </div>
         </div>        {/* Photos  selfie always required; silhouette only in free/duel mode */}
         {<GlassCard className="fu d1">
-          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>תמונות שלי</p>
+          <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>a"U% תמונות שלי</p>
           {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
-            ? [{t:"sil",lbl:"צללית (מהצד):",has:me?.silhouetteURL,cap:undefined,icons:["📷 צלם"," ✓ הועלה"]},
-               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם"," ✓ הועלה"]}]
-            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם"," ✓ הועלה"]}]
+            ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["📷 צלם","✓ הועלה"]},
+               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
+            : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
           ).map(({t,lbl,has,cap,icons})=>(
             <div key={t} style={{marginBottom:14}}>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>{lbl}</p>
@@ -1084,19 +1082,18 @@ const url=await upload(body,type);
                 border:`1px solid ${D.violet}50`,
                 color:D.violet,fontSize:13,fontWeight:700,
                 cursor:"pointer",fontFamily:ff}}>
-                 🔄 החלף שאלה ולחץ החלף</button>
+                🔄 החלף שאלה ולחץ החלף</button>
             </div>
             );
           })}
         </GlassCard>
-        )}        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
+        )}
+        < onClick={ready} style={{position:"sticky",bottom:16}}>
           {upping?"שומר...":"אני מוכן·ה! 🎮! "}
         </Btn>
       </Wrap>
     </Page>
   );
-}
-
 
 function Question({room,code,myName,isHost}){
   const RT=room.roundTime||25;
@@ -1142,7 +1139,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   useEffect(()=>{
     if(cd>0)return;
     if(tl<=0){if(isHost)reveal();return;}
-    const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
+  const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
   },[cd,tl]);  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};  const reveal=()=>{
     if(!isHost)return;
     const upd={};
@@ -1254,7 +1251,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {/* MC Options */}
         <GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
-            מה ענה·תה {mySubject?.name} את ?           </p>
+            מה ענה·תה {mySubject?.name}?
+          </p>
           {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
           {myOpts.map((opt,i)=>{
             const letters=["א","ב","ג","ד"];
@@ -1287,8 +1285,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
     );
   }
 
-
-  // MULTIPLAYER UI   return(
+  // MULTIPLAYER UI
+  return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1333,7 +1331,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>        {/* My turn or guess */}
         {amSubj&&(
           <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
-            <div style={{fontSize:34,marginBottom:6}}>{""}</div>
+            <div style={{fontSize:34,marginBottom:6}}>{"🎮"}</div>
             <p style={{color:D.violet,fontWeight:700}}>ניחשת נכון! 🎯!</p>
             <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
           </GlassCard>
@@ -1396,7 +1394,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
                   background:done?D.greenBg:"rgba(255,255,255,.06)",
                   color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
-                  {done?"":"⏳"} {p.name}
+                  {done?"":"%"} {p.name}
                 </span>;
               })}
             </div>
@@ -1408,8 +1406,6 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
   );
-}
-
 
 function Results({room,code,isHost,myName}){
   const[gif,setGif]=useState(null);
@@ -1518,7 +1514,7 @@ function Results({room,code,isHost,myName}){
               "{ta}"
             </p>
           )}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
             <Avatar url={sd?.photoURL} name={cs} size={56}/>
             <div style={{textAlign:"right"}}>
               <p style={{color:D.muted,fontSize:11,marginBottom:2}}>התשובה שלו:...</p>
@@ -1537,7 +1533,7 @@ function Results({room,code,isHost,myName}){
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
             border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
           }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"":""}</div>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"✅":"❌"}</div>
             <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
               {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
             </p>
@@ -1575,7 +1571,7 @@ function Results({room,code,isHost,myName}){
                   <div style={{textAlign:"right"}}>
                     <p style={{color:D.white,fontWeight:700,fontSize:14}}>{p.name}</p>
                     <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
-                      {good?"ניחש·ה נכון: : ":"ניחש·ה: : "}<span style={{fontWeight:700}}>{g}</span>
+                      {good?"ניחש·ה נכון: ":"ניחש·ה: : "}<span style={{fontWeight:700}}>{g}</span>
                     </p>
                     {!good&&_dr&&(
                       <p style={{color:D.muted,fontSize:11}}>נכון: {correctAns}</p>
@@ -1590,15 +1586,13 @@ function Results({room,code,isHost,myName}){
             );
           })}
           {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
-             {scorers} ניחשו נכון!!
+            🎯 {scorers} ניחשו נכון!!
           </p>}
-        </GlassCard>        {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️b%</Btn>
+        </GlassCard>        {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️</Btn>
           :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>ממתין......</p></GlassCard>}
       </Wrap>
     </Page>
   );
-}
-
 
 function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
@@ -1654,7 +1648,7 @@ function Board({room,code,isHost}){
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             טבלת ניקוד</h2>
           {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
-             סה״כ נקודות | משחק #{(room.tournamentGameCount||0)+1}
+            סה״כ נקודות | משחק #{(room.tournamentGameCount||0)+1}
           </p>}
         </div>        <GlassCard>
           {list.map((p,i)=>(
@@ -1681,14 +1675,12 @@ function Board({room,code,isHost}){
             {tid&&(
               <Btn onClick={endTournament} variant="violet">טבלת הטורניר 🏟</Btn>
             )}
-            <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
+        < onClick={restart} variant="gold">משחק חדש 🔄</Btn>
           </div>
         )}
       </Wrap>
     </Page>
   );
-}
-
 
 function TournamentBoard({room,code,isHost}){
   const[tData,setTData]=useState(null);
@@ -1757,7 +1749,6 @@ function TournamentBoard({room,code,isHost}){
     </Page>
   );
 }
-
 
 export default function App(){
   const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
