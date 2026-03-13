@@ -268,8 +268,8 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
   }
   return seq;
 }
-function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}
-  function makeSil(file){
+function pickLobbyQs(n){return[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,n);}// Duel mode: generate 3 AI decoy answers via Claude API, return 4 shuffled options// Image utils
+function makeSil(file){
   return new Promise(res=>{
     const img=new Image();
     img.onload=()=>{
@@ -345,7 +345,6 @@ const ffd = "'Heebo',sans-serif";
     ghost:  {background:"transparent",color:D.violet,border:`1.5px solid ${D.violet}`},
     gold:   {background:D.gold,color:"#0E0A1F",boxShadow:`0 4px 20px ${D.goldGlow}`},
   };
-
   return(
     <button onClick={onClick} disabled={disabled} style={{
       width:"100%",padding:"15px",borderRadius:D.r,border:"none",
@@ -393,10 +392,10 @@ const ffd = "'Heebo',sans-serif";
         <circle cx="32" cy="32" r={r} fill="none" stroke={col} strokeWidth="5"
           strokeDasharray={c} strokeDashoffset={c*(1-p)} strokeLinecap="round"
           style={{transition:"stroke-dashoffset .95s linear,stroke .3s"}}/>
-        </svg>
-        <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",
+      </svg>
+      <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",
         fontFamily:ffd,fontSize:20,fontWeight:900,color:col}}>{t}</span>
-        </div>
+    </div>
   );
 }
   function ExitBtn(){
@@ -429,14 +428,13 @@ function Page({children,center=false,style={}}){
       justifyContent:center?"center":"flex-start",...style}}>
       <style>{G}
 </style>
-        {children}
+      {children}
     </div>
   );
 }
 function Wrap({children,style={}}){
   return<div style={{width:"100%",maxWidth:440,display:"flex",flexDirection:"column",gap:14,...style}}>{children}</div>;
-}
-function Home({onJoin}){
+}//  HOME function Home({onJoin}){
   const[name,setName]=useState("");
   const[code,setCode]=useState("");
   const[tab,setTab]=useState("create");
@@ -493,11 +491,11 @@ const create=async()=>{
         <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}> קוד חדר
         </button>
         <div className="fu" style={{textAlign:"center",marginBottom:4}}>
-          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפות לחדר</h2>
+          <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}> הצטרפות לחדר</h2>
         </div>
         <GlassCard className="fu d1">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>בחר מצב משחק??</p>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
             {[2,3,4,5,6,7,8].map(n=>(
               <button key={n} onClick={()=>{setNumP(n);setRnd(null);}} style={{
                 flex:"1 1 36px",padding:"10px 0",borderRadius:12,fontFamily:ffd,fontWeight:800,fontSize:15,
@@ -508,24 +506,24 @@ const create=async()=>{
               </button>
             ))}
           </div>
-        {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}> בחר מצב  ובחר הגדרות למשחק שלך!!</p>}
+          {numP===2&&<p style={{color:D.lime,fontSize:12,marginTop:10,textAlign:"center",fontWeight:600}}> בחר מצב  ובחר הגדרות למשחק שלך!!</p>}
         </GlassCard>
         <GlassCard className="fu d2">
           <p style={{color:D.white,fontWeight:700,fontSize:14,marginBottom:10}}>בחר מצב:</p>
-        <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
+          <div style={{display:"grid",gridTemplateColumns:G3,gap:8,marginBottom:16}}>
             {[{v:"free",icon:"🎮",label:"חופשי",desc:"ענה על שאלות וגלה מה חברים עונים"},{v:"story",icon:"📖",label:"סיפור",desc:"מלא משבצות בסיפור משותף"},{v:"slider",icon:"🎮",label:"סליידר",desc:"ענה שמאל·ימין על שאלות"}].map(m=>(
               <button key={m.v} onClick={()=>setGameMode(m.v)} style={{
                 padding:"12px 8px",borderRadius:14,cursor:"pointer",fontFamily:ff,
                 background:gameMode===m.v?"rgba(168,85,247,.25)":"rgba(255,255,255,.04)",
                 border:`2px solid ${gameMode===m.v?D.violet:D.border}`,transition:"all .2s",textAlign:"center"}}>
                 <div style={{fontSize:22,marginBottom:4}}>{m.icon}</div>
-        <p style={{color:gameMode===m.v?D.white:D.offWhite,fontWeight:700,fontSize:12,marginBottom:2}}>{m.label}</p>
-        <p style={{color:D.muted,fontSize:10}}>{m.desc}</p>
-        </button>
+                <p style={{color:gameMode===m.v?D.white:D.offWhite,fontWeight:700,fontSize:12,marginBottom:2}}>{m.label}</p>
+                <p style={{color:D.muted,fontSize:10}}>{m.desc}</p>
+              </button>
             ))}
           </div>
-        <p style={{color:D.muted,fontSize:13,marginBottom:12}}>מספר סיבובים:</p>
-        <div style={{display:"flex",gap:8}}>
+          <p style={{color:D.muted,fontSize:13,marginBottom:12}}>מספר סיבובים:</p>
+          <div style={{display:"flex",gap:8}}>
             {rOpts.map(o=>(
               <button key={o.v} onClick={()=>setRnd(o.v)} style={{
                 flex:1,padding:"14px 8px",borderRadius:14,fontFamily:ffd,cursor:"pointer",fontWeight:800,
@@ -533,14 +531,14 @@ const create=async()=>{
                 color:rnd===o.v?"#fff":D.muted,border:`1px solid ${rnd===o.v?D.violet:D.border}`,
                 boxShadow:rnd===o.v?`0 0 16px ${D.violetGlow}`:"none",transition:"all .18s"}}>
                 <div style={{fontSize:14,marginBottom:2}}>{o.l}</div>
-        <div style={{fontSize:11,opacity:.7}}>{o.s}</div>
-        </button>
+                <div style={{fontSize:11,opacity:.7}}>{o.s}</div>
+              </button>
             ))}
           </div>
         </GlassCard>
         <GlassCard className="fu d3">
           <p style={{color:D.muted,fontSize:13,marginBottom:12}}>זמן לסיבוב:</p>
-        <div style={{display:"flex",gap:8}}>
+          <div style={{display:"flex",gap:8}}>
             {tOpts.map(o=>(
               <button key={o.v} onClick={()=>setTime(o.v)} style={{
                 flex:1,padding:"14px 8px",borderRadius:14,fontFamily:ffd,cursor:"pointer",fontWeight:800,fontSize:14,
@@ -548,7 +546,7 @@ const create=async()=>{
                 color:time===o.v?"#0E0A1F":D.muted,border:`1px solid ${time===o.v?D.lime:D.border}`,
                 boxShadow:time===o.v?`0 0 16px ${D.limeGlow}`:"none",transition:"all .18s"}}>
                 {o.l}<div style={{fontSize:11,marginTop:2,opacity:.7}}>{o.v} נק''</div>
-        </button>
+              </button>
             ))}
           </div>
         </GlassCard>
@@ -560,8 +558,8 @@ const create=async()=>{
             border:"1.5px solid "+(isTournament?"rgba(212,168,83,.4)":D.border)}}>
           <div>
             <p style={{color:isTournament?D.gold:D.white,fontWeight:700,fontSize:14}}>מצב טורניר</p>
-        <p style={{color:D.muted,fontSize:12}}>שחקו כמה משחקים רצופים וצברו נקודות</p>
-        </div>
+            <p style={{color:D.muted,fontSize:12}}>שחקו כמה משחקים רצופים וצברו נקודות</p>
+          </div>
           <div style={{width:44,height:24,borderRadius:12,
             background:isTournament?"rgba(212,168,83,.6)":"rgba(255,255,255,.15)",
             position:"relative",transition:"background .2s"}}>
@@ -569,10 +567,10 @@ const create=async()=>{
               position:"absolute",top:2,
               left:isTournament?2:22,
               transition:"left .2s"}}/>
-        </div>
+          </div>
         </div>
         <Btn onClick={create} disabled={!rnd||!time||busy} variant="lime">{busy?"...":"צור חדר! 🎉"}</Btn>
-        </Wrap>
+      </Wrap>
     </Page>
   );
 
@@ -580,7 +578,7 @@ const create=async()=>{
     <Page center>
       {/* Hero */}
       <div className="fu" style={{textAlign:"center",marginBottom:36}}>
-        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎮</div>
+        <div style={{fontSize:64,marginBottom:4,animation:"float 3s ease-in-out infinite"}}>🎉</div>
         <h1 style={{fontFamily:ffd,fontSize:52,fontWeight:900,lineHeight:1,
           background:`linear-gradient(135deg,${D.white},${D.violet})`,
           WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>
@@ -588,7 +586,7 @@ const create=async()=>{
         </h1>
         <p style={{color:D.muted,fontSize:16}}>משחק היכרות לחברים ומשפחה 🎮</p>
         <p style={{color:D.border,fontSize:11,marginTop:6,letterSpacing:1}}>{APP_VERSION}</p>
-        </div>
+      </div>
         <Wrap style={{maxWidth:390}}>
         {/* Tab */}
         <GlassCard className="fu d1" style={{padding:"6px"}}>
@@ -604,9 +602,9 @@ const create=async()=>{
               </button>
             ))}
           </div>
-        <div style={{padding:"12px 8px 8px",display:"flex",flexDirection:"column",gap:10}}>
+          <div style={{padding:"12px 8px 8px",display:"flex",flexDirection:"column",gap:10}}>
             <Input value={name} onChange={setName} placeholder="שם שלך 😊"/>
-        {tab==="join"&&(
+            {tab==="join"&&(
               <Input value={code} onChange={v=>setCode(v.replace(/\D/g,"").slice(0,4))} placeholder="קוד החדר"
                 style={{textAlign:"center",fontSize:32,fontWeight:900,letterSpacing:10}}/>
             )}
@@ -622,11 +620,10 @@ const create=async()=>{
         <p style={{color:"rgba(255,255,255,.2)",fontSize:11,marginTop:16,fontFamily:"monospace",letterSpacing:1}}>
           v2.4.0
         </p>
-        </Wrap>
+      </Wrap>
     </Page>
   );
-}
-  function getBlankStyle(isFilled, isActive){
+}//  LOBBY //  Story Form Component function getBlankStyle(isFilled, isActive){
   var bg = isFilled ? "rgba(163,230,53,.2)" : isActive ? "rgba(168,85,247,.3)" : "rgba(255,255,255,.08)";
   var bd = "1.5px solid " + (isFilled ? D.lime : isActive ? D.violet : D.border);
   var cl = isFilled ? D.lime : isActive ? D.white : D.muted;
@@ -664,11 +661,11 @@ const create=async()=>{
       <div style={{height:4,background:"rgba(255,255,255,.08)"}}>
         <div style={{height:"100%",width:pct+"%",
           background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",transition:"width .4s"}}/>
-        </div>
-        <div style={{padding:"16px 16px 20px"}}>
+      </div>
+      <div style={{padding:"16px 16px 20px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
           <p style={{color:D.muted,fontSize:12}}>{filled} מתוך {blanks.length} חסרות</p>
-        <p style={{fontFamily:ffd,fontSize:15,fontWeight:800,color:D.violet}}>{story.title}</p>
+          <p style={{fontFamily:ffd,fontSize:15,fontWeight:800,color:D.violet}}>{story.title}</p>
         </div>
         <div style={{fontSize:15,lineHeight:1.9,color:D.offWhite,textAlign:"right",direction:"rtl"}}>
           {story.paragraphs.map(function(para,pi){
@@ -692,7 +689,7 @@ const create=async()=>{
           <div style={{marginTop:20}}>
             <p style={{color:D.muted,fontSize:12,marginBottom:10,textAlign:"right"}}>
               בחר·י: <span style={{color:D.violet,fontWeight:700}}>{curBlank.label}</span>
-        </p>
+            </p>
             <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
               {curBlank.opts.map(function(opt,oi){
                 var sel = ans[curBlank.id]===opt;
@@ -711,28 +708,27 @@ const create=async()=>{
                 );
               })}
             </div>
-        <div style={{display:"flex",justifyContent:"space-between",marginTop:12}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:12}}>
               <button onClick={function(){setCur(Math.max(0,cur-1));}}
                 disabled={cur===0}
                 style={{background:"none",border:"1px solid "+D.border,borderRadius:8,
                   padding:"6px 12px",color:cur===0?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
                 "לא נבחר"
               </button>
-        <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{cur+1} מתוך {blanks.length}</span>
-        <button onClick={function(){setCur(Math.min(blanks.length-1,cur+1));}}
+              <span style={{color:D.muted,fontSize:12,alignSelf:"center"}}>{cur+1} מתוך {blanks.length}</span>
+              <button onClick={function(){setCur(Math.min(blanks.length-1,cur+1));}}
                 disabled={cur===blanks.length-1}
                 style={{background:"none",border:"1px solid "+D.border,borderRadius:8,
                   padding:"6px 12px",color:cur===blanks.length-1?D.muted:D.offWhite,cursor:"pointer",fontFamily:ff,fontSize:12}}>
                 "אין"
               </button>
-        </div>
+            </div>
           </div>
         }
       </div>
-        </GlassCard>
+    </GlassCard>
   );
-}
-  function SliderForm({questions, ans, setAns, code, myName}){
+}//  Slider Form Component function SliderForm({questions, ans, setAns, code, myName}){
   const [cur, setCur] = useState(0);
   const [anim, setAnim] = useState(null); // "left" | "right" | null
   const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
@@ -772,12 +768,13 @@ const create=async()=>{
   if(!q) return(
     <GlassCard className="fu d2" style={{textAlign:"center",padding:32}}>
       <p style={{fontSize:32,marginBottom:8}}>{""}</p>
-        <p style={{color:D.lime,fontWeight:700,fontSize:16}}>כל המשבצות מלאות!!</p>
-        </GlassCard>
+      <p style={{color:D.lime,fontWeight:700,fontSize:16}}>כל המשבצות מלאות!!</p>
+    </GlassCard>
   );
 
   var chosen = ans[q.id]!==undefined ? (ans[q.id]===0 ? "left" : "right") : null;
-  var _tot = questions.length || 1; var pct = Math.round(filled * 100 / _tot);
+  var _tot = questions.length || 1;
+  var pct = Math.round(filled * 100 / _tot);
 
   return(
     <div>
@@ -785,10 +782,10 @@ const create=async()=>{
         <div style={{height:"100%",width:pct+"%",
           background:"linear-gradient(90deg,"+D.violet+","+D.lime+")",
           borderRadius:2,transition:"width .4s"}}/>
-        </div>
+      </div>
         <div style={{textAlign:"center",marginBottom:12}}>
         <span style={{color:D.muted,fontSize:12}}>{filled} מתוך {questions.length} שאלות</span>
-        </div>
+      </div>
         {/* Card */}
       <div onTouchStart={handleSwipe}
         style={{
@@ -822,7 +819,7 @@ const create=async()=>{
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="left"?"0 0 20px rgba(168,85,247,.4)":"none"}}>
             <div style={{fontSize:28,marginBottom:6}}>{"🎮"}</div>
-        {q.left}
+            {q.left}
             {chosen==="left" && <div style={{fontSize:11,color:D.violet,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>
         {/* RIGHT button */}
@@ -836,7 +833,7 @@ const create=async()=>{
               transition:"all .18s",textAlign:"center",
               boxShadow:chosen==="right"?"0 0 20px rgba(163,230,53,.4)":"none"}}>
             <div style={{fontSize:28,marginBottom:6}}>{"🎮"}</div>
-        {q.right}
+            {q.right}
             {chosen==="right" && <div style={{fontSize:11,color:D.lime,marginTop:4,fontWeight:400}}>✓ בחרת</div>}
           </button>
         </div>
@@ -851,7 +848,7 @@ const create=async()=>{
             );
           })}
         </div>
-        </div>
+      </div>
         <div style={{display:"flex",justifyContent:"space-between",marginTop:12,gap:8}}>
         <button onClick={function(){setCur(Math.max(0,cur-1));}} disabled={cur===0}
           style={{flex:1,padding:"10px",borderRadius:12,cursor:"pointer",fontFamily:ff,
@@ -866,11 +863,11 @@ const create=async()=>{
             color:chosen?D.white:D.muted,fontSize:13,fontWeight:chosen?700:400}}>
           הבאה
         </button>
-        </div>
+      </div>
     </div>
   );
 }
-function Lobby({room,code,myName,isHost}){
+  function Lobby({room,code,myName,isHost}){
   const me=room.players?.[myName];
   // Each player has their own question set (falls back to room's shared questions)
   const myQs = room.players?.[myName]?.myQuestions;
@@ -994,27 +991,26 @@ const url=await upload(body,type);
   if(me?.ready){
     const pl=Object.values(room.players||{});
     const rc=pl.filter(p=>p.ready).length,all=pl.length>1&&pl.every(p=>p.ready);
-
-  return(
+    return(
       <Page>
         <ExitBtn/>
         <Wrap>
           <div className="fu" style={{textAlign:"center",padding:"12px 0 4px"}}>
             <div style={{fontSize:48,marginBottom:6}}></div>
-        <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפת! 🎉!</h2>
-        <div style={{display:"inline-flex",alignItems:"center",gap:10,marginTop:12,
+            <h2 style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white}}>הצטרפת! 🎉!</h2>
+            <div style={{display:"inline-flex",alignItems:"center",gap:10,marginTop:12,
               background:D.violetGlow,border:`1px solid ${D.violet}50`,borderRadius:16,
               padding:"10px 24px"}}>
               <span style={{color:D.muted,fontSize:13}}>קוד:</span>
-        <span style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.violet,letterSpacing:6}}>{code}</span>
-        </div>
+              <span style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.violet,letterSpacing:6}}>{code}</span>
+            </div>
           </div>
         <GlassCard className="fu d1">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <span style={{color:D.muted,fontSize:13}}>שחקנים</span>
-        <span style={{color:D.violet,fontWeight:700,fontSize:13}}>{rc} מתוך {pl.length} מוכנים</span>
-        </div>
-        {pl.map((p,i)=>(
+              <span style={{color:D.violet,fontWeight:700,fontSize:13}}>{rc} מתוך {pl.length} מוכנים</span>
+            </div>
+            {pl.map((p,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
                 padding:"10px 12px",borderRadius:14,marginBottom:6,
                 background:p.ready?"rgba(163,230,53,.08)":"rgba(255,255,255,.04)",
@@ -1022,18 +1018,18 @@ const url=await upload(body,type);
                 <span style={{color:p.ready?D.lime:D.muted,fontWeight:700,fontSize:13}}>
                   {p.ready?" מוכן·ה":"טוען..."}
                 </span>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
-        <Avatar url={p.photoURL} name={p.name} size={32}/>
-        </div>
-        </div>
+                  <Avatar url={p.photoURL} name={p.name} size={32}/>
+                </div>
+              </div>
             ))}
           </GlassCard>
         {isHost&&<Btn onClick={start} disabled={!all} variant={all?"lime":"ghost"}>
             {all?"כולם מוכנים! 🎉":`ממתין לשחקנים... (${rc}/${pl.length})`}
           </Btn>}
         </Wrap>
-        </Page>
+      </Page>
     );
   }
 
@@ -1051,36 +1047,36 @@ const url=await upload(body,type);
   return(
     <Page style={{paddingBottom:100}}>
       <ExitBtn/>
-        <Wrap>
+      <Wrap>
         <div className="fu" style={{textAlign:"center",marginBottom:4}}>
           <div style={{display:"inline-flex",alignItems:"center",gap:8,
             background:"rgba(168,85,247,.15)",border:`1px solid ${D.violet}40`,borderRadius:12,
             padding:"8px 20px",marginBottom:6}}>
             <span style={{color:D.muted,fontSize:13}}>קוד:</span>
-        <span style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.violet,letterSpacing:5}}>{code}</span>
-        </div>
+            <span style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.violet,letterSpacing:5}}>{code}</span>
+          </div>
         </div>
         {/* Photos  selfie always required; silhouette only in free/duel mode */}
         {<GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>תמונות שלי</p>
-        {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
+          {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
             ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["📷 צלם","✓ הועלה"]},
                {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
             : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
           ).map(({t,lbl,has,cap,icons})=>(
             <div key={t} style={{marginBottom:14}}>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>{lbl}</p>
-        {has&&t==="sil"&&<img src={has} style={{width:"100%",maxHeight:90,objectFit:"cover",borderRadius:12,marginBottom:8,border:`1px solid ${D.violet}30`}}/>}
+              {has&&t==="sil"&&<img src={has} style={{width:"100%",maxHeight:90,objectFit:"cover",borderRadius:12,marginBottom:8,border:`1px solid ${D.violet}30`}}/>}
               {has&&t==="pro"&&<div style={{display:"flex",justifyContent:"center",marginBottom:8}}>
                 <img src={has} style={{width:60,height:60,borderRadius:"50%",objectFit:"cover",border:`2px solid ${D.violet}`}}/>
-        </div>}
+              </div>}
               <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,
                 background:"rgba(168,85,247,.1)",border:`1.5px dashed ${D.violet}60`,
                 borderRadius:12,padding:"12px",cursor:"pointer",color:D.violet,fontWeight:600,fontSize:14}}>
                 <input type="file" accept="image/*" capture={cap} onChange={e=>onFile(e,t)} style={{display:"none"}}/>
-        {upping&&upT===t?"מעלה...":has?icons[1]:icons[0]}
+                {upping&&upT===t?"מעלה...":has?icons[1]:icons[0]}
               </label>
-        </div>
+            </div>
           ))}
         </GlassCard>}        {/* Questions  Free mode or Story mode */}
         {room.gameMode === "story" ? (
@@ -1092,13 +1088,13 @@ const url=await upload(body,type);
         <GlassCard className="fu d2">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <p style={{color:D.white,fontWeight:700,fontSize:15}}> שאלות</p>
-        <span style={{background:filled===filledTotal?D.greenBg:"rgba(255,255,255,.08)",
+            <span style={{background:filled===filledTotal?D.greenBg:"rgba(255,255,255,.08)",
               color:filled===filledTotal?D.green:D.muted,borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700}}>
               {filled} מתוך {filledTotal}
             </span>
-        </div>
+          </div>
           <p style={{color:D.muted,fontSize:12,marginBottom:14}}>לחץ על הכפתור כדי להעלות תמונה 📸 ושמור את תשובותיך </p>
-        {qs.map((q,i)=>{
+          {qs.map((q,i)=>{
             if(!q||!q.id) return null;
             const replaceQ=()=>{
               const usedIds=qs.filter(Boolean).map(x=>x.id);
@@ -1110,43 +1106,39 @@ const url=await upload(body,type);
               update(ref(db,`rooms/${code}/players/${myName}`),{myQuestions: newQs});
               setAns(p=>{const n={...p};delete n[q.id];return n;});
             };
-
-  return(
+            return(
             <div key={q.id} style={{marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:6}}>
                 <label style={{fontSize:13,color:D.offWhite,fontWeight:600,lineHeight:1.4,flex:1,textAlign:"right"}}>
                   {q.e||""} {q.label}
                 </label>
-        </div>
+              </div>
               <Input value={ans[q.id]||""} onChange={v=>setAns(p=>({...p,[q.id]:v}))}
                 placeholder="תשובה שלך......"
                 style={{borderColor:ans[q.id]?.trim()?D.lime+"80":D.border,marginBottom:6}}/>
-        <button onClick={replaceQ} style={{
+              <button onClick={replaceQ} style={{
                 width:"100%",padding:"8px",borderRadius:10,
                 background:"rgba(168,85,247,.15)",
                 border:`1px solid ${D.violet}50`,
                 color:D.violet,fontSize:13,fontWeight:700,
                 cursor:"pointer",fontFamily:ff}}>
                 🔄 החלף שאלה ולחץ החלף</button>
-        </div>
+            </div>
             );
           })}
         </GlassCard>
-        )}
-        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
+        )}        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
           {upping?"שומר...":"אני מוכן·ה! 🎮! "}
         </Btn>
-        </Wrap>
+      </Wrap>
     </Page>
   );
-
-function Question({room,code,myName,isHost}){
+}//  QUESTION SCREEN function Question({room,code,myName,isHost}){
   const RT=room.roundTime||25;
   const isDuel=Object.keys(room.players||{}).length===2;
   const[cd,setCd]=useState(3);
   const[tl,setTl]=useState(RT);
-  const[localPick,setLocalPick]=useState(null);
-
+  const[localPick,setLocalPick]=useState(null); // UI feedback before Firebase
   const players=Object.values(room.players||{});
   const seq=room.roundSequence||[];
   const si=(room.round-1)%seq.length;
@@ -1179,7 +1171,7 @@ function Question({room,code,myName,isHost}){
   // Firebase arrays come back as objects with numeric keys  convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
     : rawOpts ? Object.values(rawOpts) : [];
-  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;
+  const optsLoading = isDuel && !isSil && correctText && opts\.length === 0;
 
   useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
   useEffect(()=>{if(cd<=0)return;
@@ -1188,7 +1180,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   useEffect(()=>{
     if(cd>0)return;
     if(tl<=0){if(isHost)reveal();return;}
-  const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
+    const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
   },[cd,tl]);
 
   const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};
@@ -1254,13 +1246,13 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
     <div style={{height:"100dvh",background:D.bg,display:"flex",flexDirection:"column",
       alignItems:"center",justifyContent:"center",direction:"rtl",fontFamily:ff,color:D.white}}>
       <style>{G}</style>
-        <ExitBtn/>
-        <p style={{color:D.muted,marginBottom:16,fontSize:14}}>סיבוב {room.round} מתוך {seq.length}</p>
-        <div key={cd} style={{fontFamily:ffd,fontSize:130,fontWeight:900,lineHeight:1,
+      <ExitBtn/>
+      <p style={{color:D.muted,marginBottom:16,fontSize:14}}>סיבוב {room.round} מתוך {seq.length}</p>
+      <div key={cd} style={{fontFamily:ffd,fontSize:130,fontWeight:900,lineHeight:1,
         background:`linear-gradient(135deg,${D.violet},${D.pink})`,
         WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",
         animation:"countdown .4s cubic-bezier(.22,.68,0,1.2) both"}}>{cd}</div>
-        </div>
+    </div>
   );
 
   // DUEL MODE UI
@@ -1286,35 +1278,35 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   return(
     <Page>
       <ExitBtn/>
-        <Wrap>
+      <Wrap>
         {/* Header */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <Dots current={room.round} total={seq.length}/>
-        <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
-        </div>
+            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
+          </div>
           <TimerRing t={tl} total={RT}/>
         </div>
         {/* My question card */}
         <GlassCard className="fu" glow={D.violet}
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.15),rgba(244,114,182,.08))`,textAlign:"center",padding:"20px 16px"}}>
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>סיבוב :</p>
-        <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
+          <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {myQEmoji} {myQLabel}
           </p>
-        <div style={{display:"inline-flex",alignItems:"center",gap:10,
+          <div style={{display:"inline-flex",alignItems:"center",gap:10,
             background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
             borderRadius:99,padding:"6px 14px 6px 8px"}}>
             <Avatar url={mySubject?.photoURL} name={mySubject?.name} size={28}/>
-        <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {mySubject?.name}</span>
-        </div>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {mySubject?.name}</span>
+          </div>
         </GlassCard>
         {/* MC Options */}
         <GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>
             מה ענה·תה {mySubject?.name}?
           </p>
-        {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
+          {myOptsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
           {myOpts.map((opt,i)=>{
             const letters=["א","ב","ג","ד"];
   const picked=localPick===opt;
@@ -1332,8 +1324,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                   color:picked?"#fff":D.muted,fontFamily:ffd,fontWeight:800,fontSize:13}}>
                   {letters[i]}
                 </span>
-        <span style={{color:picked?D.white:D.offWhite,fontSize:15}}>{opt}</span>
-        </button>
+                <span style={{color:picked?D.white:D.offWhite,fontSize:15}}>{opt}</span>
+              </button>
             );
           })}
           {myGuess&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}> ממתין לתשובות...</p>}
@@ -1343,20 +1335,17 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳"}
         </Btn>}
       </Wrap>
-        </Page>
+    </Page>
     );
-  }
-
-  // MULTIPLAYER UI
-  return(
+  }//  MULTIPLAYER UI   return(
     <Page>
       <ExitBtn/>
-        <Wrap>
+      <Wrap>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <Dots current={room.round} total={seq.length}/>
-        <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
-        </div>
+            <p style={{color:D.muted,fontSize:12,marginTop:4}}>{room.round} מתוך {seq.length}</p>
+          </div>
           <TimerRing t={tl} total={RT}/>
         </div>
         {/* Subject banner  question big + center, avatar small + framed */}
@@ -1364,9 +1353,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.14),rgba(34,211,238,.07))`,textAlign:"center",padding:"20px 16px"}}>
           {/* Big question */}
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>
-            {isSil?"מי הדמות בצללית?":"התשובה שלו·ה:"}
+            {isSil?"מי הדמות בצללית??":"התשובה שלו·ה:"}
           </p>
-        <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
+          <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {cur.qEmoji} {cur.qLabel}
           </p>
           {/* Small framed avatar + name */}
@@ -1374,8 +1363,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
             borderRadius:99,padding:"6px 14px 6px 8px"}}>
             <Avatar url={subj?.photoURL} name={subj?.name} size={28}/>
-        <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>{cur.subjectName}</span>
-        </div>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>{cur.subjectName}</span>
+          </div>
         </GlassCard>
         {/* Answer or silhouette */}
         <GlassCard className="fu d1" style={{textAlign:"center"}}>
@@ -1387,19 +1376,19 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           {!isSil&&(
             <div>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה האמיתית:</p>
-        <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
+              <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
                 {(()=>{var _r=subj&&subj.personalAnswers&&subj.personalAnswers[cur.qId]; var _sq=room.sliderQuestions&&room.sliderQuestions.find(function(q){return q.id===cur.qId;}); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})()}
               </p>
-        </div>
+            </div>
           )}
         </GlassCard>
         {/* My turn or guess */}
         {amSubj&&(
           <GlassCard className="fu d2" style={{textAlign:"center",background:"rgba(168,85,247,.1)"}}>
             <div style={{fontSize:34,marginBottom:6}}>{"🎮"}</div>
-        <p style={{color:D.violet,fontWeight:700}}>ניחשת נכון! 🎯!</p>
-        <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
-        </GlassCard>
+            <p style={{color:D.violet,fontWeight:700}}>ניחשת נכון! 🎯!</p>
+            <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
+          </GlassCard>
         )}
         {!amSubj&&isSil&&(
           <div>
@@ -1414,12 +1403,12 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                       border:"1.5px solid "+(picked?D.violet:D.border),
                       transition:"all .15s"}}>
                     <Avatar url={p.photoURL} name={p.name} size={30}/>
-        <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:14}}>{p.name}</span>
-        </button>
+                    <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:14}}>{p.name}</span>
+                  </button>
                 );
               })}
             </div>
-        {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>{""} עוד מנחשים...</p>}
+            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>{""} עוד מנחשים...</p>}
           </div>
         )}
         {!amSubj&&!isSil&&(
@@ -1441,10 +1430,10 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                     justifyContent:"center",fontWeight:700,fontSize:12,flexShrink:0,
                     background:picked?"rgba(168,85,247,.3)":"rgba(255,255,255,.08)",
                     color:picked?D.white:D.muted}}>{letters[i]}</span>
-        <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:15,textAlign:"right"}}>
+                  <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:15,textAlign:"right"}}>
                     {opt}
                   </span>
-        </button>
+                </button>
               );
             })}
             {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>{""} עוד מנחשים...</p>}
@@ -1453,7 +1442,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
             <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>✅ {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
               {nonSubj.map((p,i)=>{
                 const done=!!guesses[p.name];
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
@@ -1463,16 +1452,15 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                 </span>;
               })}
             </div>
-        <Btn onClick={reveal} variant={allDone?"lime":"primary"}>
+            <Btn onClick={reveal} variant={allDone?"lime":"primary"}>
               {allDone?"כולם ענו! גלה 🎯! גלה תשובות ":"עדיין ממתין ⏳"}
             </Btn>
-        </GlassCard>
+          </GlassCard>
         )}
       </Wrap>
-        </Page>
+    </Page>
   );
-
-function Results({room,code,isHost,myName}){
+}//  RESULTS function Results({room,code,isHost,myName}){
   const[gif,setGif]=useState(null);
   const[gifLoading,setGL]=useState(true);
   const ca=room.correctAnswer||"";
@@ -1516,7 +1504,7 @@ function Results({room,code,isHost,myName}){
   return(
     <Page>
       <ExitBtn/>
-        <Wrap>
+      <Wrap>
         {/* Big reveal */}
         {dr ? (
           // DUEL RESULT: redesigned clear layout
@@ -1535,16 +1523,16 @@ function Results({room,code,isHost,myName}){
                   <div style={{height:4,background:row.correct
                     ?"linear-gradient(90deg,"+D.lime+",rgba(74,222,128,.4))"
                     :"linear-gradient(90deg,rgba(248,113,113,.8),rgba(248,113,113,.3))"}}/>
-        <div style={{padding:"14px 16px"}}>
+                  <div style={{padding:"14px 16px"}}>
                     {/* Question + subject's answer */}
                     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
                       <Avatar url={room.players?.[row.subjectName]?.photoURL} name={row.subjectName} size={36}/>
-        <div style={{flex:1,textAlign:"right"}}>
+                      <div style={{flex:1,textAlign:"right"}}>
                         <p style={{color:D.muted,fontSize:11,marginBottom:2}}>{row.qLabel}</p>
-        <p style={{fontFamily:ffd,fontSize:18,fontWeight:900,color:D.lime}}>
+                        <p style={{fontFamily:ffd,fontSize:18,fontWeight:900,color:D.lime}}>
                           {row.subjectAns}
                         </p>
-        </div>
+                      </div>
                     </div>
                     {/* Divider */}
                     <div style={{height:1,background:"rgba(255,255,255,.08)",marginBottom:10}}/>
@@ -1552,27 +1540,27 @@ function Results({room,code,isHost,myName}){
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
                         <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={28}/>
-        <div style={{textAlign:"right"}}>
+                        <div style={{textAlign:"right"}}>
                           <p style={{color:D.muted,fontSize:11}}>נכון:</p>
-        <p style={{fontWeight:800,fontSize:15,
+                          <p style={{fontWeight:800,fontSize:15,
                             color:row.correct?D.lime:"rgba(196,106,106,.9)"}}>
                             {row.guessed}
                           </p>
-        </div>
+                        </div>
                       </div>
-        <div style={{
+                      <div style={{
                         width:44,height:44,borderRadius:22,display:"flex",
                         alignItems:"center",justifyContent:"center",fontSize:22,
                         background:row.correct?"rgba(74,222,128,.15)":"rgba(248,113,113,.12)"}}>
                         {row.correct?"":""}
                       </div>
-        </div>
-        {row.correct&&(
+                    </div>
+                    {row.correct&&(
                       <p style={{textAlign:"center",color:D.lime,fontSize:12,
                         fontWeight:700,marginTop:8}}>+10 נקודות!!</p>
                     )}
                   </div>
-        </GlassCard>
+                </GlassCard>
               );
             })}
           </div>
@@ -1580,22 +1568,22 @@ function Results({room,code,isHost,myName}){
         <GlassCard className="si" glow={D.lime}
           style={{background:`linear-gradient(135deg,rgba(163,230,53,.1),rgba(74,222,128,.08))`,textAlign:"center"}}>
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>{ql}</p>
-        {ta&&!isSil&&(
+          {ta&&!isSil&&(
             <p style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white,marginBottom:10,lineHeight:1.2}}>
               "{ta}"
             </p>
           )}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
             <Avatar url={sd?.photoURL} name={cs} size={56}/>
-        <div style={{textAlign:"right"}}>
+            <div style={{textAlign:"right"}}>
               <p style={{color:D.muted,fontSize:11,marginBottom:2}}>התשובה שלו:...</p>
-        <p style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>{cs}</p>
-        </div>
+              <p style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>{cs}</p>
+            </div>
           </div>
         </GlassCard>
         )}        {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎮</div>}
+          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎉</div>}
         </GlassCard>
         {/* Scores */}
                 {/* Personal result feedback */}
@@ -1605,22 +1593,22 @@ function Results({room,code,isHost,myName}){
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
             border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
           }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"✅":"❌"}</div>
-        <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?":"}</div>
+            <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
               {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
             </p>
-        {myCorrect?<div style={{display:"inline-flex",alignItems:"center",gap:6,
+            {myCorrect?<div style={{display:"inline-flex",alignItems:"center",gap:6,
               background:"rgba(163,230,53,.15)",borderRadius:99,padding:"6px 18px",marginTop:4}}>
               <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>+10</span>
-        <span style={{color:D.muted,fontSize:13}}>התשובה הנכונה נקודות!</span>
-        </div>:<p style={{color:D.muted,fontSize:13,marginTop:4}}>
+              <span style={{color:D.muted,fontSize:13}}>התשובה הנכונה נקודות!</span>
+            </div>:<p style={{color:D.muted,fontSize:13,marginTop:4}}>
               התשובה הנכונה: : <span style={{color:D.red}}>"{myGuess}"</span>
-        </p>}
+            </p>}
           </GlassCard>
         )}
         <GlassCard className="fu d1">
           <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
-        {players.map(function(p,i){
+          {players.map(function(p,i){
             var g=guesses[p.name];
             if(!g) return null;
             var good=ok(g, p.name);
@@ -1640,21 +1628,21 @@ function Results({room,code,isHost,myName}){
                     background:good?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
                     {good?"":""}
                   </div>
-        <div style={{textAlign:"right"}}>
+                  <div style={{textAlign:"right"}}>
                     <p style={{color:D.white,fontWeight:700,fontSize:14}}>{p.name}</p>
-        <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
+                    <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
                       {good?"ניחש·ה נכון: ":"ניחש·ה: : "}<span style={{fontWeight:700}}>{g}</span>
-        </p>
-        {!good&&_dr&&(
+                    </p>
+                    {!good&&_dr&&(
                       <p style={{color:D.muted,fontSize:11}}>נכון: {correctAns}</p>
                     )}
                   </div>
-        </div>
+                </div>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   {_dr&&<span style={{color:D.muted,fontSize:11}}>על {aboutName}</span>}
                   <Avatar url={p.photoURL} name={p.name} size={32}/>
-        </div>
-        </div>
+                </div>
+              </div>
             );
           })}
           {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
@@ -1664,10 +1652,9 @@ function Results({room,code,isHost,myName}){
         {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️</Btn>
           :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>ממתין......</p></GlassCard>}
       </Wrap>
-        </Page>
+    </Page>
   );
-
-function Board({room,code,isHost}){
+}//  LEADERBOARD function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
   const medals=["🥇","🥈","🥉"];
   const tid = room.tournamentId||null;  // Accumulate this game's scores into tournament node
@@ -1719,14 +1706,14 @@ function Board({room,code,isHost}){
   return(
     <Page>
       <ExitBtn/>
-        <Wrap>
+      <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🎮</div>
-        <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
+          <div style={{fontSize:60,marginBottom:8,animation:"float 2.5s ease-in-out infinite"}}>🎉</div>
+          <h2 style={{fontFamily:ffd,fontSize:32,fontWeight:900,
             background:"linear-gradient(135deg,"+D.gold+","+D.amber+")",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             טבלת ניקוד</h2>
-        {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
+          {tid&&<p style={{color:D.muted,fontSize:12,marginTop:4}}>
             סה״כ נקודות | משחק #{(room.tournamentGameCount||0)+1}
           </p>}
         </div>
@@ -1739,16 +1726,16 @@ function Board({room,code,isHost}){
               border:"1px solid "+(i===0?"rgba(212,168,83,.25)":D.border)}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:24}}>{medals[i]||"  "}</span>
-        <div style={{textAlign:"right"}}>
+                <div style={{textAlign:"right"}}>
                   <span style={{fontFamily:ffd,fontWeight:900,fontSize:22,color:i===0?D.gold:D.white}}>{p.score}</span>
-        <span style={{color:D.muted,fontSize:12,marginRight:4}}>נק'</span>
-        </div>
+                  <span style={{color:D.muted,fontSize:12,marginRight:4}}>נק'</span>
+                </div>
               </div>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span style={{color:D.white,fontWeight:600}}>{p.name}</span>
-        <Avatar url={p.photoURL} name={p.name} size={40}/>
-        </div>
-        </div>
+                <Avatar url={p.photoURL} name={p.name} size={40}/>
+              </div>
+            </div>
           ))}
         </GlassCard>
         {isHost&&(
@@ -1756,14 +1743,13 @@ function Board({room,code,isHost}){
             {tid&&(
               <Btn onClick={endTournament} variant="violet">טבלת הטורניר 🏟</Btn>
             )}
-        <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
-        </div>
+            <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
+          </div>
         )}
       </Wrap>
-        </Page>
+    </Page>
   );
-
-function TournamentBoard({room,code,isHost}){
+}//  TOURNAMENT BOARD function TournamentBoard({room,code,isHost}){
   const[tData,setTData]=useState(null);
   const tid=room.tournamentId;
 
@@ -1804,12 +1790,12 @@ function TournamentBoard({room,code,isHost}){
       <ExitBtn/>
       <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
-          <div style={{fontSize:56,marginBottom:6}}>🎮</div>
+          <div style={{fontSize:56,marginBottom:6}}>🎉</div>
           <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
           {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
         </div>
         <GlassCard>
-          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען...</p>}
+          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען......</p>}
           {list.map((p,i)=>(
             <div key={i} className="fu" style={{animationDelay:(i*.07)+"s",
               display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -1832,16 +1818,14 @@ function TournamentBoard({room,code,isHost}){
         </GlassCard>
         {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <Btn onClick={newGame} variant="lime">משחק נוסף ➕</Btn>
+            <Btn onClick={newGame} variant="lime">משחק נוסף ➕ </Btn>
             <Btn onClick={closeTournament} variant="ghost">סגור טורניר</Btn>
           </div>
         )}
       </Wrap>
     </Page>
   );
-}
-
-export default function App(){
+}//  ROOT export default function App(){
   const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
   const[mn,setMn]=useState(()=>sessionStorage.getItem(SS_NAME)||"");
   const[room,setRoom]=useState(null);
@@ -1870,8 +1854,7 @@ export default function App(){
     <div style={{height:"100dvh",background:D.bgFixed,display:"flex",flexDirection:"column",
       alignItems:"center",justifyContent:"center",gap:12,fontFamily:ff,color:D.white}}>
       <style>{G}</style><Spinner/><p style={{color:D.muted}}>טוען......</p>
-        </div>
+    </div>
   );
-
   return<Home onJoin={join}/>;
 }
