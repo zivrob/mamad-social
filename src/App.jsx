@@ -995,7 +995,10 @@ const url=await upload(body,type);
         </Wrap>
       </Page>
     );
-  }  //  FILL FORM   const filled = room.gameMode==="slider"
+  }
+
+  // FILL FORM
+  const filled = room.gameMode==="slider"
     ? (room.sliderQuestions||[]).filter(q=>ans[q.id]!==undefined).length
     : room.gameMode==="story"
       ? (()=>{const st=(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0]); return st.paragraphs.filter(p=>p.blank&&ans[p.blank.id]).length;})()
