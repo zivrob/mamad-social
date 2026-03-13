@@ -1802,14 +1802,14 @@ function TournamentBoard({room,code,isHost}){
   return(
     <Page>
       <ExitBtn/>
-        <Wrap>
+      <Wrap>
         <div className="si" style={{textAlign:"center",padding:"16px 0 8px"}}>
           <div style={{fontSize:56,marginBottom:6}}>🎮</div>
-        <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
-        {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
+          <h2 style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.gold}}>טבלת הטורניר</h2>
+          {tData&&<p style={{color:D.muted,fontSize:13,marginTop:4}}>{tData.gameCount||0} משחקים 🎮 שוחקו עד כה</p>}
         </div>
         <GlassCard>
-          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען......</p>}
+          {list.length===0&&<p style={{color:D.muted,textAlign:"center"}}>טוען...</p>}
           {list.map((p,i)=>(
             <div key={i} className="fu" style={{animationDelay:(i*.07)+"s",
               display:"flex",justifyContent:"space-between",alignItems:"center",
@@ -1818,26 +1818,26 @@ function TournamentBoard({room,code,isHost}){
               border:"1px solid "+(i===0?"rgba(212,168,83,.3)":D.border)}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:24}}>{medals[i]||"  "}</span>
-        <div>
+                <div>
                   <p style={{fontFamily:ffd,fontWeight:900,fontSize:22,color:i===0?D.gold:D.white}}>{p.score}</p>
-        <p style={{color:D.muted,fontSize:11}}>{p.gamesPlayed||0} משחקים</p>
-        </div>
+                  <p style={{color:D.muted,fontSize:11}}>{p.gamesPlayed||0} משחקים</p>
+                </div>
               </div>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span style={{color:D.white,fontWeight:700,fontSize:15}}>{p.name}</span>
-        <Avatar url={p.photoURL} name={p.name} size={40}/>
-        </div>
-        </div>
+                <Avatar url={p.photoURL} name={p.name} size={40}/>
+              </div>
+            </div>
           ))}
         </GlassCard>
         {isHost&&(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <Btn onClick={newGame} variant="lime">משחק נוסף ➕ </Btn>
-        <Btn onClick={closeTournament} variant="ghost">סגור טורניר</Btn>
-        </div>
+            <Btn onClick={newGame} variant="lime">משחק נוסף ➕</Btn>
+            <Btn onClick={closeTournament} variant="ghost">סגור טורניר</Btn>
+          </div>
         )}
       </Wrap>
-        </Page>
+    </Page>
   );
 }
 
