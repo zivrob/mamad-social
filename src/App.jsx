@@ -1134,7 +1134,8 @@ const url=await upload(body,type);
             );
           })}
         </GlassCard>
-        )}        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
+        )}
+        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
           {upping?"שומר...":"אני מוכן·ה! 🎮! "}
         </Btn>
       </Wrap>
@@ -1346,7 +1347,10 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
       </Wrap>
     </Page>
     );
-  }//  MULTIPLAYER UI   return(
+  }
+
+  // MULTIPLAYER UI
+  return(
     <Page>
       <ExitBtn/>
       <Wrap>
