@@ -234,7 +234,8 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
 }
   function buildSequence(players, lobbyQs, story=null, sliderQs=null) {
   const n = players.length;
-  const seq = [];  if(n === 2) {
+  const seq = [];
+  if(n === 2) {
     // DUEL MODE: each round both players answer simultaneously  A about B, B about A
     // No silhouette round (the answer is obvious with only 2 players)
     const [p0, p1] = players;
@@ -483,7 +484,9 @@ const create=async()=>{
     await update(ref(db,`rooms/${code}/players/${name.trim()}`),{name:name.trim(),score:0,ready:false});
     sessionStorage.setItem(SS_CODE,code);sessionStorage.setItem(SS_NAME,name.trim());
     onJoin(code,name.trim());setBusy(false);
-  };  if(setup) return(
+  };
+
+  if(setup) return(
     <Page>
       <Wrap>
         <button onClick={()=>setSetup(false)} style={{background:"none",border:"none",color:D.violet,fontFamily:ff,fontSize:14,textAlign:"right",padding:"4px 0",marginBottom:4}}> קוד חדר
@@ -719,7 +722,9 @@ const create=async()=>{
   const [cur, setCur] = useState(0);
   const [anim, setAnim] = useState(null); // "left" | "right" | null
   const filled = questions.filter(function(q){return ans[q.id]!==undefined;}).length;
-  const q = questions[cur];  useEffect(function(){
+  const q = questions[cur];
+
+  useEffect(function(){
     var el = document.getElementById("slider-thumb-style");
     if(!el){
       el = document.createElement("style");
@@ -749,12 +754,15 @@ const create=async()=>{
       document.removeEventListener("touchend", onEnd);
     }
     document.addEventListener("touchend", onEnd);
-  }  if(!q) return(
+  }
+  if(!q) return(
     <GlassCard className="fu d2" style={{textAlign:"center",padding:32}}>
       <p style={{fontSize:32,marginBottom:8}}>{""}</p>
       <p style={{color:D.lime,fontWeight:700,fontSize:16}}>כל המשבצות מלאות!!</p>
     </GlassCard>
-  );  var chosen = ans[q.id]!==undefined ? (ans[q.id]===0 ? "left" : "right") : null;
+  );
+
+  var chosen = ans[q.id]!==undefined ? (ans[q.id]===0 ? "left" : "right") : null;
   var _tot = questions.length || 1; var pct = Math.round(filled * 100 / _tot);  return(
     <div>
       <div style={{height:4,background:"rgba(255,255,255,.08)",borderRadius:2,marginBottom:16}}>
@@ -861,7 +869,9 @@ function Lobby({room,code,myName,isHost}){
   const[ans,setAns]=useState(()=>{try{return JSON.parse(sessionStorage.getItem(KA)||"{}")}catch{return{}}});
   
   const[upping,setUp]=useState(false);
-  const[upT,setUpT]=useState("");  useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
+  const[upT,setUpT]=useState("");
+
+  useEffect(()=>{sessionStorage.setItem(KA,JSON.stringify(ans))},[ans]);
     const up=async(file,type)=>{
     setUp(true);setUpT(type);
     try{const body=type==="sil"?await makeSil(file):await compress(file);
@@ -871,7 +881,9 @@ const url=await upload(body,type);
     catch(e){alert(e.message);}
     setUp(false);setUpT("");
   };
-  const onFile=(e,t)=>{const f=e.target.files?.[0];if(f)up(f,t);e.target.value="";};  const ready=()=>{
+  const onFile=(e,t)=>{const f=e.target.files?.[0];if(f)up(f,t);e.target.value="";};
+
+  const ready=()=>{
     const isDuelMode = Object.keys(room.players||{}).length===2;
     const noPhotoMode = false; // selfie required in all modes
     if(!noPhotoMode&&!me?.photoURL)return alert("חובה להעלות תמונה!!");
@@ -1103,7 +1115,9 @@ function Question({room,code,myName,isHost}){
   const isDuel=Object.keys(room.players||{}).length===2;
   const[cd,setCd]=useState(3);
   const[tl,setTl]=useState(RT);
-  const[localPick,setLocalPick]=useState(null); // UI feedback before Firebase  const players=Object.values(room.players||{});
+  const[localPick,setLocalPick]=useState(null);
+
+  const players=Object.values(room.players||{});
   const seq=room.roundSequence||[];
   const si=(room.round-1)%seq.length;
   const cur=seq[si]||{};
@@ -1135,7 +1149,9 @@ function Question({room,code,myName,isHost}){
   // Firebase arrays come back as objects with numeric keys  convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
     : rawOpts ? Object.values(rawOpts) : [];
-  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;  useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
+  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;
+
+  useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
   useEffect(()=>{if(cd<=0)return;
 
 const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
@@ -1145,7 +1161,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
   const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
   },[cd,tl]);
 
-  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};  const reveal=()=>{
+  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};
+
+  const reveal=()=>{
     if(!isHost)return;
     const upd={};
     if(cur.qType==="duel_round"){
@@ -1229,7 +1247,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
     const rawMyOpts   = (room.decoyMap||{})[myDecoyKey];
   const myOpts      = Array.isArray(rawMyOpts) ? rawMyOpts
                         : rawMyOpts ? Object.values(rawMyOpts) : [];
-  const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;    const myGuess = guesses[myName];    return(
+  const myOptsLoading = myOpts.length === 0 && !!myCorrectTxt;
+  const myGuess = guesses[myName];    return(
     <Page>
       <ExitBtn/>
       <Wrap>
@@ -1437,7 +1456,9 @@ function Results({room,code,isHost,myName}){
   const seq=room.roundSequence||[];
   const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
-  const dr=room.duelResult||null; // duel round result object  useEffect(()=>{
+  const dr=room.duelResult||null;
+
+  useEffect(()=>{
     setGif(null);setGL(true);
     fetchGif(room.currentGiphyQuery||"celebration").then(u=>{setGif(u);setGL(false);});
   },[room.currentGiphyQuery]);
@@ -1623,7 +1644,9 @@ function Board({room,code,isHost}){
       players: {...(prev.players||{}), ...updated},
       gameCount: (prev.gameCount||0)+1
     });
-  };  const restart=async()=>{
+  };
+
+  const restart=async()=>{
     const pl=Object.values(room.players||{});
     await accumulateTournament(pl);
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
@@ -1640,7 +1663,9 @@ function Board({room,code,isHost}){
       aiStory:newAiStory||null,
       storyId:newAiStory?newAiStory.id:(room.storyId||null),
       guesses:null,roundSequence:null,duelResult:null});
-  };  const endTournament=async()=>{
+  };
+
+  const endTournament=async()=>{
     const pl=Object.values(room.players||{});
     await accumulateTournament(pl);
     await update(ref(db,"rooms/"+code),{phase:"tournament"});
@@ -1691,7 +1716,9 @@ function Board({room,code,isHost}){
 
 function TournamentBoard({room,code,isHost}){
   const[tData,setTData]=useState(null);
-  const tid=room.tournamentId;  useEffect(()=>{
+  const tid=room.tournamentId;
+
+  useEffect(()=>{
     if(!tid)return;
     return onValue(ref(db,"tournaments/"+tid),s=>{
       if(s.exists())setTData(s.val());
@@ -1716,7 +1743,9 @@ function TournamentBoard({room,code,isHost}){
       aiStory:newAiStory||null,
       storyId:newAiStory?newAiStory.id:(room.storyId||null),
       guesses:null,roundSequence:null,duelResult:null});
-  };  const closeTournament=async()=>{
+  };
+
+  const closeTournament=async()=>{
     if(!window.confirm("לסגור את הטורניר??"))return;
     await update(ref(db,"rooms/"+code),{tournamentId:null,phase:"leaderboard"});
   };  return(
@@ -1762,7 +1791,9 @@ function TournamentBoard({room,code,isHost}){
 export default function App(){
   const[rc,setRc]=useState(()=>sessionStorage.getItem(SS_CODE)||"");
   const[mn,setMn]=useState(()=>sessionStorage.getItem(SS_NAME)||"");
-  const[room,setRoom]=useState(null);  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
+  const[room,setRoom]=useState(null);
+
+  useEffect(()=>{if(rc)sessionStorage.setItem(SS_CODE,rc);},[rc]);
   useEffect(()=>{if(mn)sessionStorage.setItem(SS_NAME,mn);},[mn]);
   useEffect(()=>{
     if(!rc)return;
