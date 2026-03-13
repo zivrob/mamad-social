@@ -1084,7 +1084,8 @@ const url=await upload(body,type);
               </label>
             </div>
           ))}
-        </GlassCard>}        {/* Questions  Free mode or Story mode */}
+        </GlassCard>}
+        {/* Questions  Free mode or Story mode */}
         {room.gameMode === "story" ? (
           <StoryForm story={(room.aiStory||STORIES.find(s=>s.id===room.storyId)||STORIES[0])}
             ans={ans} setAns={setAns} code={code} myName={myName}/>
@@ -1446,7 +1447,8 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             })}
             {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center",marginTop:4}}>{""} עוד מנחשים...</p>}
           </div>
-        )}        {/* Host panel */}
+        )}
+        {/* Host panel */}
         {isHost&&(
           <GlassCard className="fu d3" style={{background:"rgba(251,191,36,.06)",border:`1px solid ${D.gold}20`}}>
             <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>✅ {answered} {answered} מתוך {nonSubj.length} ניחשו</p>
@@ -1456,7 +1458,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
                 return<span key={i} style={{padding:"4px 12px",borderRadius:99,fontSize:12,fontWeight:700,
                   background:done?D.greenBg:"rgba(255,255,255,.06)",
                   color:done?D.green:D.muted,border:`1px solid ${done?D.green+"30":D.border}`}}>
-                  {done?"":"%"} {p.name}
+                  {done?"✓":""} {p.name}
                 </span>;
               })}
             </div>
@@ -1591,7 +1593,8 @@ function Results({room,code,isHost,myName}){
             </div>
           </div>
         </GlassCard>
-        )}        {/* GIF */}
+        )}
+        {/* GIF */}
         <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
           {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎉</div>}
         </GlassCard>
