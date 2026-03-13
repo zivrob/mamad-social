@@ -321,6 +321,30 @@ const a=d?.data;if(!a?.length)return null;
   }catch{return null;}
 }
 
+async function generateSliderQsAI(n){
+  try{
+    const r=await fetch("/api/gen",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:"slider"})});
+    if(!r.ok)throw new Error("gen fail");
+    const d=await r.json();
+    if(Array.isArray(d)&&d.length>0)return d.slice(0,n);
+    throw new Error("empty");
+  }catch{return pickSliderQs(n);}
+}
+
+async function generateStoryAI(){
+  try{
+    const r=await fetch("/api/gen",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:"story"})});
+    if(!r.ok)throw new Error("gen fail");
+    const d=await r.json();
+    if(d&&d.id&&d.title)return d;
+    throw new Error("bad story");
+  }catch{return null;}
+}
+
+function pickSliderQs(n){return[...SLIDER_QS].sort(()=>Math.random()-.5).slice(0,n);}
+
+
+
 // ── Primitive Components ───────────────────────────
 const ff = "'Heebo',sans-serif";
 const ffd = "'Heebo',sans-serif";
