@@ -1568,7 +1568,7 @@ function Results({room,code,isHost,myName}){
                         width:44,height:44,borderRadius:22,display:"flex",
                         alignItems:"center",justifyContent:"center",fontSize:22,
                         background:row.correct?"rgba(74,222,128,.15)":"rgba(248,113,113,.12)"}}>
-                        {row.correct?"":""}
+                        {row.correct?"✅":"❌"}
                       </div>
                     </div>
                     {row.correct&&(
@@ -1610,7 +1610,7 @@ function Results({room,code,isHost,myName}){
             background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
             border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
           }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?":"}</div>
+            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"🎯":"😢"}</div>
             <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
               {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
             </p>
@@ -1619,7 +1619,7 @@ function Results({room,code,isHost,myName}){
               <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>+10</span>
               <span style={{color:D.muted,fontSize:13}}>התשובה הנכונה נקודות!</span>
             </div>:<p style={{color:D.muted,fontSize:13,marginTop:4}}>
-              התשובה הנכונה: : <span style={{color:D.red}}>"{myGuess}"</span>
+              התשובה הנכונה: <span style={{color:D.red}}>{myGuess}</span>
             </p>}
           </GlassCard>
         )}
@@ -1643,12 +1643,12 @@ function Results({room,code,isHost,myName}){
                   <div style={{width:36,height:36,borderRadius:18,display:"flex",
                     alignItems:"center",justifyContent:"center",fontSize:18,
                     background:good?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
-                    {good?"":""}
+                    {good?"✅":"❌"}
                   </div>
                   <div style={{textAlign:"right"}}>
                     <p style={{color:D.white,fontWeight:700,fontSize:14}}>{p.name}</p>
                     <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
-                      {good?"ניחש·ה נכון: ":"ניחש·ה: : "}<span style={{fontWeight:700}}>{g}</span>
+                      {good?"ניחש·ה נכון: ":"ניחש·ה: "}<span style={{fontWeight:700}}>{g}</span>
                     </p>
                     {!good&&_dr&&(
                       <p style={{color:D.muted,fontSize:11}}>נכון: {correctAns}</p>
