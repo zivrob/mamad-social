@@ -1091,7 +1091,7 @@ const url=await upload(body,type);
           })}
         </GlassCard>
         )}
-        < onClick={ready} style={{position:"sticky",bottom:16}}>
+        <Btn onClick={ready} style={{position:"sticky",bottom:16}}>
           {upping?"שומר...":"אני מוכן·ה! 🎮! "}
         </Btn>
       </Wrap>
@@ -1678,7 +1678,7 @@ function Board({room,code,isHost}){
             {tid&&(
               <Btn onClick={endTournament} variant="violet">טבלת הטורניר 🏟</Btn>
             )}
-        < onClick={restart} variant="gold">משחק חדש 🔄</Btn>
+        <Btn onClick={restart} variant="gold">משחק חדש 🔄</Btn>
           </div>
         )}
       </Wrap>
