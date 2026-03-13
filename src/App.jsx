@@ -1179,7 +1179,7 @@ function Question({room,code,myName,isHost}){
   // Firebase arrays come back as objects with numeric keys  convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
     : rawOpts ? Object.values(rawOpts) : [];
-  const optsLoading = isDuel && !isSil && correctText && opts\.length === 0;
+  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;
 
   useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
   useEffect(()=>{if(cd<=0)return;
