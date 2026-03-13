@@ -1744,13 +1744,22 @@ function Board({room,code,isHost}){
     });
     await update(ref(db),r);
     var newAiStory=null;
+    var newStoryId=null;
     if(room.gameMode==="story"){
       newAiStory=await generateStoryAI();
+      if(newAiStory){
+        newStoryId=newAiStory.id;
+      } else {
+        // AI failed — pick a different static story than current
+        const otherStories=STORIES.filter(s=>s.id!==(room.storyId||""));
+        const pool=otherStories.length>0?otherStories:STORIES;
+        newStoryId=pool[Math.floor(Math.random()*pool.length)].id;
+      }
     }
     await update(ref(db,"rooms/"+code),{phase:"lobby",round:0,lobbyQuestions:qs,
       sliderQuestions:sliderQs,
       aiStory:newAiStory||null,
-      storyId:newAiStory?newAiStory.id:(room.storyId||null),
+      storyId:newStoryId||(room.storyId||null),
       guesses:null,roundSequence:null,duelResult:null});
   };
 
@@ -1838,13 +1847,22 @@ function TournamentBoard({room,code,isHost}){
     });
     await update(ref(db),r);
     var newAiStory=null;
+    var newStoryId=null;
     if(room.gameMode==="story"){
       newAiStory=await generateStoryAI();
+      if(newAiStory){
+        newStoryId=newAiStory.id;
+      } else {
+        // AI failed — pick a different static story than current
+        const otherStories=STORIES.filter(s=>s.id!==(room.storyId||""));
+        const pool=otherStories.length>0?otherStories:STORIES;
+        newStoryId=pool[Math.floor(Math.random()*pool.length)].id;
+      }
     }
     await update(ref(db,"rooms/"+code),{phase:"lobby",round:0,lobbyQuestions:qs,
       sliderQuestions:sliderQs,
       aiStory:newAiStory||null,
-      storyId:newAiStory?newAiStory.id:(room.storyId||null),
+      storyId:newStoryId||(room.storyId||null),
       guesses:null,roundSequence:null,duelResult:null});
   };
 
