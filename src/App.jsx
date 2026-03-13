@@ -1143,7 +1143,9 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
     if(cd>0)return;
     if(tl<=0){if(isHost)reveal();return;}
   const t=setTimeout(()=>setTl(p=>p-1),1000);return()=>clearTimeout(t);
-  },[cd,tl]);  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};  const reveal=()=>{
+  },[cd,tl]);
+
+  const guess=name=>{update(ref(db,`rooms/${code}/guesses`),{[myName]:name});};  const reveal=()=>{
     if(!isHost)return;
     const upd={};
     if(cur.qType==="duel_round"){
@@ -1438,7 +1440,9 @@ function Results({room,code,isHost,myName}){
   const dr=room.duelResult||null; // duel round result object  useEffect(()=>{
     setGif(null);setGL(true);
     fetchGif(room.currentGiphyQuery||"celebration").then(u=>{setGif(u);setGL(false);});
-  },[room.currentGiphyQuery]);  const next=()=>{
+  },[room.currentGiphyQuery]);
+
+  const next=()=>{
     const nr=room.round+1;
     update(ref(db,`rooms/${code}`),{
       phase:nr>seq.length?"leaderboard":"question",
@@ -1692,7 +1696,9 @@ function TournamentBoard({room,code,isHost}){
     return onValue(ref(db,"tournaments/"+tid),s=>{
       if(s.exists())setTData(s.val());
     });
-  },[tid]);  const medals=["🥇","🥈","🥉"];
+  },[tid]);
+
+  const medals=["🥇","🥈","🥉"];
   const list=tData?Object.values(tData.players||{}).sort((a,b)=>b.score-a.score):[];
   const newGame=async()=>{
     const pl=Object.values(room.players||{});
@@ -1764,7 +1770,11 @@ export default function App(){
       if(s.exists())setRoom(s.val());
       else{sessionStorage.clear();setRc("");setMn("");}
     });
-  },[rc]);  const join=(c,n)=>{setRc(c);setMn(n);};  if(rc&&room){
+  },[rc]);
+
+  const join=(c,n)=>{setRc(c);setMn(n);};
+
+  if(rc&&room){
     const ih=room.host===mn;
     if(room.phase==="lobby")       return<Lobby    room={room} code={rc} myName={mn} isHost={ih}/>;
     if(room.phase==="question")    return<Question room={room} code={rc} myName={mn} isHost={ih}/>;
