@@ -904,6 +904,8 @@ function SliderForm({questions, ans, setAns, code, myName}){
   const qs = myQs
     ? (Array.isArray(myQs) ? myQs : Object.values(myQs))
     : (Array.isArray(room.lobbyQuestions) ? room.lobbyQuestions : Object.values(room.lobbyQuestions||{}));  // On first load: if player has no personal questions yet, copy from lobbyQuestions
+  // Reset answers when lobby questions change (new game)
+  const lobbyQsKey = JSON.stringify(room.lobbyQuestions||null)+"|"+(room.aiStory?.id||room.storyId||"")+(JSON.stringify(room.sliderQuestions||null));
   useEffect(()=>{
     if(!myQs && room.lobbyQuestions && room.gameMode==="free") {
       const shared = Array.isArray(room.lobbyQuestions)
@@ -912,8 +914,11 @@ function SliderForm({questions, ans, setAns, code, myName}){
       const personal = [...shared].sort(()=>Math.random()-.5);
       update(ref(db,`rooms/${code}/players/${myName}`),{myQuestions: personal});
     }
+    // Clear cached answers when question set changes
+    sessionStorage.removeItem(`ans_${code}_${myName}`);
+    setAns({});
   // eslint-disable-next-line
-  },[]);
+  },[lobbyQsKey]);
   const KA=`ans_${code}_${myName}`;
   const[ans,setAns]=useState(()=>{try{return JSON.parse(sessionStorage.getItem(KA)||"{}")}catch{return{}}});
   
@@ -1727,7 +1732,16 @@ function Board({room,code,isHost}){
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
     const sliderQs=room.gameMode==="slider"?await generateSliderQsAI(room.roundsPerPlayer||4):null;
     const r={};
-    pl.forEach(p=>{r["rooms/"+code+"/players/"+p.name+"/score"]=0;r["rooms/"+code+"/players/"+p.name+"/ready"]=false;r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;});
+    pl.forEach(p=>{
+      r["rooms/"+code+"/players/"+p.name+"/score"]=0;
+      r["rooms/"+code+"/players/"+p.name+"/ready"]=false;
+      r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;
+      r["rooms/"+code+"/players/"+p.name+"/myQuestions"]=null;
+    });
+    // Clear all players' cached answers from sessionStorage
+    pl.forEach(p=>{
+      sessionStorage.removeItem("ans_"+code+"_"+p.name);
+    });
     await update(ref(db),r);
     var newAiStory=null;
     if(room.gameMode==="story"){
@@ -1812,7 +1826,16 @@ function TournamentBoard({room,code,isHost}){
     const qs=pickLobbyQs(room.roundsPerPlayer||4);
     const sliderQs=room.gameMode==="slider"?await generateSliderQsAI(room.roundsPerPlayer||4):null;
     const r={};
-    pl.forEach(p=>{r["rooms/"+code+"/players/"+p.name+"/score"]=0;r["rooms/"+code+"/players/"+p.name+"/ready"]=false;r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;});
+    pl.forEach(p=>{
+      r["rooms/"+code+"/players/"+p.name+"/score"]=0;
+      r["rooms/"+code+"/players/"+p.name+"/ready"]=false;
+      r["rooms/"+code+"/players/"+p.name+"/personalAnswers"]=null;
+      r["rooms/"+code+"/players/"+p.name+"/myQuestions"]=null;
+    });
+    // Clear all players' cached answers from sessionStorage
+    pl.forEach(p=>{
+      sessionStorage.removeItem("ans_"+code+"_"+p.name);
+    });
     await update(ref(db),r);
     var newAiStory=null;
     if(room.gameMode==="story"){
