@@ -1415,12 +1415,18 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
               ?<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:200,objectFit:"contain",borderRadius:12}}/>
               :<p style={{color:D.muted,textAlign:"center",padding:20}}>טוען......</p>
           )}
-          {!isSil&&(
+          {!isSil&&amSubj&&(
             <div>
-              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה האמיתית:</p>
+              <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה שלך (רק אתה רואה):</p>
               <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
                 {(()=>{var _r=subj&&subj.personalAnswers&&subj.personalAnswers[cur.qId]; var _sq=room.sliderQuestions&&room.sliderQuestions.find(function(q){return q.id===cur.qId;}); return _sq&&_r!==undefined?(_r===0?_sq.left:_sq.right):(_r||"...");})()}
               </p>
+            </div>
+          )}
+          {!isSil&&!amSubj&&(
+            <div>
+              <p style={{color:D.muted,fontSize:13}}>מה ענה·תה {subj?.name}?</p>
+              <p style={{color:D.violet,fontSize:13,marginTop:6}}>בחר·י מהאפשרויות 👇</p>
             </div>
           )}
         </GlassCard>
