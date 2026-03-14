@@ -1275,6 +1275,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         phase:"results",correctAnswer:correctLabel,
         subjectTextAnswer:correctLabel,
         correctSubject:cur.subjectName,currentQLabel:cur.qLabel,currentGiphyQuery:cur.qGiphy||"celebration",
+        guesses,
       });
     }
   };  // In duel_round: ALL players are guessers (both guess simultaneously)
