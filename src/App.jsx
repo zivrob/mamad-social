@@ -1330,7 +1330,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         {/* My question card */}
         <GlassCard className="fu" glow={D.violet}
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.15),rgba(244,114,182,.08))`,textAlign:"center",padding:"20px 16px"}}>
-          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>סיבוב :</p>
+          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>השאלה:</p>
           <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {myQEmoji} {myQLabel}
           </p>
@@ -1338,7 +1338,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             background:"rgba(255,255,255,.07)",border:`1px solid ${D.border}`,
             borderRadius:99,padding:"6px 14px 6px 8px"}}>
             <Avatar url={mySubject?.photoURL} name={mySubject?.name} size={28}/>
-            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>על: {mySubject?.name}</span>
+            <span style={{color:D.offWhite,fontSize:13,fontWeight:600}}>🎯 מנחש·ת על: {mySubject?.name}</span>
           </div>
         </GlassCard>
         {/* MC Options */}
