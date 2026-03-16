@@ -1513,8 +1513,6 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
 }
 
 function Results({room,code,isHost,myName}){
-  const[gif,setGif]=useState(null);
-  const[gifLoading,setGL]=useState(true);
   const ca=room.correctAnswer||"";
   const ta=room.subjectTextAnswer||ca;
   const cs=room.correctSubject||"";
@@ -1539,10 +1537,6 @@ function Results({room,code,isHost,myName}){
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
   const dr=room.duelResult||null;
 
-  useEffect(()=>{
-    setGif(null);setGL(true);
-    fetchGif(room.currentGiphyQuery||"celebration").then(u=>{setGif(u);setGL(false);});
-  },[room.currentGiphyQuery]);
 
   const next=()=>{
     const nr=room.round+1;
@@ -1557,158 +1551,140 @@ function Results({room,code,isHost,myName}){
     <Page>
       <ExitBtn/>
       <Wrap>
-        {/* Big reveal */}
-        {dr ? (
-          // DUEL RESULT: redesigned clear layout
+
+        {/* ── DUEL MODE ── */}
+        {dr&&(
           <div>
             {[
-              {subjectName:dr.p0, subjectAns:dr.p0ans, qLabel:dr.p0qLabel,
-               guesserName:dr.p1, guessed:dr.p1guessed, correct:dr.p1correct},
-              {subjectName:dr.p1, subjectAns:dr.p1ans, qLabel:dr.p1qLabel,
-               guesserName:dr.p0, guessed:dr.p0guessed, correct:dr.p0correct}
+              {subjectName:dr.p0,subjectAns:dr.p0ans,qLabel:dr.p0qLabel,
+               guesserName:dr.p1,guessed:dr.p1guessed,correct:dr.p1correct},
+              {subjectName:dr.p1,subjectAns:dr.p1ans,qLabel:dr.p1qLabel,
+               guesserName:dr.p0,guessed:dr.p0guessed,correct:dr.p0correct}
             ].map(function(row,i){
               return(
                 <GlassCard key={i} className="si" style={{
                   marginBottom:10,padding:0,overflow:"hidden",
                   border:"1.5px solid "+(row.correct?"rgba(74,222,128,.4)":"rgba(248,113,113,.3)")}}>
-                  {/* Color bar top */}
                   <div style={{height:4,background:row.correct
                     ?"linear-gradient(90deg,"+D.lime+",rgba(74,222,128,.4))"
                     :"linear-gradient(90deg,rgba(248,113,113,.8),rgba(248,113,113,.3))"}}/>
-                  <div style={{padding:"14px 16px"}}>
-                    {/* Question + subject's answer */}
-                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-                      <Avatar url={room.players?.[row.subjectName]?.photoURL} name={row.subjectName} size={36}/>
+                  <div style={{padding:"16px"}}>
+                    {/* Subject + answer */}
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                      <Avatar url={room.players?.[row.subjectName]?.photoURL} name={row.subjectName} size={38}/>
                       <div style={{flex:1,textAlign:"right"}}>
                         <p style={{color:D.muted,fontSize:11,marginBottom:2}}>{row.qLabel}</p>
-                        <p style={{fontFamily:ffd,fontSize:18,fontWeight:900,color:D.lime}}>
-                          {row.subjectAns}
-                        </p>
+                        <p style={{fontFamily:ffd,fontSize:20,fontWeight:900,color:D.lime}}>{row.subjectAns}</p>
                       </div>
                     </div>
-                    {/* Divider */}
                     <div style={{height:1,background:"rgba(255,255,255,.08)",marginBottom:10}}/>
-                    {/* Guesser result */}
+                    {/* Guesser row */}
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                       <div style={{display:"flex",alignItems:"center",gap:8}}>
-                        <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={28}/>
+                        <div style={{width:32,height:32,borderRadius:16,display:"flex",alignItems:"center",
+                          justifyContent:"center",fontSize:16,
+                          background:row.correct?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
+                          {row.correct?"✅":"❌"}
+                        </div>
                         <div style={{textAlign:"right"}}>
-                          <p style={{color:D.muted,fontSize:11}}>נכון:</p>
-                          <p style={{fontWeight:800,fontSize:15,
-                            color:row.correct?D.lime:"rgba(196,106,106,.9)"}}>
-                            {row.guessed}
+                          <p style={{color:D.white,fontWeight:700,fontSize:14}}>{row.guesserName}</p>
+                          <p style={{fontSize:12,color:row.correct?D.lime:"rgba(248,113,113,.9)"}}>
+                            {row.correct?"ניחש·ה נכון":"ניחש·ה טעות"}: <span style={{fontWeight:700}}>{row.guessed}</span>
                           </p>
                         </div>
                       </div>
-                      <div style={{
-                        width:44,height:44,borderRadius:22,display:"flex",
-                        alignItems:"center",justifyContent:"center",fontSize:22,
-                        background:row.correct?"rgba(74,222,128,.15)":"rgba(248,113,113,.12)"}}>
-                        {row.correct?"✅":"❌"}
-                      </div>
+                      <Avatar url={room.players?.[row.guesserName]?.photoURL} name={row.guesserName} size={32}/>
                     </div>
                     {row.correct&&(
-                      <p style={{textAlign:"center",color:D.lime,fontSize:12,
-                        fontWeight:700,marginTop:8}}>+10 נקודות!!</p>
+                      <p style={{textAlign:"center",color:D.lime,fontSize:12,fontWeight:700,marginTop:8}}>+10 נקודות!</p>
                     )}
                   </div>
                 </GlassCard>
               );
             })}
           </div>
-        ) : (
-        <GlassCard className="si" glow={D.lime}
-          style={{background:`linear-gradient(135deg,rgba(163,230,53,.1),rgba(74,222,128,.08))`,textAlign:"center"}}>
-          <p style={{color:D.muted,fontSize:12,marginBottom:6}}>{ql}</p>
-          {ta&&!isSil&&(
-            <p style={{fontFamily:ffd,fontSize:26,fontWeight:900,color:D.white,marginBottom:10,lineHeight:1.2}}>
-              "{ta}"
-            </p>
-          )}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:4}}>
-            <Avatar url={sd?.photoURL} name={cs} size={56}/>
-            <div style={{textAlign:"right"}}>
-              <p style={{color:D.muted,fontSize:11,marginBottom:2}}>התשובה שלו:...</p>
-              <p style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>{cs}</p>
-            </div>
-          </div>
-        </GlassCard>
         )}
-        {/* GIF */}
-        <GlassCard style={{padding:0,overflow:"hidden",minHeight:120,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {gifLoading?<Spinner/>:gif?<img src={gif} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>:<div style={{fontSize:56,padding:20,textAlign:"center"}}>🎉</div>}
-        </GlassCard>
-        {/* Scores */}
-                {/* Personal result feedback */}
-        {myGuess!==undefined&&!dr&&(
-          <GlassCard className="si" style={{
-            textAlign:"center",
-            background:myCorrect?`linear-gradient(135deg,rgba(74,222,128,.18),rgba(74,222,128,.06))`:`linear-gradient(135deg,rgba(248,113,113,.18),rgba(248,113,113,.06))`,
-            border:`1.5px solid ${myCorrect?D.green+"50":D.red+"50"}`,
-          }}>
-            <div style={{fontSize:44,marginBottom:6}}>{myCorrect?"🎯":"😢"}</div>
-            <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:myCorrect?D.green:D.red,marginBottom:4}}>
-              {myCorrect?"ניחשת נכון! 🎯!":"טעית"}
-            </p>
-            {myCorrect?<div style={{display:"inline-flex",alignItems:"center",gap:6,
-              background:"rgba(163,230,53,.15)",borderRadius:99,padding:"6px 18px",marginTop:4}}>
-              <span style={{fontFamily:ffd,fontSize:24,fontWeight:900,color:D.lime}}>+10</span>
-              <span style={{color:D.muted,fontSize:13}}>התשובה הנכונה נקודות!</span>
-            </div>:<p style={{color:D.muted,fontSize:13,marginTop:4}}>
-              התשובה הנכונה: <span style={{color:D.red}}>{myGuess}</span>
-            </p>}
-          </GlassCard>
-        )}
-        <GlassCard className="fu d1">
-          <p style={{color:D.muted,fontSize:13,marginBottom:10,fontWeight:600}}>כל הניחושים:</p>
-          {players.map(function(p,i){
-            var g=guesses[p.name];
-            if(!g) return null;
-            var good=ok(g, p.name);
-            // In duel: show what they were guessing ABOUT
-            var _dr=room.duelResult||null;
-            var aboutName=_dr?(p.name===_dr.p0?_dr.p1:_dr.p0):cs;
-            var correctAns=_dr?(p.name===_dr.p0?_dr.p1ans:_dr.p0ans):ca;
-            return(
-              <div key={i} className="fu" style={{animationDelay:(i*.06)+"s",
-                display:"flex",justifyContent:"space-between",alignItems:"center",
-                padding:"11px 14px",borderRadius:12,marginBottom:6,
-                background:good?D.greenBg:D.redBg,
-                border:"1px solid "+(good?D.green+"30":D.red+"30")}}>
-                <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{width:36,height:36,borderRadius:18,display:"flex",
-                    alignItems:"center",justifyContent:"center",fontSize:18,
-                    background:good?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
-                    {good?"✅":"❌"}
-                  </div>
-                  <div style={{textAlign:"right"}}>
-                    <p style={{color:D.white,fontWeight:700,fontSize:14}}>{p.name}</p>
-                    <p style={{color:good?D.lime:"rgba(248,113,113,.9)",fontSize:12}}>
-                      {good?"ניחש·ה נכון: ":"ניחש·ה: "}<span style={{fontWeight:700}}>{g}</span>
-                    </p>
-                    {!good&&_dr&&(
-                      <p style={{color:D.muted,fontSize:11}}>נכון: {correctAns}</p>
-                    )}
-                  </div>
-                </div>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  {_dr&&<span style={{color:D.muted,fontSize:11}}>על {aboutName}</span>}
-                  <Avatar url={p.photoURL} name={p.name} size={32}/>
+
+        {/* ── GROUP MODE ── */}
+        {!dr&&(
+          <div>
+            {/* Answer reveal card */}
+            <GlassCard className="si" style={{
+              padding:0,overflow:"hidden",
+              border:"1.5px solid rgba(163,230,53,.3)"}}>
+              <div style={{height:4,background:"linear-gradient(90deg,"+D.lime+",rgba(74,222,128,.3))"}}/>
+              <div style={{padding:"16px",textAlign:"center"}}>
+                <p style={{color:D.muted,fontSize:12,marginBottom:4}}>{ql}</p>
+                {!isSil&&ta&&(
+                  <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,
+                    lineHeight:1.2,marginBottom:12}}>"{ta}"</p>
+                )}
+                <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+                  <Avatar url={sd?.photoURL} name={cs} size={44}/>
+                  <p style={{color:D.offWhite,fontWeight:700,fontSize:16}}>{cs}</p>
                 </div>
               </div>
-            );
-          })}
-          {scorers>1&&<p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
-            🎯 {scorers} ניחשו נכון!!
-          </p>}
-        </GlassCard>
-        {isHost?<Btn onClick={next} variant="lime">סיבוב הבא ➡️</Btn>
-          :<GlassCard style={{textAlign:"center"}}><p style={{color:D.muted}}>ממתין......</p></GlassCard>}
+            </GlassCard>
+
+            {/* All guesses — unified list */}
+            <GlassCard className="fu d1" style={{marginTop:0}}>
+              <p style={{color:D.muted,fontSize:12,marginBottom:10,fontWeight:600,textAlign:"right"}}>
+                ניחושים ({Object.values(guesses).filter(Boolean).length}/{players.filter(p=>p.name!==cs).length}):
+              </p>
+              {players.filter(function(p){return p.name!==cs;}).map(function(p,i){
+                var g=guesses[p.name];
+                var good=g?ok(g,p.name):false;
+                var isMe=p.name===myName;
+                return(
+                  <div key={i} className="fu" style={{animationDelay:(i*.06)+"s",
+                    display:"flex",alignItems:"center",justifyContent:"space-between",
+                    padding:"10px 12px",borderRadius:12,marginBottom:6,
+                    background:!g?"rgba(255,255,255,.04)":good?D.greenBg:D.redBg,
+                    border:"1px solid "+(!g?"rgba(255,255,255,.08)":good?D.green+"30":D.red+"30")}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <div style={{width:30,height:30,borderRadius:15,display:"flex",alignItems:"center",
+                        justifyContent:"center",fontSize:15,flexShrink:0,
+                        background:!g?"rgba(255,255,255,.06)":good?"rgba(74,222,128,.2)":"rgba(248,113,113,.15)"}}>
+                        {!g?"⏳":good?"✅":"❌"}
+                      </div>
+                      <div style={{textAlign:"right"}}>
+                        <p style={{color:isMe?D.violet:D.white,fontWeight:isMe?700:600,fontSize:14}}>
+                          {p.name}{isMe?" (אתה·ת)":""}
+                        </p>
+                        {g&&(
+                          <p style={{fontSize:12,color:good?D.lime:"rgba(248,113,113,.9)"}}>
+                            {g}
+                            {!good&&ca&&<span style={{color:D.muted}}> · נכון: {ca}</span>}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      {good&&<span style={{color:D.lime,fontFamily:ffd,fontWeight:900,fontSize:13}}>+10</span>}
+                      <Avatar url={p.photoURL} name={p.name} size={30}/>
+                    </div>
+                  </div>
+                );
+              })}
+              {scorers>0&&(
+                <p style={{color:D.lime,fontSize:12,textAlign:"center",marginTop:8,fontWeight:700}}>
+                  🎯 {scorers} {scorers===1?"ניחש·ה":"ניחשו"} נכון!
+                </p>
+              )}
+            </GlassCard>
+          </div>
+        )}
+
+        {isHost
+          ?<Btn onClick={next} variant="lime">סיבוב הבא ➡️</Btn>
+          :<GlassCard style={{textAlign:"center",padding:"14px"}}>
+            <p style={{color:D.muted,fontSize:13}}>ממתין למארח......</p>
+          </GlassCard>}
+
       </Wrap>
     </Page>
   );
 }
-
 function Board({room,code,isHost}){
   const list=Object.values(room.players||{}).sort((a,b)=>b.score-a.score);
   const medals=["🥇","🥈","🥉"];
