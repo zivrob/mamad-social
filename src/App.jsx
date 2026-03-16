@@ -972,15 +972,18 @@ const url=await upload(body,type);
           const wrong=rawAns===0?sliderQ.right:sliderQ.left;
           return [wrong,correct].sort(()=>Math.random()-.5);
         }
-        // Story mode: answer is a string option
+        // Free/story: use other player's answer as decoy (best for duel)
         const correct=String(rawAns).trim();
         if(!correct) return null;
         const qDef=QUESTIONS.find(q=>q.id===qId);
         const storyQ=story&&story.paragraphs.find(p=>p.blank&&p.blank.id===qId);
-        const pool=storyQ?storyQ.blank.opts.filter(d=>d!==correct):(qDef?.d||[]).filter(d=>d.trim().toLowerCase()!==correct.toLowerCase());
+        const otherSubj=pl.find(p=>p.name!==subjectName);
+        const otherAns=String(otherSubj?.personalAnswers?.[qId]||"").trim();
+        const staticPool=storyQ?storyQ.blank.opts.filter(d=>d!==correct):(qDef?.d||[]).filter(d=>d.trim().toLowerCase()!==correct.toLowerCase());
+        const pool=[...new Set([...(otherAns&&otherAns.toLowerCase()!==correct.toLowerCase()?[otherAns]:[]),...staticPool])];
         const shuffled=[...pool].sort(()=>Math.random()-.5);
         const decoys=shuffled.slice(0,3);
-        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אין");
+        while(decoys.length<3) decoys.push(decoys[decoys.length%Math.max(1,decoys.length)]||correct+"?");
         return [...decoys,correct].sort(()=>Math.random()-.5);
       };
       seq.forEach(item=>{
@@ -1005,17 +1008,25 @@ const url=await upload(body,type);
           decoyMap[fbKey(item.qId)+"_"+fbKey(item.subjectName)]=[wrong,correct].sort(()=>Math.random()-.5);
           return;
         }
-        // Story/free: string answer with decoys from question bank
+        // Story/free: string answer with decoys
         const correct=String(rawAns).trim();
         if(!correct) return;
         const storyQ=story&&story.paragraphs.find(p=>p.blank&&p.blank.id===item.qId);
         const qDef=QUESTIONS.find(q=>q.id===item.qId);
-        const pool=storyQ
+        // For free mode: use OTHER players' answers to the same question as decoys
+        const otherAnswers=pl
+          .filter(p=>p.name!==item.subjectName)
+          .map(p=>String(p.personalAnswers?.[item.qId]||"").trim())
+          .filter(a=>a&&a.toLowerCase()!==correct.toLowerCase());
+        const staticPool=storyQ
           ?storyQ.blank.opts.filter(d=>d!==correct)
           :(qDef?.d||[]).filter(d=>d.toLowerCase()!==correct.toLowerCase());
+        // Prefer other players' real answers, fall back to static pool
+        const pool=[...new Set([...otherAnswers,...staticPool])];
         const shuffled=[...pool].sort(()=>Math.random()-.5);
         const decoys=shuffled.slice(0,3);
-        while(decoys.length<3) decoys.push(shuffled[decoys.length%Math.max(1,shuffled.length)]||"אין");
+        // If still not enough, duplicate what we have
+        while(decoys.length<3) decoys.push(decoys[decoys.length%Math.max(1,decoys.length)]||correct+"?");
         decoyMap[fbKey(item.qId)+"_"+fbKey(item.subjectName)]=[...decoys,correct].sort(()=>Math.random()-.5);
       });
     }
