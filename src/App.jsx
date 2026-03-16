@@ -264,7 +264,6 @@ function getPlayerQs(player, lobbyQs, story, sliderQs) {
       if(!q) continue;
       seq.push({qId:q.id,qType:"text",qLabel:q.label,qGiphy:q.giphy||"",qEmoji:q.e||"",subjectName:player.name});
     }
-    seq.push({qId:SIL.id,qType:"sil",qLabel:SIL.label,qGiphy:SIL.giphy,qEmoji:SIL.e,subjectName:players[Math.floor(Math.random()*n)].name});
   }
   return seq;
 }
@@ -1106,8 +1105,7 @@ const url=await upload(body,type);
         {<GlassCard className="fu d1">
           <p style={{color:D.white,fontWeight:700,fontSize:15,marginBottom:14}}>תמונות שלי</p>
           {(Object.keys(room.players||{}).length!==2&&room.gameMode!=='story'&&room.gameMode!=='slider'
-            ? [{t:"sil",lbl:"צללית ((מהצד)):",has:me?.silhouetteURL,cap:undefined,icons:["📷 צלם","✓ הועלה"]},
-               {t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
+            ? [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
             : [{t:"pro",lbl:"סלפי:",has:me?.photoURL,cap:"user",icons:["📷 צלם","✓ הועלה"]}]
           ).map(({t,lbl,has,cap,icons})=>(
             <div key={t} style={{marginBottom:14}}>
@@ -1194,7 +1192,6 @@ function Question({room,code,myName,isHost}){
   const si=(room.round-1)%seq.length;
   const cur=seq[si]||{};
   const subj=room.players?.[cur.subjectName]||players[0];
-  const isSil=cur.qType==="sil";
   const amSubj=myName===cur.subjectName;
   const guesses=room.guesses||{};  // Duel specifics: guesser = the OTHER player
   const duelGuesser=isDuel?players.find(p=>p.name!==cur.subjectName):null;
@@ -1221,7 +1218,7 @@ function Question({room,code,myName,isHost}){
   // Firebase arrays come back as objects with numeric keys  convert back
   const opts = Array.isArray(rawOpts) ? rawOpts
     : rawOpts ? Object.values(rawOpts) : [];
-  const optsLoading = isDuel && !isSil && correctText && opts.length === 0;
+  const optsLoading = isDuel && correctText && opts.length === 0;
 
   useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
   useEffect(()=>{if(cd<=0)return;
@@ -1265,16 +1262,12 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         guesses,
       });
     } else {
-      const isSilRound = cur.qType==="sil";
-      // For sil round: correct=subjectName. For regular: correct=subject's actual answer
       const subj=players.find(p=>p.name===cur.subjectName);
       const rawCorrect=subj?.personalAnswers?.[cur.qId];
-  const sliderQDef=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId);
-      const correctLabel=isSilRound
-        ? cur.subjectName
-        : sliderQDef&&rawCorrect!==undefined
-          ? (rawCorrect===0?sliderQDef.left:sliderQDef.right)
-          : String(rawCorrect||"");
+      const sliderQDef=room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===cur.qId);
+      const correctLabel=sliderQDef&&rawCorrect!==undefined
+        ?(rawCorrect===0?sliderQDef.left:sliderQDef.right)
+        :String(rawCorrect||"");
       Object.entries(guesses).forEach(([g,v])=>{
         const gv=String(v).trim().toLowerCase();
         const cv=correctLabel.trim().toLowerCase();
@@ -1407,7 +1400,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
           style={{background:`linear-gradient(135deg,rgba(168,85,247,.14),rgba(34,211,238,.07))`,textAlign:"center",padding:"20px 16px"}}>
           {/* Big question */}
           <p style={{color:D.muted,fontSize:12,marginBottom:6}}>
-            {isSil?"מי הדמות בצללית??":"התשובה שלו·ה:"}
+            "התשובה שלו·ה:"
           </p>
           <p style={{fontFamily:ffd,fontSize:22,fontWeight:900,color:D.white,lineHeight:1.25,marginBottom:16}}>
             {cur.qEmoji} {cur.qLabel}
@@ -1422,12 +1415,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
         </GlassCard>
         {/* Answer or silhouette */}
         <GlassCard className="fu d1" style={{textAlign:"center"}}>
-          {isSil&&(
-            subj?.silhouetteURL
-              ?<img src={subj.silhouetteURL} style={{width:"100%",maxHeight:200,objectFit:"contain",borderRadius:12}}/>
-              :<p style={{color:D.muted,textAlign:"center",padding:20}}>טוען......</p>
-          )}
-          {!isSil&&amSubj&&(
+          {amSubj&&(
             <div>
               <p style={{color:D.muted,fontSize:12,marginBottom:8}}>התשובה שלך (רק אתה רואה):</p>
               <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,lineHeight:1.2}}>
@@ -1435,7 +1423,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
               </p>
             </div>
           )}
-          {!isSil&&!amSubj&&(
+          {!amSubj&&(
             <div>
               <p style={{color:D.muted,fontSize:13}}>מה ענה·תה {subj?.name}?</p>
               <p style={{color:D.violet,fontSize:13,marginTop:6}}>בחר·י מהאפשרויות 👇</p>
@@ -1450,28 +1438,7 @@ const t=setTimeout(()=>setCd(p=>p-1),1000);return()=>clearTimeout(t);},[cd]);
             <p style={{color:D.muted,fontSize:13,marginTop:4}}>ממתין לתשובות......</p>
           </GlassCard>
         )}
-        {!amSubj&&isSil&&(
-          <div>
-            <div style={{display:"grid",gridTemplateColumns:G2,gap:8}}>
-              {players.map(function(p,i){
-                var picked=guesses[myName]===p.name;
-                return(
-                  <button key={i} onClick={function(){if(!guesses[myName])guess(p.name);}}
-                    style={{padding:"12px 10px",borderRadius:14,cursor:guesses[myName]?"default":"pointer",
-                      display:"flex",alignItems:"center",gap:8,fontFamily:ff,
-                      background:picked?"rgba(168,85,247,.18)":"rgba(255,255,255,.05)",
-                      border:"1.5px solid "+(picked?D.violet:D.border),
-                      transition:"all .15s"}}>
-                    <Avatar url={p.photoURL} name={p.name} size={30}/>
-                    <span style={{color:picked?D.white:D.offWhite,fontWeight:picked?700:500,fontSize:14}}>{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-            {guesses[myName]&&!isHost&&<p style={{color:D.muted,fontSize:13,textAlign:"center"}}>{""} עוד מנחשים...</p>}
-          </div>
-        )}
-        {!amSubj&&!isSil&&(
+        {!amSubj&&(
           <div>
             {optsLoading&&<div style={{textAlign:"center",padding:"16px 0"}}><Spinner size={24}/></div>}
             {opts.map(function(opt,i){
@@ -1544,7 +1511,6 @@ function Results({room,code,isHost,myName}){
   const myGuess=guesses[myName];
   const myCorrect=myGuess!==undefined&&ok(myGuess, myName);
   const seq=room.roundSequence||[];
-  const isSil=seq[(room.round-1)%seq.length]?.qType==="sil";
   const scorers=Object.entries(guesses).filter(([,g])=>ok(g)).length;
   const dr=room.duelResult||null;
 
@@ -1626,7 +1592,7 @@ function Results({room,code,isHost,myName}){
               <div style={{height:4,background:"linear-gradient(90deg,"+D.lime+",rgba(74,222,128,.3))"}}/>
               <div style={{padding:"16px",textAlign:"center"}}>
                 <p style={{color:D.muted,fontSize:12,marginBottom:4}}>{ql}</p>
-                {!isSil&&ta&&(
+                {ta&&(
                   <p style={{fontFamily:ffd,fontSize:28,fontWeight:900,color:D.lime,
                     lineHeight:1.2,marginBottom:12}}>"{ta}"</p>
                 )}
