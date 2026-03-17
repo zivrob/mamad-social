@@ -1215,9 +1215,32 @@ function Question({room,code,myName,isHost}){
     ? (fbKey(duelTargetQId)+"_"+fbKey(duelTargetName))
     : (fbKey(cur.qId)+"_"+fbKey(cur.subjectName));
   const rawOpts = (room.decoyMap||{})[decoyKey];
-  // Firebase arrays come back as objects with numeric keys  convert back
-  const opts = Array.isArray(rawOpts) ? rawOpts
-    : rawOpts ? Object.values(rawOpts) : [];
+  // Firebase arrays come back as objects with numeric keys — convert back
+  var _baseOpts = Array.isArray(rawOpts) ? rawOpts : rawOpts ? Object.values(rawOpts) : [];
+  // Free mode fallback: build opts from all players' personalAnswers on-the-fly
+  const opts = (()=>{
+    if(_baseOpts.length>=2) return _baseOpts; // decoyMap has real options
+    // Build from personalAnswers: correct answer + other players' answers
+    const targetQId = isDuel ? duelTargetQId : cur.qId;
+    const targetSubj = isDuel ? duelTargetName : cur.subjectName;
+    const correctRaw = room.players?.[targetSubj]?.personalAnswers?.[targetQId];
+    const sliderQ2 = room.sliderQuestions&&room.sliderQuestions.find(q=>q.id===targetQId);
+    const correct = sliderQ2&&correctRaw!==undefined
+      ? (correctRaw===0?sliderQ2.left:sliderQ2.right)
+      : String(correctRaw||"").trim();
+    if(!correct) return _baseOpts;
+    const others = players
+      .filter(p=>p.name!==targetSubj)
+      .map(p=>{
+        const r=p.personalAnswers?.[targetQId];
+        const sq=sliderQ2;
+        return sq&&r!==undefined?(r===0?sq.left:sq.right):String(r||"").trim();
+      })
+      .filter(a=>a&&a.toLowerCase()!==correct.toLowerCase());
+    const pool=[...new Set(others)].sort(()=>Math.random()-.5).slice(0,3);
+    while(pool.length<3) pool.push(pool[pool.length%Math.max(1,pool.length)]||correct+"?");
+    return [...pool,correct].sort(()=>Math.random()-.5);
+  })();
   const optsLoading = isDuel && correctText && opts.length === 0;
 
   useEffect(()=>{setCd(3);setTl(RT);setLocalPick(null);},[room.round]);
